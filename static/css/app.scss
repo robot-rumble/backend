@@ -1,0 +1,51 @@
+@import "../../node_modules/bootstrap/scss/bootstrap-grid";
+@import "../../node_modules/bootstrap/scss/bootstrap-reboot";
+@import "../../node_modules/bootstrap/scss/type";
+@import "../../node_modules/bootstrap/scss/utilities";
+@import "../../node_modules/bootstrap/scss/_variables";
+@import "../../node_modules/bootstrap/scss/_functions";
+@import "../../node_modules/bootstrap/scss/mixins/_breakpoints";
+
+.field {
+  width: 500px;
+  height: 500px;
+  position: relative;
+  background-image: url("../assets/Grid.png");
+  background-size: 100% 100%;
+}
+
+.Red {
+  &.Player {
+    background-color: #ff0000;
+  }
+  &.Block {
+    background-color: #ff8888;
+  }
+}
+
+.Blue {
+  &.Player {
+    background-color: #0000ff;
+  }
+  &.Block {
+    background-color: #8888ff;
+  }
+}
+
+.Player {
+  position: absolute;
+  width: 25px;
+  height: 25px;
+}
+
+
+.Block {
+  position: absolute;
+  width: 25px;
+  height: 25px;
+
+}
+
+.Item {
+
+}
