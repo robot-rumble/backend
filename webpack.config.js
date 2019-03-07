@@ -5,7 +5,7 @@ module.exports = {
   mode: process.env.NODE_ENV,
   stats: 'minimal',
   entry: {
-    app: ['@babel/polyfill', './src/app.js'],
+    app: ['@babel/polyfill', './src/app.js', './static/css/app.scss'],
   },
   output: {
     path: path.join(__dirname, 'dist'),
@@ -22,7 +22,18 @@ module.exports = {
       },
       {
         test: /\.(sa|sc|c)ss$/,
-        use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
+        use: [MiniCssExtractPlugin.loader, 'css-loader','sass-loader']
+      },
+{
+        test: /\.(png|jpg|gif)$/i,
+        use: [
+          {
+            loader: 'url-loader',
+            options: {
+              limit: 8192
+            }
+          }
+        ]
       },
       {
         test: /\.elm$/,
@@ -33,10 +44,11 @@ module.exports = {
       },
     ],
   },
-  plugins: [new MiniCssExtractPlugin({ filename: './css/[name].css' })],
+  plugins: [new MiniCssExtractPlugin({ filename: '[name].css' })],
   devServer: {
     contentBase: path.join(__dirname, 'dist'),
     historyApiFallback: true,
     stats: 'minimal',
   },
 }
+
