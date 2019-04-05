@@ -1,0 +1,29 @@
+EXCLUDE_QUERY_DIR
+B /home/anton/.opam/default/lib/atdgen
+B /home/anton/.opam/default/lib/atdgen-runtime
+B /home/anton/.opam/default/lib/base
+B /home/anton/.opam/default/lib/base/caml
+B /home/anton/.opam/default/lib/base/shadow_stdlib
+B /home/anton/.opam/default/lib/biniou
+B /home/anton/.opam/default/lib/bytes
+B /home/anton/.opam/default/lib/easy-format
+B /home/anton/.opam/default/lib/js_of_ocaml
+B /home/anton/.opam/default/lib/sexplib0
+B /home/anton/.opam/default/lib/uchar
+B /home/anton/.opam/default/lib/yojson
+B _build/default/.main.eobjs/byte
+S /home/anton/.opam/default/lib/atdgen
+S /home/anton/.opam/default/lib/atdgen-runtime
+S /home/anton/.opam/default/lib/base
+S /home/anton/.opam/default/lib/base/caml
+S /home/anton/.opam/default/lib/base/shadow_stdlib
+S /home/anton/.opam/default/lib/biniou
+S /home/anton/.opam/default/lib/bytes
+S /home/anton/.opam/default/lib/easy-format
+S /home/anton/.opam/default/lib/js_of_ocaml
+S /home/anton/.opam/default/lib/sexplib0
+S /home/anton/.opam/default/lib/uchar
+S /home/anton/.opam/default/lib/yojson
+S .
+FLG -ppx '/home/anton/code/web/robot-front/logic-src/_build/default/.ppx/3edf09989a28fce237f8b735bd39446a/ppx.exe --as-ppx'
+FLG -w @a-4-29-40-41-42-44-45-48-58-59-60-40 -strict-sequence -strict-formats -short-paths -keep-locs

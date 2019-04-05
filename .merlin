@@ -1,0 +1,9 @@
+####{BSB GENERATED: NO EDIT
+FLG -ppx /home/anton/code/web/robot-front/node_modules/bs-platform/lib/bsppx.exe
+S /home/anton/code/web/robot-front/node_modules/bs-platform/lib/ocaml
+B /home/anton/code/web/robot-front/node_modules/bs-platform/lib/ocaml
+FLG -nostdlib -color always
+FLG -w -30-40+6+7+27+32..39+44+45+101
+S logic-src
+B lib/bs/logic-src
+####BSB GENERATED: NO EDIT}

@@ -1,4 +1,4 @@
-module Main exposing (..)
+port module Main exposing (..)
 
 import Browser
 import Browser.Dom
@@ -10,7 +10,10 @@ import Html.Events exposing (..)
 import Task
 import Url
 
+import Json.Encode as Encode
 
+import Json.Decode as Decode exposing (Decoder, int, string, float)
+import Json.Decode.Pipeline exposing (required, optional, hardcoded)
 
 -- MAIN
 
@@ -34,13 +37,12 @@ main =
 type alias Model =
     { key : Nav.Key
     , url : Url.Url
-    , width : Int
     }
 
 
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
-    (Model key url 0, Task.perform InitialViewport Browser.Dom.getViewport )
+    (Model key url, Cmd.none )
 
 
 
@@ -50,8 +52,7 @@ init flags url key =
 type Msg
     = LinkClicked Browser.UrlRequest
     | UrlChanged Url.Url
-    | Resized Int Int
-    | InitialViewport Browser.Dom.Viewport
+    | GotOutput Unit
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -67,11 +68,8 @@ update msg model =
         UrlChanged url ->
             ( { model | url = url }, Cmd.none )
 
-        Resized width height ->
-            ( { model | width = width }, Cmd.none )
-
-        InitialViewport viewport ->
-            ( { model | width = truncate viewport.viewport.width }, Cmd.none)
+        GotOutput unit ->
+            ( model, Cmd.none )
 
 
 
@@ -80,7 +78,9 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Browser.Events.onResize Resized
+    Sub.batch
+        [ getOutput (decodeUnit >> GotOutput)
+        ]
 
 
 
@@ -96,3 +96,29 @@ view model =
     }
 
 
+type alias Unit =
+  { class : String
+  , x : Int
+  , y : Int
+  , health : Int
+  }
+
+
+encodeUnit : Unit -> Encode.Value
+encodeUnit unit =
+    Encode.object
+        []
+
+unitDecoder : Decoder Unit
+unitDecoder =
+    Decode.succeed Unit
+        |> required "class" string
+        |> required "x" int
+        |> required "y" int
+        |> required "health" int
+
+decodeUnit : Encode.Value -> Unit
+decodeUnit = Decode.decodeValue unitDecoder >> Result.withDefault { class = "asd", x = 0, y = 0, health = 10}
+
+port sendInput : Encode.Value -> Cmd msg
+port getOutput : (Encode.Value -> msg) -> Sub msg

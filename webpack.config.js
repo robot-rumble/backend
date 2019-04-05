@@ -5,7 +5,7 @@ module.exports = {
   mode: process.env.NODE_ENV,
   stats: 'minimal',
   entry: {
-    app: ['@babel/polyfill', './src/app.js'],
+    app: ['@babel/polyfill', './web-src/app.js'],
   },
   output: {
     path: path.join(__dirname, 'dist'),
@@ -32,7 +32,6 @@ module.exports = {
         test: /\.elm$/,
         use: {
           loader: 'elm-webpack-loader',
-          options: {},
         },
       },
     ],
@@ -42,5 +41,8 @@ module.exports = {
     contentBase: path.join(__dirname, 'dist'),
     historyApiFallback: true,
     stats: 'minimal',
+  },
+  node: {
+    fs: 'empty',
   },
 }

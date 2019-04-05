@@ -1,0 +1,53 @@
+type main_input = {
+  p1_code : string;
+}
+
+type main_output = {
+  winner : int;
+  turns : state list;
+}
+
+type state = {
+  turn : int;
+  p1 : unit_list;
+  p2 : unit_list;
+}
+
+type json <ocaml module="Yojson.Safe"> = abstract
+
+type robot_input = {
+  state : state;
+  custom : json;
+}
+
+type robot_output = {
+  actions : action_list;
+  custom : json;
+}
+
+type id = string
+
+type unit_list = (id * unit_) list <json repr="object">
+
+type action_list = (id * action) list <json repr="object">
+
+type unit_ = {
+  type_ : unit_type;
+  x : int;
+  y : int;
+  health : int;
+  next_action : action;
+}
+
+type unit_type = [ Soldier ]
+
+type action = {
+  type_ : action_type;
+  direction: direction;
+}
+
+type action_type = [ Move | Attack ]
+
+type direction = [ Left | Right | Up | Down ]
+
+

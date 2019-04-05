@@ -2,12 +2,18 @@
   "repository": {},
   "license": "MIT",
   "scripts": {
-    "deploy": "NODE_ENV=production webpack",
-    "watch": "NODE_ENV=development webpack-dev-server --hot"
+    "web-build": "NODE_ENV=production webpack",
+    "web-watch": "NODE_ENV=development webpack-dev-server --hot",
+    "bs-clean": "bsb -clean-world",
+    "bs-build": "bsb -make-world -backend js",
+    "bs-watch": "bsb -make-world -backend js -w",
+    "bs-build-native": "bsb -make-world -backend native"
   },
   "dependencies": {
     "@babel/polyfill": "^7.2.5",
     "bootstrap": "^4.1.3",
+    "bsb-native": "^4.0.7000",
+    "ecma-proposal-realms": "https://github.com/tc39/proposal-realms.git",
     "lodash": "^4.17.11"
   },
   "devDependencies": {
