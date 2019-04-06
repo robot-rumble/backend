@@ -12,6 +12,7 @@
 (library
   (name logic)
   (libraries base atdgen)
+  (modes byte native)
   (modules :standard \ web server))
 
 (rule
@@ -27,6 +28,10 @@
 (alias
   (name server)
   (deps server.exe))
+
+(alias
+  (name logic)
+  (deps logic.a))
 
 (alias
   (name atd)
