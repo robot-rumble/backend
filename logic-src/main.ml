@@ -1,36 +1,20 @@
-type input = {
-  p1_code : string;
-}
+open Base
 
-type output = {
-  winner : int;
-  turns : turn list;
-}
+let letters = String.to_array "abcdefghijklmnopqrstuvwxyz"
 
-and turn = {
-  p1 : unit_ list;
-  p2 : unit_ list;
-}
+let generate_id () =
+  String.init 5 ~f:(fun _ -> Array.random_element_exn letters)
 
-and unit_ = {
-  id : string;
-  type_ : unit_type;
-  x : int;
-  y : int;
-  health : int;
-  next_action : action;
-}
+(* let create_unit ~type_ ~x ~y ~health ~team = *)
+(*   {type_; x; y; health; team; id= generate_id ()} *)
 
-and unit_type = Soldier
+(* let create_id_map unit_list = *)
+(*   List.map unit_list ~f:(fun unit_ -> (unit_.id, unit_)) *)
+(*   |> Map.of_alist_exn (module String) *)
 
-and action = {
-  type_ : action_type;
-  direction: direction;
-}
+(* let start run input = *)
+(*   let initial_state = {p1= [create_unit `Soldier 0 0 10]; p2= []} in *)
+(*   let result = run input initial_state in *)
+(*   result *)
 
-and action_type = Move | Attack
-
-and direction = Left | Right | Up | Down
-
-let start run input =
-  run input
+let start () = "asf"

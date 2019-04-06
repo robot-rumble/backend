@@ -9,11 +9,12 @@ type main_output = {
 
 type state = {
   turn : int;
-  p1 : unit_list;
-  p2 : unit_list;
+  units : unit_list;
+  teams : units_by_team;
+  map : units_by_map;
 }
 
-type json <ocaml module="Yojson.Safe"> = abstract
+type json <ocaml module="Yojson.Safe" t="t"> = abstract
 
 type robot_input = {
   state : state;
@@ -31,18 +32,26 @@ type unit_list = (id * unit_) list <json repr="object">
 
 type action_list = (id * action) list <json repr="object">
 
+type units_by_team = (team * id list) list <json repr="object">
+
+type units_by_map = id option list list
+
 type unit_ = {
-  type_ : unit_type;
+  type_ <json name="type">: unit_type;
   x : int;
   y : int;
   health : int;
-  next_action : action;
+  id : id;
+  team : team;
+(* next_action : action; *)
 }
+
+type team = string
 
 type unit_type = [ Soldier ]
 
 type action = {
-  type_ : action_type;
+  type_ <json name="type">: action_type;
   direction: direction;
 }
 

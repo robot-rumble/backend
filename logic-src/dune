@@ -1,12 +1,18 @@
 (executable
-  (name main)
+  (name web)
   (libraries js_of_ocaml base atdgen)
-  (preprocess (pps js_of_ocaml-ppx)))
+  (preprocess (pps js_of_ocaml-ppx))
+  (modules web main))
+
+(executable
+  (name server)
+  (libraries base atdgen stdio docker-api)
+  (modules server main))
 
 (rule
   (targets web.js)
   (action
-    (run %{bin:js_of_ocaml} --noruntime %{lib:js_of_ocaml-compiler:runtime.js}
+    (run %{bin:js_of_ocaml} +base/runtime.js --noruntime %{lib:js_of_ocaml-compiler:runtime.js}
          --source-map %{dep:main.bc} -o %{targets} --pretty)))
 
 (alias
@@ -17,15 +23,18 @@
   (name server)
   (deps server.exe))
 
+; (alias
+;   (name atd)
+;   (deps logic_j.ml logic_j.mli logic_t.ml logic_t.mli))
 
-(rule
- (targets logic_j.ml
-          logic_j.mli)
- (deps    logic.atd)
- (action  (run atdgen -j -j-std %{deps})))
+; (rule
+;  (targets logic_j.ml
+;           logic_j.mli)
+;  (deps    logic.atd)
+;  (action  (run atdgen -j -j-std %{deps})))
 
-(rule
- (targets logic_t.ml
-          logic_t.mli)
- (deps    logic.atd)
- (action  (run atdgen -t %{deps})))
+; (rule
+;  (targets logic_t.ml
+;           logic_t.mli)
+;  (deps    logic.atd)
+;  (action  (run atdgen -t %{deps})))

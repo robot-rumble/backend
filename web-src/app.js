@@ -4,7 +4,7 @@ import '../css/app.scss'
 // import { main } from '../lib/js/logic-src/Main.bs'
 // main('asdf')
 //
-import { main } from '../logic-src/_build/default/main.js'
+import { main } from '../logic-src/_build/default/web.js'
 import Realm from 'ecma-proposal-realms'
 let r = Realm.makeRootRealm()
 

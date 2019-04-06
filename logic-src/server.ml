@@ -1,1 +1,3 @@
-let _ = Main.run
+open Stdio
+
+let _ = Main.start ()
