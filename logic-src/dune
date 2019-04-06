@@ -6,7 +6,7 @@
 
 (executable
   (name server)
-  (libraries logic stdio docker-api)
+  (libraries logic base stdio docker-api)
   (modules server))
 
 (library

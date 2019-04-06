@@ -45,4 +45,7 @@ module.exports = {
   node: {
     fs: 'empty',
   },
+  watchOptions: {
+    ignored: ['logic-src/*.*', 'node_modules'],
+  },
 }

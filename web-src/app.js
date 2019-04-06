@@ -6,9 +6,17 @@ import '../css/app.scss'
 //
 import { main } from '../logic-src/_build/default/web.js'
 import Realm from 'ecma-proposal-realms'
-let r = Realm.makeRootRealm()
+let realm = Realm.makeRootRealm()
+realm.global.console = console
 
-console.log(main({ p1: '(state => state.soldier)(state)', realm: r }))
+let code = `
+function main (state) {
+  console.log(state)
+  return []
+}
+`
+let result = main({ realm, p1: code })
+console.log(result)
 
 // let app = Elm.Main.init({
 //   node: document.getElementById('root'),

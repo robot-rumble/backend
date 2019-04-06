@@ -11,7 +11,7 @@ type state = {
   turn : int;
   units : unit_list;
   teams : units_by_team;
-  map : units_by_map;
+  map : map;
 }
 
 type json <ocaml module="Yojson.Safe" t="t"> = abstract
@@ -32,9 +32,29 @@ type unit_list = (id * unit_) list <json repr="object">
 
 type action_list = (id * action) list <json repr="object">
 
-type units_by_team = (team * id list) list <json repr="object">
+type team = [ Red | Blue ]
+<ocaml repr="classic">
 
-type units_by_map = id option list list
+type units_by_team = (string * id list) list <json repr="object"> wrap
+(*
+<ocaml t="(team * id list) list" wrap="List.map ~f:(
+  fun (team, units) -> match team with
+  | \"Blue\" -> (`Blue, units)
+  | \"Red\" -> (`Red, units)
+  | _ -> failwith \"Invalid team.\"
+)" unwrap="List.map ~f:(
+  fun (team, units) -> match team with
+  | `Blue -> (\"Blue\", units)
+  | `Red -> (\"Red\", units)
+)">
+*)
+
+type map = tile list <ocaml repr="array"> list <ocaml repr="array">
+
+type tile = [ Unit of id | Wall | Empty ]
+<json adapter.ocaml="Atdgen_runtime.Json_adapter.Type_field">
+<ocaml repr="classic">
+
 
 type unit_ = {
   type_ <json name="type">: unit_type;
@@ -46,9 +66,8 @@ type unit_ = {
 (* next_action : action; *)
 }
 
-type team = string
-
 type unit_type = [ Soldier ]
+<ocaml repr="classic">
 
 type action = {
   type_ <json name="type">: action_type;
@@ -56,7 +75,8 @@ type action = {
 }
 
 type action_type = [ Move | Attack ]
+<ocaml repr="classic">
 
 type direction = [ Left | Right | Up | Down ]
-
+<ocaml repr="classic">
 
