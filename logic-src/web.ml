@@ -9,18 +9,19 @@ class type realm =
 
 class type input =
   object
-    method p1 : string Js.readonly_prop
+    method p1_code : Js.js_string Js.t Js.readonly_prop
 
     method realm : realm Js.t Js.readonly_prop
   end
 
-let main () = Logic.start ()
-
-(* let run code state = *)
-(*   Js.Unsafe.set input##.realm##.global "state" state; *)
-(*   let result = input##.realm##evaluate code in *)
-(*   Logic_j.robot_output_of_string result *)
-(* in *)
-(* Main.start run {p1_code= input##.p1} *)
+let main (input : input Js.t) =
+  let run code state =
+    Js.Unsafe.set input##.realm##.global "state" state;
+    input##.realm##evaluate code
+  and code =
+    Printf.sprintf "%s;JSON.stringify(main(JSON.parse(state)))"
+    @@ Js.to_string input##.p1_code
+  in
+  Logic.start run {p1_code= code}
 
 let _ = Js.export "main" main
