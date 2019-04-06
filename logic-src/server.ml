@@ -1,3 +1,3 @@
 open Stdio
 
-let _ = Main.start ()
+let _ = Logic.start ()

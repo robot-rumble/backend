@@ -14,7 +14,7 @@ class type input =
     method realm : realm Js.t Js.readonly_prop
   end
 
-let main () = Main.start ()
+let main () = Logic.start ()
 
 (* let run code state = *)
 (*   Js.Unsafe.set input##.realm##.global "state" state; *)
