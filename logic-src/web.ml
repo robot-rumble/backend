@@ -15,11 +15,14 @@ class type input =
   end
 
 let main (input : input Js.t) =
-  let run code state =
-    Js.Unsafe.set input##.realm##.global "state" state;
-    input##.realm##evaluate code
-  and code =
-    Printf.sprintf "%s;JSON.stringify(main(JSON.parse(state)))"
+  let code =
+    Printf.sprintf
+      {|
+    %s;
+    let output = main(JSON.parse(state))
+    output.custom = JSON.stringify(output.custom)
+    JSON.stringify(output)
+    |}
     @@ Js.to_string input##.p1_code
   in
   Logic.start run {p1_code= code}
