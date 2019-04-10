@@ -14,16 +14,18 @@ type state = {
   map : map;
 }
 
-type json <ocaml module="Yojson.Safe" t="t"> = abstract
+type json = string
 
 type robot_input = {
   state : state;
   custom : json;
+  friend : team;
+  foe : team;
 }
 
 type robot_output = {
   actions : action_list;
-  custom : json;
+  custom : json ;
 }
 
 type id = string
@@ -35,8 +37,10 @@ type action_list = (id * action) list <json repr="object">
 type team = [ Red | Blue ]
 <ocaml repr="classic">
 
-type units_by_team = (string * id list) list <json repr="object"> wrap
+type units_by_team = (string * id list) list <json repr="object">
+
 (*
+type units_by_team = (string * id list) list <json repr="object"> wrap
 <ocaml t="(team * id list) list" wrap="List.map ~f:(
   fun (team, units) -> match team with
   | \"Blue\" -> (`Blue, units)
