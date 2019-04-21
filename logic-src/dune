@@ -1,18 +1,19 @@
 (executable
   (name web)
-  (libraries logic js_of_ocaml)
+  (libraries logic js_of_ocaml-lwt)
   (preprocess (pps js_of_ocaml-ppx))
   (modules web))
 
 (executable
   (name server)
-  (libraries logic base stdio docker-api)
+  (libraries logic base stdio docker-api lwt)
   (modules server))
 
 (library
   (name logic)
   (libraries base atdgen)
   (modes byte native)
+  (preprocess (pps lwt_ppx))
   (modules :standard \ web server))
 
 (rule

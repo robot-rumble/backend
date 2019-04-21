@@ -25,6 +25,11 @@ let main (input : input Js.t) =
     |}
     @@ Js.to_string input##.p1_code
   in
-  Logic.start run {p1_code= code}
+  let run input =
+    Lwt.wrap (fun () ->
+        Js.Unsafe.set input##.realm##.global "input" input;
+        input##.realm##evaluate code )
+  in
+  Logic.start run
 
 let _ = Js.export "main" main
