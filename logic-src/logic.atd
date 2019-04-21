@@ -3,7 +3,7 @@ type main_input = {
 }
 
 type main_output = {
-  winner : int;
+  winner : string;
   turns : state list;
 }
 
@@ -25,7 +25,7 @@ type robot_input = {
 
 type robot_output = {
   actions : action_list;
-  custom : json ;
+  custom : json;
 }
 
 type id = string
@@ -59,11 +59,11 @@ type tile = [ Unit of id | Wall | Empty ]
 <json adapter.ocaml="Atdgen_runtime.Json_adapter.Type_field">
 <ocaml repr="classic">
 
+type coords = (int * int)
 
 type unit_ = {
   type_ <json name="type">: unit_type;
-  x : int;
-  y : int;
+  coords : coords;
   health : int;
   id : id;
   team : team;

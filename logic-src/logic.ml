@@ -1,5 +1,6 @@
 open Base
 open Logic_t
+open Lwt.Infix
 
 let letters = String.to_array "abcdefghijklmnopqrstuvwxyz"
 
@@ -7,7 +8,7 @@ let generate_id () =
   String.init 5 ~f:(fun _ -> Array.random_element_exn letters)
 
 let create_unit type_ x y health team =
-  {Logic_t.type_; x; y; health; team; id= generate_id ()}
+  {Logic_t.type_; coords= (x, y); health; team; id= generate_id ()}
 
 let create_circle_map radius =
   let is_wall x y = ((x - radius) ** 2) + ((y - radius) ** 2) > radius ** 2 in
@@ -32,29 +33,96 @@ let create_team_list unit_list =
 let radius' = 10
 let unit_num' = 6
 let other_team = function Red -> Blue | Blue -> Red
+let lwt_join [a; b] = Lwt.both a b >|= fun (a, b) -> [a; b]
 
-let run_turn run turn units map custom_fields =
+let check_actions team actions units =
+  List.iter actions ~f:(fun (id, action) ->
+      match List.Assoc.find ~equal:String.( = ) units id with
+      | Some unit_ ->
+          if Poly.(unit_.team = team) then
+            failwith "Action ID belongs to opposing team."
+          else ()
+      | None -> failwith "Action ID does not exist." )
+
+let compute_coords (x, y) direction =
+  match direction with
+  | Left -> (x - 1, y)
+  | Right -> (x + 1, y)
+  | Up -> (x, y - 1)
+  | Down -> (x, y + 1)
+
+let compare_coords (x1, y1) (x2, y2) = x1 - x2 + (y1 - y2)
+let coords_equal (x1, y1) (x2, y2) = x1 = x2 && y1 = y2
+
+let determine_winner state =
+  let res =
+    List.max_elt state.teams ~compare:(fun (_, units1) (_, units2) ->
+        List.length units1 - List.length units2 )
+  in
+  match res with Some (team, _) -> team | None -> assert false
+
+let rec validate_movement_map movement_map map =
+  let movement_map, conflicting_moves =
+    List.partition_map movement_map ~f:(fun (coords, id) ->
+        match map.(fst coords).(snd coords) with
+        | Empty -> `Fst (coords, id)
+        | _ -> `Snd (coords, id) )
+  in
+  List.iter conflicting_moves ~f:(fun (coords, id) ->
+      map.(fst coords).(snd coords) <- Unit id );
+  if List.is_empty conflicting_moves then movement_map
+  else validate_movement_map movement_map map
+
+let rec run_turn run turn units map custom_fields state_list =
   let team_list = create_team_list units in
   let state = {turn= turn + 1; units; teams= team_list; map} in
-  let inputs =
-    List.map [Red; Blue] ~f:(fun team ->
-        { state
-        ; custom= Caml.List.assoc team custom_fields
-        ; friend= team
-        ; foe= other_team team } )
-  in
-  inputs |> List.map ~f:run |> Lwt.join
-  >|= fun (result : string) ->
-  let output_list = List.map result ~f:Logic_j.robot_output_of_string in
-  let output_list = List.zip_exn [Red; Blue] output_list in
-  List.iter output_list ~f:(fun (team, actions) ->
-      List.iter actions ~f:(fun (id, action) ->
-          match List.Assoc.find ~equal:String.( = ) units id with
-          | Some unit_ ->
-              if Poly.(unit_.team = team) then
-                failwith "Action ID belongs to opposing team."
-              else ()
-          | None -> failwith "Action ID does not exist." ) )
+  let state_list = state :: state_list in
+  if turn = 9 then Lwt.return state_list
+  else
+    let inputs =
+      List.map [Red; Blue] ~f:(fun team ->
+          { state
+          ; custom= Caml.List.assoc team custom_fields
+          ; friend= team
+          ; foe= other_team team } )
+    in
+    inputs |> List.map ~f:run |> lwt_join
+    >>= fun (result : string list) ->
+    let output_list = List.map result ~f:Logic_j.robot_output_of_string in
+    let team_output_list = List.zip_exn [Red; Blue] output_list in
+    List.iter team_output_list ~f:(fun (team, output) ->
+        check_actions team output.actions units );
+    let all_actions =
+      List.concat_map output_list ~f:(fun output -> output.actions)
+    and custom_fields =
+      List.map team_output_list ~f:(fun (team, output) -> (team, output.custom))
+    in
+    let movement_map =
+      List.filter_map all_actions ~f:(fun (id, action) ->
+          match action.type_ with
+          | Move ->
+              Some
+                ( compute_coords (Caml.List.assoc id units).coords
+                    action.direction
+                , id )
+          | _ -> None )
+    in
+    let conflicting_moves =
+      List.find_all_dups movement_map
+        ~compare:(fun (coords1, _) (coords2, _) ->
+          compare_coords coords1 coords2 )
+    in
+    let movement_map =
+      List.filter movement_map ~f:(fun (coords, _) ->
+          not @@ List.Assoc.mem conflicting_moves ~equal:coords_equal coords )
+    in
+    List.iter movement_map ~f:(fun (_, id) ->
+        let coords = (Caml.List.assoc id units).coords in
+        map.(fst coords).(snd coords) <- Empty );
+    let movement_map = validate_movement_map movement_map map in
+    List.iter movement_map ~f:(fun (coords, id) ->
+        map.(fst coords).(snd coords) <- Unit id );
+    run_turn run (turn + 1) units map custom_fields state_list
 
 let start run =
   let map = create_circle_map radius' in
@@ -64,6 +132,9 @@ let start run =
         let unit = create_unit Soldier x y 10 team in
         (unit.id, unit) )
   in
-  List.iter units ~f:(fun (_, unit) -> map.(unit.x).(unit.y) <- Unit unit.id);
+  List.iter units ~f:(fun (_, unit_) ->
+      map.(fst unit_.coords).(snd unit_.coords) <- Unit unit_.id );
   let custom_fields = [(Red, ""); (Blue, "")] in
-  run_turn run 0 units map custom_fields
+  run_turn run 0 units map custom_fields []
+  >|= fun states ->
+  {turns= states; winner= determine_winner @@ List.hd_exn states}
