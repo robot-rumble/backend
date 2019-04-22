@@ -11,9 +11,10 @@ let app = Elm.Main.init({
   windowWidth: window.innerWidth,
 })
 
+setTimeout(() => app.ports.getOutput.send(3), 1000)
+
 app.ports.startEval.subscribe((code) => {
   let time = Date.now()
-  app.ports.getOutput.send(34)
 
   // let result = main({ realm, p1: code }, (result) => {
   //   console.log('=========FINAL=========')
