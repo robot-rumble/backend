@@ -10,9 +10,8 @@ import Html.Events exposing (..)
 import Task
 import Url
 
-import Decode
-import Json.Decode
-import Json.Encode as Encode
+import Decode as CustomDecode
+import Json.Decode as Decode
 
 -- MAIN
 
@@ -36,13 +35,14 @@ main =
 type alias Model =
     { key : Nav.Key
     , url : Url.Url
-    , output : Maybe Decode.Output
+    , output : Maybe CustomDecode.Output
+    , error : Maybe String
     }
 
 
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
-    (Model key url Nothing, Cmd.none )
+    (Model key url Nothing Nothing, Cmd.none )
 
 
 
@@ -53,8 +53,7 @@ port startEval : String -> Cmd msg
 type Msg
     = LinkClicked Browser.UrlRequest
     | UrlChanged Url.Url
-    | GotOutput Decode.Output
-    | BadOutput Json.Decode.Error
+    | GotOutput Decode.Value
     | Run
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -72,10 +71,12 @@ update msg model =
             ( { model | url = url }, Cmd.none )
 
         GotOutput output ->
-            ( { model | output = Just output }, Cmd.none )
+          case CustomDecode.decodeOutput output of
+            Ok data ->
+              ( { model | output = Just data }, Cmd.none )
+            Err error ->
+              ( model, Cmd.none )
 
-        BadOutput error ->
-            ( model, Cmd.none )
 
         Run ->
             ( model, startEval """
@@ -89,15 +90,11 @@ update msg model =
 
 -- SUBSCRIPTIONS
 
-port getOutput : (Json.Decode.Value -> msg) -> Sub msg
+port getOutput : (Decode.Value -> msg) -> Sub msg
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-         getOutput (\val ->
-          case Decode.decodeOutput val of
-            Ok a -> GotOutput a
-            Err err -> BadOutput err
-          )
+   getOutput GotOutput
 
 -- VIEW
 
@@ -107,8 +104,9 @@ view model =
     { title = "Copala"
     , body =
         [button [onClick Run] [text "run"]
-        ] ++ case model.output of
-          Just output -> [div [] [text output.winner]]
-          Nothing -> []
+        , case model.output of
+            Just output -> div [] [text output.winner]
+            _ -> div [] []
+        ]
     }
 
