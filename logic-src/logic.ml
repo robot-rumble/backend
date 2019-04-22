@@ -33,10 +33,13 @@ let create_team_list unit_list =
 let radius' = 10
 let unit_num' = 6
 let other_team = function Red -> Blue | Blue -> Red
-let lwt_join [a; b] = Lwt.both a b >|= fun (a, b) -> [a; b]
+
+let lwt_join = function
+  | [a; b] -> Lwt.both a b >|= fun (a, b) -> [a; b]
+  | _ -> failwith "Join requires two arguments."
 
 let check_actions team actions units =
-  List.iter actions ~f:(fun (id, action) ->
+  List.iter actions ~f:(fun (id, _action) ->
       match List.Assoc.find ~equal:String.( = ) units id with
       | Some unit_ ->
           if Poly.(unit_.team = team) then
@@ -86,7 +89,9 @@ let rec run_turn run turn units map custom_fields state_list =
           ; friend= team
           ; foe= other_team team } )
     in
-    inputs |> List.map ~f:run |> lwt_join
+    inputs
+    |> List.map ~f:Logic_j.string_of_robot_input
+    |> List.map ~f:run |> lwt_join
     >>= fun (result : string list) ->
     let output_list = List.map result ~f:Logic_j.robot_output_of_string in
     let team_output_list = List.zip_exn [Red; Blue] output_list in
@@ -137,4 +142,5 @@ let start run =
   let custom_fields = [(Red, ""); (Blue, "")] in
   run_turn run 0 units map custom_fields []
   >|= fun states ->
-  {turns= states; winner= determine_winner @@ List.hd_exn states}
+  Logic_j.string_of_main_output
+    {turns= states; winner= determine_winner @@ List.hd_exn states}
