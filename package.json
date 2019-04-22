@@ -4,10 +4,10 @@
   "scripts": {
     "web-build": "NODE_ENV=production webpack",
     "web-watch": "NODE_ENV=development webpack-dev-server --hot",
-    "logic-clean": "dune clean",
-    "logic-build": "dune build @web",
-    "logic-watch": "dune build @web -w",
-    "logic-build-native": "dune build @native"
+    "logic-clean": "cd logic-src && dune clean",
+    "logic-build": "cd logic-src && dune build @web",
+    "logic-watch": "cd logic-src && dune build @web -w",
+    "logic-build-native": "cd logic-src && dune build @native"
   },
   "dependencies": {
     "@babel/polyfill": "^7.2.5",
