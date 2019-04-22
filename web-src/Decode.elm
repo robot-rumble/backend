@@ -5,13 +5,15 @@ import Json.Decode exposing (..)
 import Json.Decode.Pipeline exposing (required)
 import Dict exposing (Dict)
 
+import Basics
+
 arrayAsTuple2 : Decoder a -> Decoder b -> Decoder (a, b)
 arrayAsTuple2 a b =
     index 0 a
         |> andThen (\aVal -> index 1 b
         |> andThen (\bVal -> Json.Decode.succeed (aVal, bVal)))
 
-stringAsUnion : List (String, a) -> (Decoder String -> Decoder a)
+stringAsUnion : List (String, a) -> Decoder String -> Decoder a
 stringAsUnion mapping =
   let dict = Dict.fromList mapping in
   andThen (\str ->
@@ -24,9 +26,9 @@ unionDecoder : List (String, a) -> List (String, String -> a) -> Decoder a
 unionDecoder plainMappings valueMappings =
   let
     decodePlain = string |> stringAsUnion plainMappings
-    decodeValue = index 0 string |> stringAsUnion valueMappings |> andThen (\unionType -> map unionType <| index 1 string)
+    decodeWithValue = index 0 string |> stringAsUnion valueMappings |> andThen (\unionType -> map unionType <| index 1 string)
   in
-  oneOf [decodePlain, decodeValue]
+  oneOf [decodePlain, decodeWithValue]
 
 type alias Id = String
 type alias Coords = (Int, Int)
@@ -37,14 +39,12 @@ decodeOutput = decodeValue outputDecoder
 
 type alias Output =
   { winner : String
-  , turns : List State
   }
 
 outputDecoder : Decoder Output
 outputDecoder =
     succeed Output
-        |> required "winner" string
-        |> required "turns" (list stateDecoder)
+      |> required "winner" string
 
 type alias State =
   { turn : Int

@@ -58,7 +58,7 @@ type tile = [ Unit of id | Wall | Empty ]
 type coords = (int * int)
 
 type unit_ = {
-  type_ <json name="type">: unit_type;
+  type_ : unit_type;
   coords : coords;
   health : int;
   id : id;

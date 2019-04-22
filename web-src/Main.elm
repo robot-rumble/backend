@@ -75,6 +75,7 @@ update msg model =
             Ok data ->
               ( { model | output = Just data }, Cmd.none )
             Err error ->
+              let _ = Debug.log "Error" <| Debug.toString error in
               ( model, Cmd.none )
 
 
