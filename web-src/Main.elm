@@ -10,10 +10,9 @@ import Html.Events exposing (..)
 import Task
 import Url
 
+import Decode
+import Json.Decode
 import Json.Encode as Encode
-
-import Json.Decode as Decode exposing (Decoder, int, string, float)
-import Json.Decode.Pipeline exposing (required, optional, hardcoded)
 
 -- MAIN
 
@@ -37,22 +36,26 @@ main =
 type alias Model =
     { key : Nav.Key
     , url : Url.Url
+    , output : Maybe Decode.Output
     }
 
 
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
-    (Model key url, Cmd.none )
+    (Model key url Nothing, Cmd.none )
 
 
 
 -- UPDATE
 
+port startEval : String -> Cmd msg
 
 type Msg
     = LinkClicked Browser.UrlRequest
     | UrlChanged Url.Url
-    | GotOutput Unit
+    | GotOutput Decode.Output
+    | BadOutput Json.Decode.Error
+    | Run
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -68,21 +71,33 @@ update msg model =
         UrlChanged url ->
             ( { model | url = url }, Cmd.none )
 
-        GotOutput unit ->
+        GotOutput output ->
+            ( { model | output = Just output }, Cmd.none )
+
+        BadOutput error ->
             ( model, Cmd.none )
+
+        Run ->
+            ( model, startEval """
+	function main (input) {
+		console.log(input)
+		return { actions: {} }
+	}
+            """ )
 
 
 
 -- SUBSCRIPTIONS
 
+port getOutput : (Json.Decode.Value -> msg) -> Sub msg
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Sub.batch
-        [ getOutput (decodeUnit >> GotOutput)
-        ]
-
-
+         getOutput (\val ->
+          case Decode.decodeOutput val of
+            Ok a -> GotOutput a
+            Err err -> BadOutput err
+          )
 
 -- VIEW
 
@@ -91,34 +106,9 @@ view : Model -> Browser.Document Msg
 view model =
     { title = "Copala"
     , body =
-        [div [] [text "hello!"]
-        ]
+        [button [onClick Run] [text "run"]
+        ] ++ case model.output of
+          Just output -> [div [] [text output.winner]]
+          Nothing -> []
     }
 
-
-type alias Unit =
-  { class : String
-  , x : Int
-  , y : Int
-  , health : Int
-  }
-
-
-encodeUnit : Unit -> Encode.Value
-encodeUnit unit =
-    Encode.object
-        []
-
-unitDecoder : Decoder Unit
-unitDecoder =
-    Decode.succeed Unit
-        |> required "class" string
-        |> required "x" int
-        |> required "y" int
-        |> required "health" int
-
-decodeUnit : Encode.Value -> Unit
-decodeUnit = Decode.decodeValue unitDecoder >> Result.withDefault { class = "asd", x = 0, y = 0, health = 10}
-
-port sendInput : Encode.Value -> Cmd msg
-port getOutput : (Encode.Value -> msg) -> Sub msg
