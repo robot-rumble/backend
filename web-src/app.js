@@ -1,38 +1,40 @@
-import { Elm } from './Main.elm'
-import '../css/app.scss'
+// import { Elm } from './Main.elm'
+// import '../css/app.scss'
 
-import { main } from '../logic-src/_build/default/web.js'
-import Realm from 'ecma-proposal-realms'
-let realm = Realm.makeRootRealm()
-realm.global.console = console
-
-let code = `
-function main (input) {
-  console.log(input)
-  return { actions: {}, custom: {} }
-}
-`
-
-let time = Date.now()
-let result = main({ realm, p1: code }, (result) => {
-  console.log('=========FINAL=========')
-  console.log(JSON.parse(result))
-  console.log(`Time taken: ${(Date.now() - time) / 1000}`)
-})
-
+// import { main } from '../logic-src/_build/default/web.js'
 // import Realm from 'ecma-proposal-realms'
 // let realm = Realm.makeRootRealm()
+// realm.global.console = console
 
-// const state = {
-//   onFinish: (result) => console.log(result),
+// let code = `
+// function main (input) {
+//   console.log(input)
+//   return { actions: {}, custom: {} }
 // }
+// `
 
-// realm.global.state = state
+// let time = Date.now()
+// let result = main({ realm, p1: code }, (result) => {
+//   console.log('=========FINAL=========')
+//   console.log(JSON.parse(result))
+//   console.log(`Time taken: ${(Date.now() - time) / 1000}`)
+// })
 
-// realm.evaluate('state.start = (data) => state.onFinish(data + 1)')
-// state.start(3)
+// --------------------------------
 
-// setTimeout(() => state.start(5), 1000)
+import Realm from 'ecma-proposal-realms'
+let realm = Realm.makeRootRealm()
+
+const state = {
+  onFinish: (result) => console.log(result),
+}
+
+realm.global.state = state
+
+realm.evaluate('state.start = (data) => state.onFinish(data + 1)')
+state.start(3)
+
+setTimeout(() => state.start(5), 1000)
 
 // let app = Elm.Main.init({
 //   node: document.getElementById('root'),
