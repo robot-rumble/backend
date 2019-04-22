@@ -14,18 +14,14 @@ type state = {
   map : map;
 }
 
-type json = string
-
 type robot_input = {
   state : state;
-  custom : json;
   friend : team;
   foe : team;
 }
 
 type robot_output = {
   actions : action_list;
-  custom : json;
 }
 
 type id = string

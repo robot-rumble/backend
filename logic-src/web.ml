@@ -21,21 +21,18 @@ let main (input : input Js.t) callback =
   let code =
     Printf.sprintf
       {|
-    %s;
-    let input = JSON.parse(%s)
-    if (input.custom) input.custom = JSON.parse(input.custom)
-    else input.custom = {}
-    let output = main(input)
-    output.custom = JSON.stringify(output.custom)
-    JSON.stringify(output)
+	  (input) => {
+		%s;
+		return JSON.stringify(main(JSON.parse(input)))
+	  }
     |}
       (Js.to_string input##.p1_code)
-      input_var
   in
-  let run robot_input =
+  let func = input##.realm##evaluate code in
+  let run (robot_input : string) =
     Lwt.wrap (fun () ->
-        Js.Unsafe.set input##.realm##.global input_var robot_input;
-        input##.realm##evaluate code |> Js.to_string )
+        Js.Unsafe.fun_call func [|Js.Unsafe.inject robot_input|]
+        |> Js.to_string )
   in
   Logic.start run >|= Js.string >|= callback
 

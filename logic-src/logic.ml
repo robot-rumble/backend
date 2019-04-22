@@ -76,7 +76,7 @@ let rec validate_movement_map movement_map map =
   if List.is_empty conflicting_moves then movement_map
   else validate_movement_map movement_map map
 
-let rec run_turn run turn units map custom_fields state_list =
+let rec run_turn run turn units map state_list =
   let team_list = create_team_list units in
   let state = {turn= turn + 1; units; teams= team_list; map} in
   let state_list = state :: state_list in
@@ -84,10 +84,7 @@ let rec run_turn run turn units map custom_fields state_list =
   else
     let inputs =
       List.map [Red; Blue] ~f:(fun team ->
-          { state
-          ; custom= Caml.List.assoc team custom_fields
-          ; friend= team
-          ; foe= other_team team } )
+          {state; friend= team; foe= other_team team} )
     in
     inputs
     |> List.map ~f:Logic_j.string_of_robot_input
@@ -99,8 +96,6 @@ let rec run_turn run turn units map custom_fields state_list =
         check_actions team output.actions units );
     let all_actions =
       List.concat_map output_list ~f:(fun output -> output.actions)
-    and custom_fields =
-      List.map team_output_list ~f:(fun (team, output) -> (team, output.custom))
     in
     let movement_map =
       List.filter_map all_actions ~f:(fun (id, action) ->
@@ -127,7 +122,7 @@ let rec run_turn run turn units map custom_fields state_list =
     let movement_map = validate_movement_map movement_map map in
     List.iter movement_map ~f:(fun (coords, id) ->
         map.(fst coords).(snd coords) <- Unit id );
-    run_turn run (turn + 1) units map custom_fields state_list
+    run_turn run (turn + 1) units map state_list
 
 let start run =
   let map = create_circle_map radius' in
@@ -139,8 +134,7 @@ let start run =
   in
   List.iter units ~f:(fun (_, unit_) ->
       map.(fst unit_.coords).(snd unit_.coords) <- Unit unit_.id );
-  let custom_fields = [(Red, ""); (Blue, "")] in
-  run_turn run 0 units map custom_fields []
+  run_turn run 0 units map []
   >|= fun states ->
   Logic_j.string_of_main_output
     {turns= states; winner= determine_winner @@ List.hd_exn states}
