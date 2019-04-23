@@ -10,10 +10,17 @@ let generate_id () =
 let create_unit type_ x y health team =
   {Logic_t.type_; coords= (x, y); health; team; id= generate_id ()}
 
+let create_rect_map side =
+  Array.init side ~f:(fun x ->
+      Array.init side ~f:(fun y ->
+          if x = 0 || x = side - 1 || y = 0 || y = side - 1 then Wall
+          else Empty ) )
+
 let create_circle_map radius =
   let is_wall x y = ((x - radius) ** 2) + ((y - radius) ** 2) > radius ** 2 in
-  Array.init radius ~f:(fun x ->
-      Array.init radius ~f:(fun y -> if is_wall x y then Wall else Empty) )
+  Array.init (radius * 2) ~f:(fun x ->
+      Array.init (radius * 2) ~f:(fun y -> if is_wall x y then Wall else Empty)
+  )
 
 let rec random_loc map =
   let x = Random.int @@ Array.length map
@@ -42,7 +49,7 @@ let check_actions team actions units =
   List.iter actions ~f:(fun (id, _action) ->
       match List.Assoc.find ~equal:String.( = ) units id with
       | Some unit_ ->
-          if Poly.(unit_.team = team) then
+          if Poly.(unit_.team <> team) then
             failwith "Action ID belongs to opposing team."
           else ()
       | None -> failwith "Action ID does not exist." )
@@ -64,17 +71,18 @@ let determine_winner state =
   in
   match res with Some (team, _) -> team | None -> assert false
 
-let rec validate_movement_map movement_map map =
+let rec validate_movement_map movement_map map units =
   let movement_map, conflicting_moves =
-    List.partition_map movement_map ~f:(fun (coords, id) ->
+    List.partition_map movement_map ~f:(fun (id, coords) ->
         match map.(fst coords).(snd coords) with
-        | Empty -> `Fst (coords, id)
-        | _ -> `Snd (coords, id) )
+        | Empty -> `Fst (id, coords)
+        | _ -> `Snd (id, coords) )
   in
-  List.iter conflicting_moves ~f:(fun (coords, id) ->
+  List.iter conflicting_moves ~f:(fun (id, _) ->
+      let coords = (Caml.List.assoc id units).coords in
       map.(fst coords).(snd coords) <- Unit id );
   if List.is_empty conflicting_moves then movement_map
-  else validate_movement_map movement_map map
+  else validate_movement_map movement_map map units
 
 let rec run_turn run turn units map state_list =
   let team_list = create_team_list units in
@@ -102,30 +110,40 @@ let rec run_turn run turn units map state_list =
           match action.type_ with
           | Move ->
               Some
-                ( compute_coords (Caml.List.assoc id units).coords
-                    action.direction
-                , id )
+                ( id
+                , compute_coords (Caml.List.assoc id units).coords
+                    action.direction )
           | _ -> None )
     in
     let conflicting_moves =
       List.find_all_dups movement_map
-        ~compare:(fun (coords1, _) (coords2, _) ->
+        ~compare:(fun (_, coords1) (_, coords2) ->
           compare_coords coords1 coords2 )
     in
     let movement_map =
-      List.filter movement_map ~f:(fun (coords, _) ->
-          not @@ List.Assoc.mem conflicting_moves ~equal:coords_equal coords )
+      List.filter movement_map ~f:(fun (_, coords) ->
+          not
+          @@ List.Assoc.mem
+               (List.Assoc.inverse conflicting_moves)
+               ~equal:coords_equal coords )
     in
-    List.iter movement_map ~f:(fun (_, id) ->
+    List.iter movement_map ~f:(fun (id, _) ->
         let coords = (Caml.List.assoc id units).coords in
         map.(fst coords).(snd coords) <- Empty );
-    let movement_map = validate_movement_map movement_map map in
-    List.iter movement_map ~f:(fun (coords, id) ->
+    let movement_map = validate_movement_map movement_map map units in
+    List.iter movement_map ~f:(fun (id, coords) ->
         map.(fst coords).(snd coords) <- Unit id );
+    let units =
+      List.Assoc.map units ~f:(fun unit_ ->
+          match Caml.List.assoc_opt unit_.id movement_map with
+          | Some coords -> {unit_ with coords}
+          | None -> unit_ )
+    in
     run_turn run (turn + 1) units map state_list
 
 let start run =
-  let map = create_circle_map radius' in
+  Random.self_init ();
+  let map = create_rect_map radius' in
   let units =
     List.init unit_num' ~f:(fun i ->
         let x, y = random_loc map and team = if i % 2 = 0 then Red else Blue in
@@ -137,4 +155,4 @@ let start run =
   run_turn run 0 units map []
   >|= fun states ->
   Logic_j.string_of_main_output
-    {turns= states; winner= determine_winner @@ List.hd_exn states}
+    {turns= states |> List.rev; winner= determine_winner @@ List.hd_exn states}

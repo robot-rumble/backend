@@ -95,8 +95,14 @@ update msg model =
         Run ->
             ( model, startEval """
 	function main (input) {
-		console.log(input)
-		return { actions: { } }
+        let actions = {}
+        console.log(displayMap(input.state.map))
+        console.log(input)
+        for (let id of input.state.teams[input.friend.toLowerCase()]) {
+            actions[id] = { type_: "Move", direction: "Right" }
+        }
+
+		return { actions }
 	}
             """ )
 
