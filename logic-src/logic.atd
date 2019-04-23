@@ -70,7 +70,7 @@ type unit_type = [ Soldier ]
 <ocaml repr="classic">
 
 type action = {
-  type_ <json name="type">: action_type;
+  type_ : action_type;
   direction: direction;
 }
 

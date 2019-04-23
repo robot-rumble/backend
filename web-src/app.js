@@ -14,9 +14,13 @@ let app = Elm.Main.init({
 app.ports.startEval.subscribe((code) => {
   let time = Date.now()
 
-  let result = main({ realm, p1: code }, (result) => {
-    console.log('=========FINAL=========')
-    console.log(`Time taken: ${(Date.now() - time) / 1000}`)
-    app.ports.getOutput.send(JSON.parse(result))
-  })
+  try {
+    let result = main({ realm, p1: code }, (result) => {
+      console.log('=========FINAL=========')
+      console.log(`Time taken: ${(Date.now() - time) / 1000}`)
+      app.ports.getOutput.send(JSON.parse(result))
+    })
+  } catch (e) {
+    console.log('OCaml Error: ', e[2].c)
+  }
 })
