@@ -5,3 +5,23 @@
 @import "node_modules/bootstrap/scss/_variables";
 @import "node_modules/bootstrap/scss/_functions";
 @import "node_modules/bootstrap/scss/mixins/_breakpoints";
+
+
+$red: #FE8D8D;
+$blue: #8DCEFE;
+
+.renderer {
+    display: grid;
+    width: 300px;
+    height: 300px;
+
+    .unit {
+        &.team-Red {
+            background: $red;
+        }
+
+        &.team-Blue {
+            background: $blue;
+        }
+    }
+}
