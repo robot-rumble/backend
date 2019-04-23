@@ -5,6 +5,21 @@ import { main } from '../logic-src/_build/default/web.js'
 import Realm from 'ecma-proposal-realms'
 let realm = Realm.makeRootRealm()
 realm.global.console = console
+realm.global.displayMap = (map) =>
+  map
+    .map((col) =>
+      col
+        .map((unit) => {
+          if (typeof unit === 'object') {
+            return unit[1].slice(0, 5)
+          } else {
+            if (unit === 'Empty') return '     '
+            else if (unit === 'Wall') return 'OOOOO'
+          }
+        })
+        .join(' '),
+    )
+    .join('\n')
 
 let app = Elm.Main.init({
   node: document.getElementById('root'),
@@ -21,6 +36,6 @@ app.ports.startEval.subscribe((code) => {
       app.ports.getOutput.send(JSON.parse(result))
     })
   } catch (e) {
-    console.log('OCaml Error: ', e[2].c)
+    console.log('OCaml Error: ', e)
   }
 })
