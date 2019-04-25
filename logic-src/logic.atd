@@ -42,7 +42,7 @@ type team = string
 
 type objs_by_team = (team * id list) list <json repr="object">
 
-type objs_by_map = id option list <ocaml repr="array"> list <ocaml repr="array">
+type objs_by_map = id nullable list <ocaml repr="array"> list <ocaml repr="array"> <json keep_nulls>
 
 type coords = (int * int)
 

@@ -2,6 +2,11 @@
 # yarn lockfile v1
 
 
+"@agoric/make-hardener@^0.0.4":
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/@agoric/make-hardener/-/make-hardener-0.0.4.tgz#9b5d6692bc2fbbac2fff0a6682959ac5e69c582d"
+  integrity sha512-0k/wGkIVQO3IY7p/H/5OS3BIXsRK9Qb7nHnqyvj6hzvSyumwgPp8e4rz5QaVWSen43TGJl+zQn4mW9ZZShT1aw==
+
 "@babel/code-frame@^7.0.0":
   version "7.0.0"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.0.0.tgz#06e2ab19bdb535385559aabb5ba59729482800f8"
@@ -2878,10 +2883,6 @@ ecc-jsbn@~0.1.1:
     jsbn "~0.1.0"
     safer-buffer "^2.1.0"
 
-"ecma-proposal-realms@https://github.com/tc39/proposal-realms.git":
-  version "1.0.0"
-  resolved "https://github.com/tc39/proposal-realms.git#0c00eba43680dda89f98cf8c9892b2f656b8fe65"
-
 editions@^2.1.2, editions@^2.1.3:
   version "2.1.3"
   resolved "https://registry.yarnpkg.com/editions/-/editions-2.1.3.tgz#727ccf3ec2c7b12dcc652c71000f16c4824d6f7d"
@@ -3039,6 +3040,11 @@ eslint-scope@^3.7.1:
   dependencies:
     esrecurse "^4.1.0"
     estraverse "^4.1.1"
+
+esm@^3.2.5:
+  version "3.2.22"
+  resolved "https://registry.yarnpkg.com/esm/-/esm-3.2.22.tgz#5062c2e22fee3ccfee4e8f20da768330da90d6e3"
+  integrity sha512-z8YG7U44L82j1XrdEJcqZOLUnjxco8pO453gKOlaMD1/md1n/5QrscAmYG+oKUspsmDLuBFZrpbxI6aQ67yRxA==
 
 esprima@^2.6.0:
   version "2.7.3"
@@ -7168,6 +7174,14 @@ serve-static@1.13.2:
     escape-html "~1.0.3"
     parseurl "~1.3.2"
     send "0.16.2"
+
+ses@^0.5.0:
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/ses/-/ses-0.5.0.tgz#2e410055f52e5b0cf93ccd148c39597cbff883ca"
+  integrity sha512-alpPOmwrlOhg52o2ix7ZaXMCqhQ7MrZ4AR+BZSB2VmiFJ8u5L9sRIZGkfmom0Dexal6RXvNUJkx81QwXVQx9Kg==
+  dependencies:
+    "@agoric/make-hardener" "^0.0.4"
+    esm "^3.2.5"
 
 set-blocking@^2.0.0, set-blocking@~2.0.0:
   version "2.0.0"

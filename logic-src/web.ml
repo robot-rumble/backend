@@ -22,8 +22,8 @@ let main (input : input Js.t) callback =
     Printf.sprintf
       {|
 	  (input) => {
-		%s;
-		return JSON.stringify(main(JSON.parse(input)))
+	      %s;
+	      return JSON.stringify(main(JSON.parse(input)))
 	  }
     |}
       (Js.to_string input##.p1_code)
