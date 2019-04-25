@@ -1,4 +1,4 @@
-module Decode exposing (Coords, Id, Map, Output, State, Team, Tile, Unit, UnitType, decodeOutput)
+module Decode exposing (Coords, Id, Output, State, Team, Unit, UnitType, Terrain, TerrainType(..), ObjDetails(..), decodeOutput)
 
 import Basics
 import Dict exposing (Dict)
@@ -6,7 +6,6 @@ import Array exposing (Array)
 import Json.Decode exposing (..)
 import Json.Decode.Pipeline exposing (required)
 import Json.Encode as Encode
-
 
 arrayAsTuple2 : Decoder a -> Decoder b -> Decoder ( a, b )
 arrayAsTuple2 a b =
@@ -79,9 +78,7 @@ outputDecoder =
 
 type alias State =
     { turn : Int
-    , units : Dict String Unit
-    , teams : Dict String (List Id)
-    , map : Map
+    , objs : Dict String Obj
     }
 
 
@@ -89,49 +86,68 @@ stateDecoder : Decoder State
 stateDecoder =
     succeed State
         |> required "turn" int
-        |> required "units" (dict unitDecoder)
-        |> required "teams" (dict (list string))
-        |> required "map" mapDecoder
+        |> required "objs" (dict objDecoder)
+
+type alias Obj = ( BasicObj, ObjDetails )
+
+objDecoder : Decoder Obj
+objDecoder =
+    field "type_" string
+    |> andThen (\type_ ->
+        case type_ of
+            "Soldier" -> unitDecoder
+            "Wall" -> terrainDecoder
+            _ -> fail ("Invalid type: " ++ type_)
+        )
+    |> andThen (\details ->
+        basicObjDecoder |> andThen (\basic ->
+            succeed (basic, details)
+        )
+    )
+
+type alias BasicObj =
+    { coords : Coords
+    , id : Id
+    }
+
+basicObjDecoder : Decoder BasicObj
+basicObjDecoder =
+    succeed BasicObj
+        |> required "coords" (arrayAsTuple2 int int)
+        |> required "id" string
 
 
-type UnitType
-    = Soldier
+type ObjDetails = UnitObj Unit | TerrainObj Terrain
 
 
 type alias Unit =
     { type_ : UnitType
-    , coords : Coords
     , health : Int
-    , id : Id
     , team : Team
     }
 
+type UnitType
+    = Soldier
 
-unitDecoder : Decoder Unit
+unitDecoder : Decoder ObjDetails
 unitDecoder =
     succeed Unit
         |> required "type_" (string |> stringAsUnion [ ( "Soldier", Soldier ) ])
-        |> required "coords" (arrayAsTuple2 int int)
         |> required "health" int
-        |> required "id" string
         |> required "team" string
+        |> map UnitObj
 
 
-type alias Map =
-    List (List Tile)
+type alias Terrain =
+    { type_ : TerrainType
+    }
 
+type TerrainType
+    = Wall
 
-mapDecoder : Decoder Map
-mapDecoder =
-    list (list tileDecoder)
+terrainDecoder : Decoder ObjDetails
+terrainDecoder =
+    succeed Terrain
+        |> required "type_" (string |> stringAsUnion [ ( "Wall", Wall ) ])
+        |> map TerrainObj
 
-
-type Tile
-    = UnitTile Id
-    | Wall
-    | Empty
-
-
-tileDecoder : Decoder Tile
-tileDecoder =
-    unionDecoder [ ( "Empty", Empty ), ( "Wall", Wall ) ] [ ( "Unit", UnitTile ) ]

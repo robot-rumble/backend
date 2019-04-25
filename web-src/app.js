@@ -17,10 +17,10 @@ app.ports.startEval.subscribe((code) => {
     let result = main({ realm, p1: code }, (result) => {
       console.log('=========FINAL=========')
       console.log(`Time taken: ${(Date.now() - time) / 1000}`)
-      console.log(JSON.parse(result))
       app.ports.getOutput.send(JSON.parse(result))
     })
   } catch (e) {
+    console.log('ROOT Error: ' + e.message)
     console.error(new Error(e))
   }
 })

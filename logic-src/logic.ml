@@ -142,7 +142,7 @@ let rec run_turn run turn objs (map : (Coords.t, id, 'a) Map.t) state_list =
     let input_teams = create_teams objs team_names in
     let input_map = create_array_map map map_size in
     let input_state =
-      {turn= state.turn; objs= state.objs; teams= input_teams; map= input_map}
+      {basic= state; additional= {teams= input_teams; map= input_map}}
     in
     let inputs =
       List.map team_names ~f:(fun team -> {team; state= input_state})

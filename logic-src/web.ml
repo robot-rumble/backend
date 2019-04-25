@@ -23,7 +23,12 @@ let main (input : input Js.t) callback =
       {|
 	  (input) => {
 	      %s;
-	      return JSON.stringify(main(JSON.parse(input)))
+	      try {
+		return JSON.stringify(main(JSON.parse(input)))
+	      } catch (e) {
+		console.log('Error: ' + e.message)
+		console.error(new Error(e))
+	      }
 	  }
     |}
       (Js.to_string input##.p1_code)
