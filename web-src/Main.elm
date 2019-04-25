@@ -94,10 +94,27 @@ update msg model =
 
         Run ->
             ( model, startEval """
+   const displayMap = (objs, map) =>
+     map
+       .map((col) =>
+         col
+           .map((id) => {
+             if (id) {
+               if (objs[id].type === 'Wall') return 'wall '
+               else return id
+             } else {
+               return '     '
+             }
+           })
+           .join(' '),
+       )
+
+       .join(`\n`)
+
 	function main (input) {
         let actions = {}
-        console.log(displayMap(input.state.map))
-        console.log(input)
+        console.log(displayMap(input.state.objs, input.state.map))
+
         for (let id of input.state.teams[input.friend.toLowerCase()]) {
             actions[id] = { type_: "Move", direction: "Right" }
         }
