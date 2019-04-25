@@ -26,7 +26,8 @@ let main (input : input Js.t) callback =
 	      try {
 		return JSON.stringify(main(JSON.parse(input)))
 	      } catch (e) {
-		console.log('Error: ' + e.message)
+		console.log('Inside Error!')
+		console.log(e.message)
 		console.error(new Error(e))
 	      }
 	  }
