@@ -113,9 +113,10 @@ update msg model =
 
 	function main (input) {
         let actions = {}
+        console.log(input)
         console.log(displayMap(input.state.objs, input.state.map))
 
-        for (let id of input.state.teams[input.friend.toLowerCase()]) {
+        for (let id of input.state.teams[input.team]) {
             actions[id] = { type_: "Move", direction: "Right" }
         }
 
@@ -180,15 +181,28 @@ map_height = 10
 
 viewGame : RR.State -> Html Msg
 viewGame state =
-    let unit_divs =
-            Dict.values state.units
-            |> List.map (\unit ->
-                let (x, y) = unit.coords in
-                div [ class "unit"
-                    , class <| "team-" ++ unit.team
+    let obj_divs =
+            Dict.values state.objs
+            |> List.map (\(basic, details) ->
+                let (x, y) = basic.coords in
+                div ([ class "obj"
                     , style "grid-column" <| String.fromInt x
                     , style "grid-row" <| String.fromInt y
-                    ] []
+                    ] ++ (
+                     case details of
+                        RR.UnitObj unit ->
+                           [ class "unit"
+                           , class <| "team-" ++ unit.team
+                           ]
+                        RR.TerrainObj terrain ->
+                           [ class "terrain"
+                           , class <| "type-" ++ (
+                              case terrain.type_ of
+                                 RR.Wall -> "wall"
+                              )
+                           ]
+                     ))
+                    []
             )
         gridTemplateRows = "repeat(" ++ String.fromInt map_width ++ ", 1fr)"
         gridTemplateColumns = "repeat(" ++ String.fromInt map_height ++ ", 1fr)"
@@ -196,4 +210,4 @@ viewGame state =
     div [class "renderer"
         , style "grid-template-rows" gridTemplateRows
         , style "grid-template-columns" gridTemplateColumns
-        ] unit_divs
+        ] obj_divs

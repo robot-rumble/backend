@@ -14,14 +14,17 @@ type main_output = {
 type turn_state = {
   turn : int;
   objs : objs;
-}
+} <json adapter.ocaml="Json_adapter.Obj">
 
-type robot_input_state = {
-  turn : int;
-  objs : objs;
+type additional_state = {
   teams : objs_by_team;
   map : objs_by_map;
 }
+
+type robot_input_state = {
+  basic: turn_state;
+  additional: additional_state;
+} <json adapter.ocaml="Json_adapter.State">
 
 type robot_input = {
   state : robot_input_state;
