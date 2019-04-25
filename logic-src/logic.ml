@@ -10,6 +10,7 @@ let id_length = 5
 let generate_id () =
   String.init id_length ~f:(fun _ -> Array.random_element_exn letters)
 
+let log sexp = Sexp.to_string sexp |> Caml.print_endline
 let create_basic_obj coords = {coords; id= generate_id ()}
 let create_terrain type_ coords = (create_basic_obj coords, Terrain {type_})
 let unit_health = 10
@@ -23,24 +24,28 @@ module Coords = struct
   include Comparator.Make (T)
 
   let equal (x1, y1) (x2, y2) = x1 = x2 && y1 = y2
+  let log_map v_sexp map = Map.sexp_of_m__t (module T) v_sexp map |> log
 end
 
 module Map = struct
   include Map
 
   let update_exn map key ~f =
-    Map.update map key ~f:(function Some v -> f v | None -> assert false)
+    Map.update map key ~f:(function
+      | Some v -> f v
+      | None -> failwith "Key for update not found" )
 
   let append_exn map1 map2 =
-    match Map.append ~lower_part:map1 ~upper_part:map2 with
-    | `Ok res -> res
-    | `Overlapping_key_ranges -> assert false
+    Map.fold map1 ~init:map2 ~f:(fun ~key ~data acc ->
+        Map.add_exn acc ~key ~data )
 
   let partition_tf_keys map ~f =
     Map.partitioni_tf map ~f:(fun ~key ~data:_ -> f key)
 end
 
-let create_grid size = List.zip_exn (List.range 0 size) (List.range 0 size)
+let create_grid size =
+  List.init size ~f:(fun x -> List.init size ~f:(fun y -> (x, y)))
+  |> List.concat
 
 let filter_empty type_ size =
   List.filter ~f:(fun (x, y) ->
@@ -114,7 +119,9 @@ let determine_winner (state : turn_state) =
     List.max_elt teams ~compare:(fun (_, units1) (_, units2) ->
         List.length units1 - List.length units2 )
   in
-  match res with Some (team, _) -> team | None -> assert false
+  match res with
+  | Some (team, _) -> team
+  | None -> Caml.fst @@ List.hd_exn teams
 
 let get_obj_coords objs id =
   let base, _ = Map.find_exn objs id in
@@ -165,19 +172,15 @@ let rec run_turn run turn objs (map : (Coords.t, id, 'a) Map.t) state_list =
               Some
                 (compute_coords (get_obj_coords objs id) action.direction, id)
           | _ -> None )
-      |> Map.of_alist_exn (module Coords)
-    in
-    let conflicting_moves =
-      List.find_all_dups (Map.keys movement_map)
-        ~compare:Coords.comparator.compare
+      |> Map.of_alist_multi (module Coords)
     in
     let movement_map =
-      Map.filter_keys movement_map
-        ~f:(List.mem conflicting_moves ~equal:Coords.equal)
+      Map.filter_map movement_map ~f:(fun ids ->
+          if List.length ids > 1 then None else Some (List.hd_exn ids) )
     in
     let map =
-      Map.filter map ~f:(fun id ->
-          not @@ Map.mem movement_map (get_obj_coords objs id) )
+      let ids = Map.data movement_map in
+      Map.filter map ~f:(fun id -> not @@ List.mem ids id ~equal:String.equal)
     in
     let movement_map, map = validate_movement_map movement_map map objs in
     let map = Map.append_exn map movement_map in
@@ -191,11 +194,14 @@ let rec run_turn run turn objs (map : (Coords.t, id, 'a) Map.t) state_list =
 let start run =
   Random.self_init ();
   let terrains, map = create_map Rect map_size in
-  let units =
-    List.concat_map team_names ~f:(fun team ->
-        List.init team_unit_num ~f:(fun _ ->
+  let map, units =
+    List.fold team_names ~init:(map, []) ~f:(fun acc team ->
+        List.fold (List.range 0 team_unit_num) ~init:acc
+          ~f:(fun (map, units) _ ->
             let coords = random_loc map map_size in
-            create_unit Soldier coords team ) )
+            let ((basic, _) as unit_) = create_unit Soldier coords team in
+            let map = Map.set map ~key:coords ~data:basic.id in
+            (map, unit_ :: units) ) )
   in
   let objs =
     List.append units terrains

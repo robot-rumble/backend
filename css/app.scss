@@ -15,6 +15,10 @@ $blue: #8DCEFE;
     width: 300px;
     height: 300px;
 
+    .terrain {
+        background: gray;
+    }
+
     .unit {
         &.team-red {
             background: $red;

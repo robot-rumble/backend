@@ -100,7 +100,7 @@ update msg model =
          col
            .map((id) => {
              if (id) {
-               if (objs[id].type === 'Wall') return 'wall '
+               if (objs[id].type_ === 'Wall') return 'wall '
                else return id
              } else {
                return '     '
@@ -117,7 +117,7 @@ update msg model =
         console.log(displayMap(input.state.objs, input.state.map))
 
         for (let id of input.state.teams[input.team]) {
-            actions[id] = { type_: "Move", direction: "Right" }
+            actions[id] = { type_: "Move", direction: input.team == "red" ? "Right" : "Down" }
         }
 
 		return { actions }
@@ -171,8 +171,13 @@ viewUI state =
     div []
         [ game
         , div [] [text <| "current turn: " ++ String.fromInt (state.turn + 1)]
-        , button [onClick <| GotRenderMsg (ChangeTurn Next)] [text "next turn"]
-        , button [onClick <| GotRenderMsg (ChangeTurn Previous)] [text "previous turn"]
+        , button
+         [onClick <| GotRenderMsg (ChangeTurn Next)
+         , disabled (state.turn == Array.length state.data.turns - 1)
+         ] [text "next turn"]
+        , button
+         [onClick <| GotRenderMsg (ChangeTurn Previous)
+         , disabled (state.turn == 0)] [text "previous turn"]
     ]
 
 
@@ -186,8 +191,9 @@ viewGame state =
             |> List.map (\(basic, details) ->
                 let (x, y) = basic.coords in
                 div ([ class "obj"
-                    , style "grid-column" <| String.fromInt x
-                    , style "grid-row" <| String.fromInt y
+                     , class basic.id
+                     , style "grid-column" <| String.fromInt (x + 1)
+                     , style "grid-row" <| String.fromInt (y + 1)
                     ] ++ (
                      case details of
                         RR.UnitObj unit ->

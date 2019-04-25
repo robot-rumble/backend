@@ -20,7 +20,8 @@ app.ports.startEval.subscribe((code) => {
       app.ports.getOutput.send(JSON.parse(result))
     })
   } catch (e) {
-    console.log('ROOT Error: ' + e.message)
+    console.log('Root Error!')
+    console.log(e.message)
     console.error(new Error(e))
   }
 })
