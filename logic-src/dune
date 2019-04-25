@@ -13,7 +13,7 @@
   (name logic)
   (libraries base atdgen)
   (modes byte native)
-  (preprocess (pps lwt_ppx))
+  (preprocess (pps lwt_ppx ppx_jane))
   (modules :standard \ web server))
 
 (rule

@@ -1,23 +1,31 @@
 type main_input = {
   p1_code : string;
+  map_type : map_type;
 }
+
+type map_type = [ Rect | Circle ]
+<ocaml repr="classic">
 
 type main_output = {
   winner : string;
-  turns : state list;
+  turns : turn_state list;
 }
 
-type state = {
+type turn_state = {
   turn : int;
-  units : unit_list;
-  teams : units_by_team;
-  map : map;
+  objs : objs;
+}
+
+type robot_input_state = {
+  turn : int;
+  objs : objs;
+  teams : objs_by_team;
+  map : objs_by_map;
 }
 
 type robot_input = {
-  state : state;
-  friend : team;
-  foe : team;
+  state : robot_input_state;
+  team : team;
 }
 
 type robot_output = {
@@ -26,44 +34,39 @@ type robot_output = {
 
 type id = string
 
-type unit_list = (id * unit_) list <json repr="object">
+type objs = (id * obj) list <json repr="object">
 
 type action_list = (id * action) list <json repr="object">
 
-type team = [ Red | Blue ]
-<ocaml repr="classic">
+type team = string
 
-type units_by_team = (string * id list) list <json repr="object">
+type objs_by_team = (team * id list) list <json repr="object">
 
-(*
-type units_by_team = (string * id list) list <json repr="object"> wrap
-<ocaml t="(team * id list) list" wrap="List.map ~f:(
-  fun (team, units) -> match team with
-  | \"Blue\" -> (`Blue, units)
-  | \"Red\" -> (`Red, units)
-  | _ -> failwith \"Invalid team.\"
-)" unwrap="List.map ~f:(
-  fun (team, units) -> match team with
-  | `Blue -> (\"Blue\", units)
-  | `Red -> (\"Red\", units)
-)">
-*)
-
-type map = tile list <ocaml repr="array"> list <ocaml repr="array">
-
-type tile = [ Unit of id | Wall | Empty ]
-<json adapter.ocaml="Atdgen_runtime.Json_adapter.Type_field">
-<ocaml repr="classic">
+type objs_by_map = id option list <ocaml repr="array"> list <ocaml repr="array">
 
 type coords = (int * int)
 
+type basic_obj = {
+  id : id;
+  coords : coords;
+}
+
+type obj = (basic_obj * obj_details)
+
+type obj_details = [ Terrain of terrain | Unit of unit_ ]
+<ocaml repr="classic">
+
+type terrain = {
+  type_ : terrain_type;
+}
+
+type terrain_type = [ Wall ]
+<ocaml repr="classic">
+
 type unit_ = {
   type_ : unit_type;
-  coords : coords;
-  health : int;
-  id : id;
   team : team;
-(* next_action : action; *)
+  health : int;
 }
 
 type unit_type = [ Soldier ]
