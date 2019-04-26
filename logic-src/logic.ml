@@ -34,7 +34,7 @@ module Map = struct
   let update_exn map key ~f =
     Map.update map key ~f:(function
       | Some v -> f v
-      | None -> failwith "Key for update not found" )
+      | None -> failwith "Key for Map.update not found" )
 
   let merge_exn map1 map2 =
     Map.fold map1 ~init:map2 ~f:(fun ~key ~data acc ->
@@ -144,7 +144,7 @@ let rec validate_movement_map movement_map map objs =
 
 let map_size = 10
 let team_unit_num = 6
-let attack_strength = 1
+let attack_strength = 10
 
 let rec run_turn run turn objs (map : (Coords.t, id, 'a) Map.t) state_list =
   let state = {turn= turn + 1; objs= Map.to_alist objs} in
@@ -211,6 +211,14 @@ let rec run_turn run turn objs (map : (Coords.t, id, 'a) Map.t) state_list =
               , match details with
                 | Unit unit_ -> Unit {unit_ with health= unit_.health - attack}
                 | other -> other ) ) )
+    in
+    let objs, dead_objs =
+      Map.partition_tf objs ~f:(fun (_basic, details) ->
+          match details with Unit unit_ -> unit_.health > 0 | _ -> true )
+    in
+    let map =
+      Map.fold dead_objs ~init:map ~f:(fun ~key:_ ~data:(basic, _) acc ->
+          Map.remove acc basic.coords )
     in
     run_turn run (turn + 1) objs map state_list
 
