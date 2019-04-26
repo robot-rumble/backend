@@ -117,7 +117,7 @@ update msg model =
         console.log(displayMap(input.state.objs, input.state.map))
 
         for (let id of input.state.teams[input.team]) {
-            actions[id] = { type_: "Move", direction: input.team == "red" ? "Right" : "Down" }
+            actions[id] = { type_: input.state.turn % 2 == 0 ? "Move" : "Attack", direction: input.team == "red" ? "Right" : "Down" }
         }
 
 		return { actions }
@@ -188,6 +188,8 @@ viewUI state =
 
 map_width = 10
 map_height = 10
+max_health = 5
+health_bar_width = 80
 
 image : String -> Html.Attribute Msg
 image name =
@@ -219,7 +221,18 @@ viewGame state =
                            , image "wall"
                            ]
                      ))
-                    []
+                    [
+                     case details of
+                        RR.UnitObj unit ->
+                           let health_perc = (toFloat unit.health) / (toFloat max_health) * health_bar_width
+                           in
+                           div
+                              [ class "health-bar"
+                              , style "width" <| String.fromFloat health_perc ++ "%"
+                              ] []
+                        _ -> div [] []
+                    ]
+
             )
         gridTemplateRows = "repeat(" ++ String.fromInt map_width ++ ", 1fr)"
         gridTemplateColumns = "repeat(" ++ String.fromInt map_height ++ ", 1fr)"
