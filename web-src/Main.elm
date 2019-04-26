@@ -154,7 +154,7 @@ view : Model -> Browser.Document Msg
 view model =
     { title = "Copala"
     , body =
-        [button [onClick Run] [text "run"]
+        [ button [onClick Run, class "mx-auto", class "d-block", class "mt-5"] [text "run"]
         , case model.renderState of
             Just output -> viewUI output
             _ -> div [] []
@@ -168,21 +168,30 @@ viewUI state =
                Just turn -> viewGame turn
                Nothing -> div [] [text "Invalid turn."]
     in
-    div []
-        [ game
-        , div [] [text <| "current turn: " ++ String.fromInt (state.turn + 1)]
-        , button
-         [onClick <| GotRenderMsg (ChangeTurn Next)
-         , disabled (state.turn == Array.length state.data.turns - 1)
-         ] [text "next turn"]
-        , button
-         [onClick <| GotRenderMsg (ChangeTurn Previous)
-         , disabled (state.turn == 0)] [text "previous turn"]
+    div
+      [ class "d-flex"
+      , class "mt-6"
+      ] [
+       div [ class "mx-auto"]
+           [ game
+           , div [] [text <| "current turn: " ++ String.fromInt (state.turn + 1)]
+           , button
+            [onClick <| GotRenderMsg (ChangeTurn Next)
+            , disabled (state.turn == Array.length state.data.turns - 1)
+            ] [text "next turn"]
+           , button
+            [onClick <| GotRenderMsg (ChangeTurn Previous)
+            , disabled (state.turn == 0)] [text "previous turn"]
+       ]
     ]
 
 
 map_width = 10
 map_height = 10
+
+image : String -> Html.Attribute Msg
+image name =
+   style "background-image" <| "url(\"" ++ name ++ ".png\")"
 
 viewGame : RR.State -> Html Msg
 viewGame state =
@@ -199,6 +208,7 @@ viewGame state =
                         RR.UnitObj unit ->
                            [ class "unit"
                            , class <| "team-" ++ unit.team
+                           , image <| "soldier-" ++ unit.team
                            ]
                         RR.TerrainObj terrain ->
                            [ class "terrain"
@@ -206,6 +216,7 @@ viewGame state =
                               case terrain.type_ of
                                  RR.Wall -> "wall"
                               )
+                           , image "wall"
                            ]
                      ))
                     []
