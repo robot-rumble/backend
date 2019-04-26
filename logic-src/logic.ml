@@ -2,8 +2,9 @@ open Base
 open Logic_t
 open Lwt.Infix
 
-let team_names = ["red"; "blue"]
 let ( >> ) f g x = f (g x)
+let identity x = x
+let team_names = ["red"; "blue"]
 let letters = String.to_array "abcdefghijklmnopqrstuvwxyz"
 let id_length = 5
 
@@ -13,7 +14,7 @@ let generate_id () =
 let log sexp = Sexp.to_string sexp |> Caml.print_endline
 let create_basic_obj coords = {coords; id= generate_id ()}
 let create_terrain type_ coords = (create_basic_obj coords, Terrain {type_})
-let unit_health = 10
+let unit_health = 5
 
 let create_unit type_ coords team =
   (create_basic_obj coords, Unit {type_; health= unit_health; team})
@@ -35,7 +36,7 @@ module Map = struct
       | Some v -> f v
       | None -> failwith "Key for update not found" )
 
-  let append_exn map1 map2 =
+  let merge_exn map1 map2 =
     Map.fold map1 ~init:map2 ~f:(fun ~key ~data acc ->
         Map.add_exn acc ~key ~data )
 
@@ -127,6 +128,9 @@ let get_obj_coords objs id =
   let base, _ = Map.find_exn objs id in
   base.coords
 
+let get_action_target objs id action =
+  compute_coords (get_obj_coords objs id) action.direction
+
 let rec validate_movement_map movement_map map objs =
   let conflicting_moves, movement_map =
     Map.partition_tf_keys movement_map ~f:(Map.mem map)
@@ -140,6 +144,7 @@ let rec validate_movement_map movement_map map objs =
 
 let map_size = 10
 let team_unit_num = 6
+let attack_strength = 1
 
 let rec run_turn run turn objs (map : (Coords.t, id, 'a) Map.t) state_list =
   let state = {turn= turn + 1; objs= Map.to_alist objs} in
@@ -165,13 +170,13 @@ let rec run_turn run turn objs (map : (Coords.t, id, 'a) Map.t) state_list =
     let all_actions =
       List.concat_map output_list ~f:(fun output -> output.actions)
     in
+    let move_actions, attack_actions =
+      List.partition_tf all_actions ~f:(fun (_id, action) ->
+          match action.type_ with Move -> true | Attack -> false )
+    in
     let movement_map =
-      List.filter_map all_actions ~f:(fun (id, action) ->
-          match action.type_ with
-          | Move ->
-              Some
-                (compute_coords (get_obj_coords objs id) action.direction, id)
-          | _ -> None )
+      List.map move_actions ~f:(fun (id, action) ->
+          (get_action_target objs id action, id) )
       |> Map.of_alist_multi (module Coords)
     in
     let movement_map =
@@ -183,11 +188,29 @@ let rec run_turn run turn objs (map : (Coords.t, id, 'a) Map.t) state_list =
       Map.filter map ~f:(fun id -> not @@ List.mem ids id ~equal:String.equal)
     in
     let movement_map, map = validate_movement_map movement_map map objs in
-    let map = Map.append_exn map movement_map in
+    let map = Map.merge_exn map movement_map in
+    let attack_map =
+      List.map attack_actions ~f:(fun (id, action) ->
+          (get_action_target objs id action, attack_strength) )
+      |> Map.of_alist_multi (module Coords)
+      |> Map.map ~f:(List.sum (module Int) ~f:identity)
+    in
+    let map_with_attack = Map.map map ~f:(fun id -> (id, 0)) in
+    let map_with_attack =
+      Map.fold attack_map ~init:map_with_attack
+        ~f:(fun ~key:coords ~data:attack acc ->
+          Map.change acc coords ~f:(function
+            | Some (id, attack_) -> Some (id, attack_ + attack)
+            | None -> None ) )
+    in
     let objs =
-      Map.fold map ~init:objs ~f:(fun ~key:coords ~data:id objs ->
+      Map.fold map_with_attack ~init:objs
+        ~f:(fun ~key:coords ~data:(id, attack) objs ->
           Map.update_exn objs id ~f:(fun (base, details) ->
-              ({base with coords}, details) ) )
+              ( {base with coords}
+              , match details with
+                | Unit unit_ -> Unit {unit_ with health= unit_.health - attack}
+                | other -> other ) ) )
     in
     run_turn run (turn + 1) objs map state_list
 
