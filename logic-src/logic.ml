@@ -144,7 +144,7 @@ let rec validate_movement_map movement_map map objs =
 
 let map_size = 10
 let team_unit_num = 6
-let attack_strength = 10
+let attack_strength = 1
 
 let rec run_turn run turn objs (map : (Coords.t, id, 'a) Map.t) state_list =
   let state = {turn= turn + 1; objs= Map.to_alist objs} in

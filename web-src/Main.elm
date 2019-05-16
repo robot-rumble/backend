@@ -189,11 +189,7 @@ viewUI state =
 map_width = 10
 map_height = 10
 max_health = 5
-health_bar_width = 80
-
-image : String -> Html.Attribute Msg
-image name =
-   style "background-image" <| "url(\"" ++ name ++ ".png\")"
+health_bar_width = 100
 
 viewGame : RR.State -> Html Msg
 viewGame state =
@@ -210,7 +206,6 @@ viewGame state =
                         RR.UnitObj unit ->
                            [ class "unit"
                            , class <| "team-" ++ unit.team
-                           , image <| "soldier-" ++ unit.team
                            ]
                         RR.TerrainObj terrain ->
                            [ class "terrain"
@@ -218,7 +213,6 @@ viewGame state =
                               case terrain.type_ of
                                  RR.Wall -> "wall"
                               )
-                           , image "wall"
                            ]
                      ))
                     [
@@ -229,15 +223,23 @@ viewGame state =
                            div
                               [ class "health-bar"
                               , style "width" <| String.fromFloat health_perc ++ "%"
+                              , style "height" <| String.fromFloat health_perc ++ "%"
                               ] []
                         _ -> div [] []
                     ]
 
             )
+        grid_divs = List.append
+            (List.range 1 map_width |> List.map (\y ->
+                div [class "grid-row", style "grid-area" <| "1 / " ++ (String.fromInt y) ++ "/ end / auto"] []
+            ))
+            (List.range 1 map_width |> List.map (\x ->
+                div [class "grid-col", style "grid-area" <| (String.fromInt x) ++ "/ 1 / auto / end"] []
+            ))
         gridTemplateRows = "repeat(" ++ String.fromInt map_width ++ ", 1fr)"
         gridTemplateColumns = "repeat(" ++ String.fromInt map_height ++ ", 1fr)"
     in
     div [class "renderer"
         , style "grid-template-rows" gridTemplateRows
         , style "grid-template-columns" gridTemplateColumns
-        ] obj_divs
+        ] <| List.append obj_divs grid_divs
