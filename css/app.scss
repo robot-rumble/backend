@@ -12,29 +12,51 @@ $spacers: (
 @import "node_modules/bootstrap/scss/mixins/_breakpoints";
 
 
-$red: #FE8D8D;
-$blue: #8DCEFE;
+$red: #F392B1;
+$blue: #79C7FF;
+$light-red: #FCDEE7;
+$light-blue: #CAE9FF;
+$grid: rgba(135, 135, 135, .1);
 
 .renderer {
     display: grid;
     width: 500px;
     height: 500px;
 
+    .grid-row, .grid-col {
+      border: 1px solid $grid;
+    }
+
     .obj {
-        image-rendering: pixelated;
-        image-rendering: -moz-crisp-edges;
-        image-rendering: crisp-edges;
         width: 50px;
         height: 50px;
         background-size: 50px;
+        position: relative;
+
+        &.unit {
+          &.team-red {
+            background: $light-red;
+            .health-bar {
+              background: $red;
+            }
+          }
+          &.team-blue {
+            background: $light-blue;
+            .health-bar {
+              background: $blue;
+            }
+          }
+          border-radius: 100%;
+        }
 
         .health-bar {
-          position: relative;
-          width: 80%;
-          margin: 0 auto;
-          top: 90%;
-          background: $red;
-          height: 5px;
+          position: absolute;
+          margin: auto;
+          left: 0;
+          right: 0;
+          top: 0;
+          bottom: 0;
+          border-radius: 100%;
         }
     }
 }
