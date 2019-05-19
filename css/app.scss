@@ -2,6 +2,7 @@ $spacers: (
   6: 5rem,
   7: 10rem,
 );
+$font-size-base: 1.3rem;
 
 @import "node_modules/bootstrap/scss/bootstrap-grid";
 @import "node_modules/bootstrap/scss/bootstrap-reboot";
@@ -19,9 +20,11 @@ $dark-blue: #39ACFF;
 $light-red: #FCDEE7;
 $light-blue: #CAE9FF;
 $grey: rgb(200, 200, 200);
+$light-grey: rgb(240, 240, 240);
+$code-font: Fantasque;
 
 body {
-  font-family: Fantasque;
+  font-family: $code-font;
 }
 
 .arrow-button {
@@ -40,8 +43,6 @@ body {
     border-color: $light-blue;
     color: $blue;
   }
-
-  font-size: $h4-font-size;
 }
 
 $grid: rgba(135, 135, 135, .1);
@@ -90,7 +91,26 @@ $grid: rgba(135, 135, 135, .1);
     }
 }
 
-#editor {
-  height: 500px;
-  width: 500px;
+code-editor {
+  .CodeMirror {
+    height: 100%;
+    border: 0;
+
+    * {
+      font-family: $code-font;
+      line-height: 1.1;
+    }
+  }
+
+  .CodeMirror-gutters {
+    background: white;
+    border-right: 0;
+    width: 40px;
+  }
+
+  .CodeMirror-linenumber {
+    color: $grey;
+  }
 }
+
+

@@ -175,7 +175,7 @@ viewGameViewer model =
                        Just turn -> gameRenderer (gameObjs turn)
                        Nothing -> div [] [text "Invalid turn."]
             in
-            div [class "h4"]
+            div []
                 [ game
                 , div [class "d-flex", class "justify-content-center", class "mt-3"]
                   [ button
