@@ -16,6 +16,7 @@ import Tuple exposing (first, second)
 
 import Decode as RR
 import Json.Decode as Decode
+import Json.Encode
 
 -- MAIN
 
@@ -118,14 +119,10 @@ updateRender msg model =
 -- SUBSCRIPTIONS
 
 port getOutput : (Decode.Value -> msg) -> Sub msg
-port changeCode : (String -> msg) -> Sub msg
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Sub.batch [
-        getOutput GotOutput,
-        changeCode CodeChanged
-    ]
+    getOutput GotOutput
 
 -- VIEW
 
@@ -137,26 +134,31 @@ view model =
     }
 
 viewUI : Model -> Html Msg
-viewUI state =
+viewUI model =
     div
       [ class "d-flex"
       , class "justify-content-around"
       , class "mt-6"
-      ] [ viewEditor state
-        , viewGame state
+      ] [ viewEditor model
+        , viewGame model
         ]
 
 viewEditor : Model -> Html Msg
-viewEditor state =
-    div [id "editor"] []
+viewEditor model =
+    Html.node "code-editor"
+        [ Html.Events.on "editorChanged" <|
+            Decode.map CodeChanged <|
+                Decode.at [ "target", "value" ] <|
+                    Decode.string
+        ]
+        []
 
 viewGame : Model -> Html Msg
-viewGame state =
+viewGame model =
     div []
-        [ viewGameBar state
-        , viewGameViewer state
+        [ viewGameBar model
+        , viewGameViewer model
         ]
-
 
 
 viewGameBar : Model -> Html Msg
