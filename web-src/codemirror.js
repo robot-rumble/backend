@@ -39,6 +39,10 @@ customElements.define(
       })
 
       this.dispatchEvent(new CustomEvent('editorChanged'))
+
+      document.fonts.ready.then(() => {
+        if (this._editor) this._editor.refresh()
+      })
     }
   },
 )
