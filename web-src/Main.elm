@@ -65,6 +65,7 @@ type Msg
     | GotOutput Decode.Value
     | Run
     | GotRenderMsg RenderMsg
+    | CodeChanged String
 
 type RenderMsg = ChangeTurn Direction
 type Direction = Next | Previous
@@ -94,41 +95,15 @@ update msg model =
 
 
         Run ->
-            ( model, startEval """
-   const displayMap = (objs, map) =>
-     map
-       .map((col) =>
-         col
-           .map((id) => {
-             if (id) {
-               if (objs[id].type_ === 'Wall') return 'wall '
-               else return id
-             } else {
-               return '     '
-             }
-           })
-           .join(' '),
-       )
-
-       .join(`\n`)
-
-	function main (input) {
-        let actions = {}
-        console.log(input)
-        console.log(displayMap(input.state.objs, input.state.map))
-
-        for (let id of input.state.teams[input.team]) {
-            actions[id] = { type_: input.state.turn % 2 == 0 ? "Move" : "Attack", direction: input.team == "red" ? "Right" : "Down" }
-        }
-
-		return { actions }
-	}
-            """ )
+            ( model, startEval model.code )
 
         GotRenderMsg renderMsg ->
             case model.renderState of
                 Just state -> ( { model | renderState = Just <| updateRender renderMsg state }, Cmd.none )
                 Nothing -> ( model, Cmd.none )
+
+        CodeChanged code ->
+            ( { model | code = code }, Cmd.none )
 
 updateRender : RenderMsg -> RenderState -> RenderState
 updateRender msg model =
@@ -143,10 +118,14 @@ updateRender msg model =
 -- SUBSCRIPTIONS
 
 port getOutput : (Decode.Value -> msg) -> Sub msg
+port changeCode : (String -> msg) -> Sub msg
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-   getOutput GotOutput
+    Sub.batch [
+        getOutput GotOutput,
+        changeCode CodeChanged
+    ]
 
 -- VIEW
 
@@ -169,7 +148,7 @@ viewUI state =
 
 viewEditor : Model -> Html Msg
 viewEditor state =
-    textarea [] []
+    div [id "editor"] []
 
 viewGame : Model -> Html Msg
 viewGame state =

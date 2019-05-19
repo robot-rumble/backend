@@ -35,12 +35,16 @@ module.exports = {
         },
       },
       {
-        test: /\.(woff|ttf)$/i,
+        test: /\.(woff|ttf)$/,
         use: [
           {
             loader: 'url-loader',
           },
         ],
+      },
+      {
+        test: /\.raw.*$/,
+        use: 'raw-loader',
       },
     ],
   },
