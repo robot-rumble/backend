@@ -10,12 +10,40 @@ $spacers: (
 @import "node_modules/bootstrap/scss/_variables";
 @import "node_modules/bootstrap/scss/_functions";
 @import "node_modules/bootstrap/scss/mixins/_breakpoints";
-
+@import "./fantasque/stylesheet.css";
+@import "./fixes.scss";
 
 $red: #F392B1;
 $blue: #79C7FF;
+$dark-blue: #39ACFF;
 $light-red: #FCDEE7;
 $light-blue: #CAE9FF;
+$grey: rgb(200, 200, 200);
+
+body {
+  font-family: Fantasque;
+}
+
+.arrow-button {
+  &:disabled {
+    color: $grey;
+  }
+}
+
+.button {
+  border: 2px solid $blue;
+  color: $dark-blue;
+  background: none;
+  padding: 0 0.5rem;
+
+  &:disabled {
+    border-color: $light-blue;
+    color: $blue;
+  }
+
+  font-size: $h4-font-size;
+}
+
 $grid: rgba(135, 135, 135, .1);
 
 .renderer {

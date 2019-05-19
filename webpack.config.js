@@ -34,6 +34,14 @@ module.exports = {
           loader: 'elm-webpack-loader',
         },
       },
+      {
+        test: /\.(woff|ttf)$/i,
+        use: [
+          {
+            loader: 'url-loader',
+          },
+        ],
+      },
     ],
   },
   plugins: [new MiniCssExtractPlugin()],

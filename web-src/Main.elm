@@ -39,6 +39,7 @@ main =
 type alias Model =
     { key : Nav.Key
     , url : Url.Url
+    , code : String
     , renderState : Maybe RenderState
     }
 
@@ -50,7 +51,7 @@ type alias RenderState =
 
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
-    (Model key url Nothing, Cmd.none )
+    (Model key url "" Nothing, Cmd.none )
 
 
 
@@ -153,37 +154,64 @@ subscriptions _ =
 view : Model -> Browser.Document Msg
 view model =
     { title = "Copala"
-    , body =
-        [ button [onClick Run, class "mx-auto", class "d-block", class "mt-5"] [text "run"]
-        , case model.renderState of
-            Just output -> viewUI output
-            _ -> div [] []
-        ]
+    , body = [viewUI model]
     }
 
-viewUI : RenderState -> Html Msg
+viewUI : Model -> Html Msg
 viewUI state =
-    let game =
-            case Array.get state.turn state.data.turns of
-               Just turn -> viewGame turn
-               Nothing -> div [] [text "Invalid turn."]
-    in
     div
       [ class "d-flex"
+      , class "justify-content-around"
       , class "mt-6"
-      ] [
-       div [ class "mx-auto"]
-           [ game
-           , div [] [text <| "current turn: " ++ String.fromInt (state.turn + 1)]
-           , button
-            [onClick <| GotRenderMsg (ChangeTurn Next)
-            , disabled (state.turn == Array.length state.data.turns - 1)
-            ] [text "next turn"]
-           , button
-            [onClick <| GotRenderMsg (ChangeTurn Previous)
-            , disabled (state.turn == 0)] [text "previous turn"]
-       ]
-    ]
+      ] [ viewEditor state
+        , viewGame state
+        ]
+
+viewEditor : Model -> Html Msg
+viewEditor state =
+    textarea [] []
+
+viewGame : Model -> Html Msg
+viewGame state =
+    div []
+        [ viewGameBar state
+        , viewGameViewer state
+        ]
+
+
+
+viewGameBar : Model -> Html Msg
+viewGameBar model =
+    div []
+        [ button [onClick Run, class "button", class "mb-3"] [text "run"] ]
+
+viewGameViewer : Model -> Html Msg
+viewGameViewer model =
+    case model.renderState of
+        Just state ->
+            let game =
+                    case Array.get state.turn state.data.turns of
+                       Just turn -> gameRenderer (gameObjs turn)
+                       Nothing -> div [] [text "Invalid turn."]
+            in
+            div [class "h4"]
+                [ game
+                , div [class "d-flex", class "justify-content-center", class "mt-3"]
+                  [ button
+                        [onClick <| GotRenderMsg (ChangeTurn Previous)
+                        , disabled (state.turn == 0)
+                        , class "arrow-button"
+                        ] [text "\u{2190}"]
+                  , div [class "mx-3"] [text <| "turn " ++ String.fromInt (state.turn + 1)]
+                  , button
+                        [onClick <| GotRenderMsg (ChangeTurn Next)
+                        , disabled (state.turn == Array.length state.data.turns - 1)
+                        , class "arrow-button"
+                        ] [text "\u{2192}"]
+                  ]
+            ]
+        Nothing ->
+            gameRenderer []
 
 
 map_width = 10
@@ -191,55 +219,62 @@ map_height = 10
 max_health = 5
 health_bar_width = 100
 
-viewGame : RR.State -> Html Msg
-viewGame state =
-    let obj_divs =
-            Dict.values state.objs
-            |> List.map (\(basic, details) ->
-                let (x, y) = basic.coords in
-                div ([ class "obj"
-                     , class basic.id
-                     , style "grid-column" <| String.fromInt (x + 1)
-                     , style "grid-row" <| String.fromInt (y + 1)
-                    ] ++ (
-                     case details of
-                        RR.UnitObj unit ->
-                           [ class "unit"
-                           , class <| "team-" ++ unit.team
-                           ]
-                        RR.TerrainObj terrain ->
-                           [ class "terrain"
-                           , class <| "type-" ++ (
-                              case terrain.type_ of
-                                 RR.Wall -> "wall"
-                              )
-                           ]
-                     ))
-                    [
-                     case details of
-                        RR.UnitObj unit ->
-                           let health_perc = (toFloat unit.health) / (toFloat max_health) * health_bar_width
-                           in
-                           div
-                              [ class "health-bar"
-                              , style "width" <| String.fromFloat health_perc ++ "%"
-                              , style "height" <| String.fromFloat health_perc ++ "%"
-                              ] []
-                        _ -> div [] []
-                    ]
+gameObjs : RR.State -> List (Html Msg)
+gameObjs state =
+    Dict.values state.objs
+    |> List.map (\(basic, details) ->
+        let (x, y) = basic.coords in
+        div ([ class "obj"
+             , class basic.id
+             , style "grid-column" <| String.fromInt (x + 1)
+             , style "grid-row" <| String.fromInt (y + 1)
+            ] ++ (
+             case details of
+                RR.UnitObj unit ->
+                   [ class "unit"
+                   , class <| "team-" ++ unit.team
+                   ]
+                RR.TerrainObj terrain ->
+                   [ class "terrain"
+                   , class <| "type-" ++ (
+                      case terrain.type_ of
+                         RR.Wall -> "wall"
+                      )
+                   ]
+             ))
+            [
+             case details of
+                RR.UnitObj unit ->
+                   let health_perc = (toFloat unit.health) / (toFloat max_health) * health_bar_width
+                   in
+                   div
+                      [ class "health-bar"
+                      , style "width" <| String.fromFloat health_perc ++ "%"
+                      , style "height" <| String.fromFloat health_perc ++ "%"
+                      ] []
+                _ -> div [] []
+            ]
 
-            )
-        grid_divs = List.append
-            (List.range 1 map_width |> List.map (\y ->
-                div [class "grid-row", style "grid-area" <| "1 / " ++ (String.fromInt y) ++ "/ end / auto"] []
-            ))
-            (List.range 1 map_width |> List.map (\x ->
-                div [class "grid-col", style "grid-area" <| (String.fromInt x) ++ "/ 1 / auto / end"] []
-            ))
-        gridTemplateRows = "repeat(" ++ String.fromInt map_width ++ ", 1fr)"
+    )
+
+gameGrid : List (Html Msg)
+gameGrid =
+    List.append
+        (List.range 1 map_width |> List.map (\y ->
+            div [class "grid-row", style "grid-area" <| "1 / " ++ (String.fromInt y) ++ "/ end / auto"] []
+        ))
+        (List.range 1 map_width |> List.map (\x ->
+            div [class "grid-col", style "grid-area" <| (String.fromInt x) ++ "/ 1 / auto / end"] []
+        ))
+
+
+-- accepts divs to display in the renderer
+gameRenderer : List (Html Msg) -> Html Msg
+gameRenderer divs =
+    let gridTemplateRows = "repeat(" ++ String.fromInt map_width ++ ", 1fr)"
         gridTemplateColumns = "repeat(" ++ String.fromInt map_height ++ ", 1fr)"
     in
     div [class "renderer"
         , style "grid-template-rows" gridTemplateRows
         , style "grid-template-columns" gridTemplateColumns
-        ] <| List.append obj_divs grid_divs
+        ] <| List.append (gameGrid) divs
