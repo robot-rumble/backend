@@ -7,27 +7,38 @@ import 'codemirror/lib/codemirror.css'
 import robotLib from '!raw-loader!./robotLib.raw'
 import sampleRobot from '!raw-loader!./sampleRobot.raw'
 
-export function initCodeMirror(changeCode) {
-  const cm = CodeMirror(document.querySelector('#editor'), {
-    tabSize: 2,
-    mode: 'text/javascript',
-    lineNumbers: true,
-    matchBrackets: true,
-    autoRefresh: true,
-  })
-  cm.setValue(sampleRobot)
-  changeCode(processCode(sampleRobot))
+customElements.define(
+  'code-editor',
+  class extends HTMLElement {
+    constructor() {
+      super()
+      this._value = sampleRobot
+    }
 
-  cm.setOption('extraKeys', {
-    Tab: (cm) => cm.execCommand('indentMore'),
-    'Shift-Tab': (cm) => cm.execCommand('indentLess'),
-  })
+    get value() {
+      return robotLib + ';' + this._value
+    }
 
-  cm.on('change', () => {
-    changeCode(processCode(cm.getValue()))
-  })
-}
+    connectedCallback() {
+      this._editor = CodeMirror(this, {
+        tabSize: 2,
+        mode: 'text/javascript',
+        lineNumbers: true,
+        matchBrackets: true,
+        autoRefresh: true,
+        value: this._value,
+        extraKeys: {
+          Tab: (cm) => cm.execCommand('indentMore'),
+          'Shift-Tab': (cm) => cm.execCommand('indentLess'),
+        },
+      })
 
-function processCode(code) {
-  return robotLib + ';' + code
-}
+      this._editor.on('changes', () => {
+        this._value = this._editor.getValue()
+        this.dispatchEvent(new CustomEvent('editorChanged'))
+      })
+
+      this.dispatchEvent(new CustomEvent('editorChanged'))
+    }
+  },
+)
