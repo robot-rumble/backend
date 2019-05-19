@@ -28,6 +28,7 @@ body {
 }
 
 .arrow-button {
+  padding: 0 0.5rem;
   &:disabled {
     color: $grey;
   }

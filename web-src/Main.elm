@@ -177,13 +177,13 @@ viewGameViewer model =
             in
             div []
                 [ game
-                , div [class "d-flex", class "justify-content-center", class "mt-3"]
+                , div [class "d-flex", class "justify-content-center", class "mt-2"]
                   [ button
                         [onClick <| GotRenderMsg (ChangeTurn Previous)
                         , disabled (state.turn == 0)
                         , class "arrow-button"
                         ] [text "\u{2190}"]
-                  , div [class "mx-3"] [text <| "turn " ++ String.fromInt (state.turn + 1)]
+                  , div [style "width" "6rem", class "text-center"] [text <| "turn " ++ String.fromInt (state.turn + 1)]
                   , button
                         [onClick <| GotRenderMsg (ChangeTurn Next)
                         , disabled (state.turn == Array.length state.data.turns - 1)
