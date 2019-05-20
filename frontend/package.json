@@ -2,8 +2,8 @@
   "repository": {},
   "license": "MIT",
   "scripts": {
-    "build": "NODE_ENV=production webpack",
-    "watch": "NODE_ENV=development webpack-dev-server --hot"
+    "build": "webpack",
+    "watch": "webpack-dev-server --hot"
   },
   "dependencies": {
     "@babel/polyfill": "^7.2.5",
