@@ -32,6 +32,9 @@ module.exports = {
         test: /\.elm$/,
         use: {
           loader: 'elm-webpack-loader',
+          options: {
+            optimize: process.env.NODE_ENV === 'production',
+          },
         },
       },
       {

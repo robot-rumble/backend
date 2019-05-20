@@ -93,7 +93,6 @@ update msg model =
               ( { model | renderState = Just { data = data, turn = 0 } }, Cmd.none )
 
             Err error ->
-              let _ = Debug.log "Elm Error" <| Debug.toString error in
               ( model, Cmd.none )
 
 
