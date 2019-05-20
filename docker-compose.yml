@@ -7,9 +7,11 @@ services:
   app:
     build: .
     environment:
-      - COOKIE='abc'
-      - NAME='robot'
-
+      - COOKIE=abc
+      - NAME=robot
+    ports:
+      - 4369
+      - 9000
     volumes:
       - ./backend:/backend
       - static:/static
@@ -19,7 +21,7 @@ services:
   nginx:
     image: nginx:latest
     ports:
-      - 8080:80
+      - 80
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - static:/static:ro
