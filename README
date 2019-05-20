@@ -1,2 +1,17 @@
 # Robot Rumble
 
+To start the site:
+```
+docker-compose up -d
+```
+
+To run a mix command:
+```
+docker-compose exec app mix [COMMAND]
+```
+
+To remote shell into the phoenix process:
+```
+docker ps # find the id of the app container
+docker-compose exec app iex --sname local --cookie abc --remsh "robot@[ID]"
+```
