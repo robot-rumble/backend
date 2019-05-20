@@ -20,16 +20,13 @@ RUN npm install
 COPY frontend/src src
 COPY --from=logic-builder /logic/_build/default/frontend.js src/frontend.js
 
-COPY frontend/dist ./
+COPY frontend/dist dist
 COPY frontend/webpack.config.js frontend/.babelrc frontend/elm.json ./
 RUN npm run build
 
 
 FROM elixir:alpine
 ENV MIX_ENV=prod
-
-WORKDIR /frontend
-COPY --from=frontend-builder /frontend/dist ./
 
 WORKDIR /backend
 RUN mix local.hex --force && mix local.rebar --force
@@ -39,5 +36,13 @@ RUN mix do deps.get, deps.compile
 
 COPY backend ./
 
+COPY --from=frontend-builder /frontend/dist /static
+
+RUN echo $COOKIE
+RUN echo $NAME
+RUN iex --cookie $COOKIE --sname $NAME -S mix phx.server
+
 EXPOSE 4000
-CMD iex --cookie $cookie --sname $name -S mix phx.server
+CMD iex --cookie $COOKIE --sname $NAME -S mix phx.server
+
+

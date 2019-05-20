@@ -4,20 +4,27 @@ services:
   db:
     image: postgres:latest
 
+  app:
+    build: .
+    environment:
+      - COOKIE='abc'
+      - NAME='robot'
+
+    volumes:
+      - ./backend:/backend
+      - static:/static
+    depends_on:
+      - db
+
   nginx:
     image: nginx:latest
     ports:
       - 8080:80
-      - 4000
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-
-  app:
-    build: .
-    ports:
-      - 4000
-    environment:
-      - COOKIE='abc'
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - static:/static:ro
     depends_on:
-      - db
-      - nginx
+      - app
+
+volumes:
+  static:
