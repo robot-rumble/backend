@@ -1,0 +1,12 @@
+# frontend
+*/node_modules
+*/elm-stuff
+**/bundle.js
+**/app.css
+
+# backend
+*/_build
+*/deps
+
+# logic
+*/_build

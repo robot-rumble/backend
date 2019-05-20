@@ -63,9 +63,9 @@ module.exports = {
   resolve: {
     alias: {
       logic:
-        process.env.NODE_ENV === 'development'
-          ? path.join(__dirname, '../logic/_build/default/frontend.js')
-          : './frontend.js',
+        process.env.NODE_ENV === 'production'
+          ? './frontend.js'
+          : path.join(__dirname, '../logic/_build/default/frontend.js'),
     },
   },
 }
