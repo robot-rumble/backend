@@ -40,9 +40,9 @@ B /home/anton/.opam/default/lib/uchar
 B /home/anton/.opam/default/lib/variantslib
 B /home/anton/.opam/default/lib/yojson
 B /usr/lib/ocaml
+B _build/default/.backend.eobjs/byte
+B _build/default/.frontend.eobjs/byte
 B _build/default/.logic.objs/byte
-B _build/default/.server.eobjs/byte
-B _build/default/.web.eobjs/byte
 S /home/anton/.opam/default/lib/atdgen
 S /home/anton/.opam/default/lib/atdgen-runtime
 S /home/anton/.opam/default/lib/base

@@ -2,12 +2,8 @@
   "repository": {},
   "license": "MIT",
   "scripts": {
-    "web-build": "NODE_ENV=production webpack",
-    "web-watch": "NODE_ENV=development webpack-dev-server --hot",
-    "logic-clean": "cd logic-src && dune clean",
-    "logic-build": "cd logic-src && dune build @web",
-    "logic-watch": "cd logic-src && dune build @web -w",
-    "logic-build-native": "cd logic-src && dune build @native"
+    "build": "NODE_ENV=production webpack",
+    "watch": "NODE_ENV=development webpack-dev-server --hot"
   },
   "dependencies": {
     "@babel/polyfill": "^7.2.5",
@@ -21,7 +17,6 @@
     "@babel/plugin-syntax-dynamic-import": "^7.2.0",
     "@babel/preset-env": "^7.0.0",
     "babel-loader": "^8.0.0",
-    "copy-webpack-plugin": "^4.5.0",
     "css-loader": "^0.28.10",
     "elm-webpack-loader": "^5.0.0",
     "mini-css-extract-plugin": "^0.4.0",
