@@ -39,4 +39,4 @@ COPY backend ./
 COPY --from=frontend-builder /frontend/dist /static
 
 EXPOSE 4000
-CMD iex --cookie $COOKIE --sname $NAME -S mix
+CMD iex --cookie $COOKIE --sname $NAME -S mix phx.server
