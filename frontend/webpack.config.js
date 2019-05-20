@@ -5,7 +5,7 @@ module.exports = {
   mode: process.env.NODE_ENV,
   stats: 'minimal',
   entry: {
-    app: ['@babel/polyfill', './web-src/app.js'],
+    app: ['@babel/polyfill', './src/app.js'],
   },
   output: {
     path: path.join(__dirname, 'dist'),
@@ -57,7 +57,12 @@ module.exports = {
   node: {
     fs: 'empty',
   },
-  watchOptions: {
-    ignored: ['logic-src/*.*', 'node_modules'],
+  resolve: {
+    alias: {
+      logic:
+        process.env.NODE_ENV === 'development'
+          ? path.join(__dirname, '../logic/_build/default/frontend.js')
+          : './frontend.js',
+    },
   },
 }

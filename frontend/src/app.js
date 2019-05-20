@@ -1,7 +1,7 @@
 import { Elm } from './Main.elm'
-import '../css/app.scss'
+import './css/app.scss'
 
-import { main } from '../logic-src/_build/default/web'
+import { main } from 'logic'
 import SES from 'ses'
 import './codemirror'
 
