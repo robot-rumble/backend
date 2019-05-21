@@ -1,22 +1,25 @@
 # Robot Rumble
 
-Start dev:
+Prepare:
 ```
-docker-compose -f docker-compose.dev.yml up
+docker-compose -f docker-compose.[dev/prod].yml build
+docker-compose -f docker-compose.[dev/prod].yml run --rm backend mix do ecto.create, ecto.migrate
+docker-compose -f docker-compose.[dev/prod].yml up [-d]
 ```
 
-Start prod:
+Start:
 ```
-docker-compose -d -f docker-compose.prod.yml up
+docker-compose -f docker-compose.[dev/prod].yml up
 ```
 
 Run a mix command:
 ```
-docker-compose exec app mix [COMMAND]
+docker-compose -f docker-compose.[dev/prod].yml exec [service] mix [command]
 ```
 
 Remote-shell into the Phoenix process:
 ```
 docker ps # find the id of the app container
-docker-compose exec app iex --sname local --cookie abc --remsh "robot@[ID]"
+# the name and cookie are in the compose file
+docker-compose -f docker-compose.prod.yml exec backend iex --sname local --cookie [cookie] --remsh "[name]@[id]"
 ```
