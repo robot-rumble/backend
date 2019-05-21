@@ -4,12 +4,11 @@ Prepare:
 ```
 docker-compose -f docker-compose.[dev/prod].yml build
 docker-compose -f docker-compose.[dev/prod].yml run --rm backend mix do ecto.create, ecto.migrate
-docker-compose -f docker-compose.[dev/prod].yml up [-d]
 ```
 
 Start:
 ```
-docker-compose -f docker-compose.[dev/prod].yml up
+docker-compose -f docker-compose.[dev/prod].yml up [-d]
 ```
 
 Run a mix command:
