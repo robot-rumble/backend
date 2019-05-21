@@ -56,6 +56,7 @@ module.exports = {
     contentBase: path.join(__dirname, 'dist'),
     historyApiFallback: true,
     stats: 'minimal',
+    host: '0.0.0.0',
   },
   node: {
     fs: 'empty',

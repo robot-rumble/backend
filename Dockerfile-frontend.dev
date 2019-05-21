@@ -5,7 +5,6 @@ COPY frontend/package.json ./
 RUN npm install
 
 COPY frontend ./
-RUN ls -a .
 
 # needed for elm to install packages
 RUN node_modules/.bin/elm make src/*.elm
