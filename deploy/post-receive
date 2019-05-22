@@ -1,4 +1,5 @@
 NAME="robot"
+COMMAND="docker-compose -f $HOME/robot/docker-compose.prod.yml up --build -d"
 
 TARGET="$HOME/$NAME"
 GIT_DIR="$HOME/$NAME.git"
@@ -13,4 +14,5 @@ do
         mkdir -p $TARGET
         cd $TARGET
         git --work-tree=$TARGET --git-dir=$GIT_DIR checkout -f
+        bash -c "$COMMAND"
 done
