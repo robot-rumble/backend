@@ -140,7 +140,7 @@ viewUI model =
         [ p [ class "mt-5"
             , class "w-75"
             , class "mx-auto"
-            ] [text "Welcome to Robot Rumble! This demo allows you to code a robot and run it against itself. The robot's code is a function that returns the type and direction of an action. The arena on the right is a way to battle the robot against itself."]
+            ] [text "Welcome to Robot Rumble! This demo allows you to code a robot and run it against itself. The robot's code is a function that returns the type and direction of an action. The arena on the right is a way to battle the robot against itself. The code is open source at https://github.com/chicode/robot-frontend."]
         , div
           [ class "d-flex"
           , class "justify-content-around"
