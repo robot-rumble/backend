@@ -27,6 +27,7 @@ Prepare deploy:
 ```
 # where robot is the ip alias
 ssh robot 'bash -s' < deploy/install-docker.sh
+ssh robot 'bash -s' < deploy/install-fish.sh
 ssh robot 'bash -s' < deploy/disable-aa.sh
 ssh robot git init --bare robot.git
 scp ./deploy/post-receive robot:robot.git/hooks
