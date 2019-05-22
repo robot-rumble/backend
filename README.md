@@ -27,6 +27,7 @@ Prepare deploy:
 ```
 # where robot is the ip alias
 ssh robot 'bash -s' < deploy/install-docker.sh
+ssh robot 'bash -s' < deploy/disable-aa.sh
 ssh robot git init --bare robot.git
 scp ./deploy/post-receive robot:robot.git/hooks
 ssh robot chmod +x robot.git/hooks/post-receive
@@ -36,7 +37,3 @@ scp ./backend/config/prod.secret.exs robot:robot/backend/config
 sudo systemctl restart docker
 ```
 
-Deploy:
-```
-ssh robot docker-compose -f robot/docker-compose.prod.yml up
-```
