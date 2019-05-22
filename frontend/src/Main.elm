@@ -130,14 +130,17 @@ subscriptions _ =
 
 view : Model -> Browser.Document Msg
 view model =
-    { title = "Copala"
+    { title = "Robot Rumble"
     , body = [viewUI model]
     }
 
 viewUI : Model -> Html Msg
 viewUI model =
     div []
-        [ p [] [text "Welcome to Robot Rumble! This demo allows you to code a robot and run it against itself. The robot's code is simply a main function, which returns the type and direction of an action. The arena on the right is a way to view the robot's battles. In this case, the battle is just the robot running against itself."]
+        [ p [ class "mt-5"
+            , class "w-75"
+            , class "mx-auto"
+            ] [text "Welcome to Robot Rumble! This demo allows you to code a robot and run it against itself. The robot's code is a function that returns the type and direction of an action. The arena on the right is a way to battle the robot against itself."]
         , div
           [ class "d-flex"
           , class "justify-content-around"

@@ -3,6 +3,7 @@ $spacers: (
   7: 10rem,
 );
 $font-size-base: 1.3rem;
+$line-height-base: 1.2;
 
 @import "node_modules/bootstrap/scss/bootstrap-grid";
 @import "node_modules/bootstrap/scss/bootstrap-reboot";
