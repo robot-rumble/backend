@@ -136,12 +136,15 @@ view model =
 
 viewUI : Model -> Html Msg
 viewUI model =
-    div
-      [ class "d-flex"
-      , class "justify-content-around"
-      , class "mt-6"
-      ] [ viewEditor model
-        , viewGame model
+    div []
+        [ p [] [text "Welcome to Robot Rumble! This demo allows you to code a robot and run it against itself. The robot's code is simply a main function, which returns the type and direction of an action. The arena on the right is a way to view the robot's battles. In this case, the battle is just the robot running against itself."]
+        , div
+          [ class "d-flex"
+          , class "justify-content-around"
+          , class "mt-6"
+          ] [ viewEditor model
+            , viewGame model
+            ]
         ]
 
 viewEditor : Model -> Html Msg
