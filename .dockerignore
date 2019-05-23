@@ -1,8 +1,8 @@
 # frontend
 */node_modules
 */elm-stuff
-**/bundle.js
-**/app.css
+*/dist/*
+!*/dist/index.html
 
 # backend
 */_build
