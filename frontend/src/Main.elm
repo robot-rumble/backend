@@ -202,8 +202,7 @@ viewGameViewer model =
             gameRenderer []
 
 
-map_width = 10
-map_height = 10
+map_size = 19
 max_health = 5
 health_bar_width = 100
 
@@ -248,10 +247,10 @@ gameObjs state =
 gameGrid : List (Html Msg)
 gameGrid =
     List.append
-        (List.range 1 map_width |> List.map (\y ->
+        (List.range 1 map_size |> List.map (\y ->
             div [class "grid-row", style "grid-area" <| "1 / " ++ (String.fromInt y) ++ "/ end / auto"] []
         ))
-        (List.range 1 map_width |> List.map (\x ->
+        (List.range 1 map_size |> List.map (\x ->
             div [class "grid-col", style "grid-area" <| (String.fromInt x) ++ "/ 1 / auto / end"] []
         ))
 
@@ -259,8 +258,8 @@ gameGrid =
 -- accepts divs to display in the renderer
 gameRenderer : List (Html Msg) -> Html Msg
 gameRenderer divs =
-    let gridTemplateRows = "repeat(" ++ String.fromInt map_width ++ ", 1fr)"
-        gridTemplateColumns = "repeat(" ++ String.fromInt map_height ++ ", 1fr)"
+    let gridTemplateRows = "repeat(" ++ String.fromInt map_size ++ ", 1fr)"
+        gridTemplateColumns = "repeat(" ++ String.fromInt map_size ++ ", 1fr)"
     in
     div [class "renderer"
         , style "grid-template-rows" gridTemplateRows
