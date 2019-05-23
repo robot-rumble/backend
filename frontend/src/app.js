@@ -7,7 +7,10 @@ import './codemirror'
 
 const realm = SES.makeSESRootRealm({ consoleMode: 'allow', errorStackMode: 'allow' })
 
-let rpPromise = import('rustpython_wasm')
+let rp
+let rpPromise = import('rustpython_wasm').then((rustpython) => (rp = rustpython))
+
+window.language = 'python'
 
 let app = Elm.Main.init({
   node: document.getElementById('root'),
@@ -15,9 +18,10 @@ let app = Elm.Main.init({
 })
 
 app.ports.startEval.subscribe((code) => {
-  rpPromise.then((rp) => {
-    let time = Date.now()
+  let time = Date.now()
 
+  let func
+  if (window.language === 'python') {
     rp.vmStore.destroy('robot')
     const vm = rp.vmStore.init('robot', false)
 
@@ -29,27 +33,33 @@ app.ports.startEval.subscribe((code) => {
       console.error(err)
     }
 
-    const func = vm.eval('main')
-    const run = (args) => {
-      try {
-        return JSON.stringify(func([JSON.parse(args)], {}))
-      } catch (e) {
-        console.log('Inside Error!')
-        console.log(e.message)
-        console.error(new Error(e))
-      }
-    }
+    func = (args) => vm.eval('main')([args])
+  } else if (window.language === 'js') {
+    func = realm.eval(`(args) => {
+      ${code};
+      main(args)
+    }`)
+  }
 
+  const run = (args) => {
     try {
-      let result = main({ run }, (result) => {
-        console.log('=========FINAL=========')
-        console.log(`Time taken: ${(Date.now() - time) / 1000}`)
-        app.ports.getOutput.send(JSON.parse(result))
-      })
+      return JSON.stringify(func(JSON.parse(args), {}))
     } catch (e) {
-      console.log('Root Error!')
+      console.log('Inside Error!')
       console.log(e.message)
       console.error(new Error(e))
     }
-  })
+  }
+
+  try {
+    let result = main({ run }, (result) => {
+      console.log('=========FINAL=========')
+      console.log(`Time taken: ${(Date.now() - time) / 1000}`)
+      app.ports.getOutput.send(JSON.parse(result))
+    })
+  } catch (e) {
+    console.log('Root Error!')
+    console.log(e.message)
+    console.error(new Error(e))
+  }
 })
