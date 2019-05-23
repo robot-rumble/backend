@@ -142,7 +142,7 @@ let rec validate_movement_map movement_map map objs =
   if Map.is_empty conflicting_moves then (movement_map, map)
   else validate_movement_map movement_map map objs
 
-let map_size = 10
+let map_size = 19
 let team_unit_num = 6
 let attack_strength = 1
 
