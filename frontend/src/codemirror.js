@@ -4,8 +4,10 @@ import 'codemirror/lib/codemirror.css'
 
 // inline loader syntax used because otherwise this loader doesn't work
 // eslint-disable-next-line import/no-webpack-loader-syntax
-import robotLib from '!raw-loader!./robotLib.raw'
-import sampleRobot from '!raw-loader!./sampleRobot.raw'
+// import robotLib from '!raw-loader!./robotLib.raw'
+// import sampleRobot from '!raw-loader!./sampleRobot.raw'
+//
+import sampleRobot from '!raw-loader!./sampleRobot.raw.py'
 
 customElements.define(
   'code-editor',
@@ -15,8 +17,12 @@ customElements.define(
       this._value = sampleRobot
     }
 
+    // get value() {
+    //   return robotLib + ';' + this._value
+    // }
+
     get value() {
-      return robotLib + ';' + this._value
+      return this._value
     }
 
     connectedCallback() {
