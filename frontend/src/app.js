@@ -26,7 +26,7 @@ app.ports.startEval.subscribe(async (code) => {
     rp.vmStore.destroy('robot')
     const vm = rp.vmStore.init('robot', false)
 
-    vm.setStdout(console.log)
+    vm.addToScope('print', (val) => console.log(val))
 
     try {
       vm.exec(code)
