@@ -145,6 +145,7 @@ viewUI model =
           [ class "d-flex"
           , class "justify-content-around"
           , class "mt-6"
+          , class "mx-6"
           ] [ viewEditor model
             , viewGame model
             ]
@@ -157,6 +158,7 @@ viewEditor model =
             Decode.map CodeChanged <|
                 Decode.at [ "target", "value" ] <|
                     Decode.string
+        , style "width" "60%"
         ]
         []
 
