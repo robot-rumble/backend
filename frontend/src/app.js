@@ -10,6 +10,7 @@ const realm = SES.makeSESRootRealm({ consoleMode: 'allow', errorStackMode: 'allo
 let rpPromise = import('rustpython_wasm')
 
 window.language = 'python'
+window.turnNum = 30
 
 let app = Elm.Main.init({
   node: document.getElementById('root'),
@@ -52,7 +53,7 @@ app.ports.startEval.subscribe(async (code) => {
   }
 
   try {
-    let result = main({ run }, (result) => {
+    let result = main({ run, turn_num: window.turnNum }, (result) => {
       console.log('=========FINAL=========')
       console.log(`Time taken: ${(Date.now() - time) / 1000}`)
       app.ports.getOutput.send(JSON.parse(result))
