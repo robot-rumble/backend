@@ -145,11 +145,12 @@ let rec validate_movement_map movement_map map objs =
 let map_size = 19
 let team_unit_num = 6
 let attack_strength = 1
+let max_turn = 30
 
 let rec run_turn run turn objs (map : (Coords.t, id, 'a) Map.t) state_list =
   let state = {turn= turn + 1; objs= Map.to_alist objs} in
   let state_list = state :: state_list in
-  if turn = 9 then Lwt.return state_list
+  if turn = max_turn then Lwt.return state_list
   else
     let input_teams = create_teams objs team_names in
     let input_map = create_array_map map map_size in
