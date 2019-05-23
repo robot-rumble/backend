@@ -1,5 +1,6 @@
 import CodeMirror from 'codemirror'
 import 'codemirror/mode/javascript/javascript.js'
+import 'codemirror/mode/python/python.js'
 import 'codemirror/lib/codemirror.css'
 
 // inline loader syntax used because otherwise this loader doesn't work
@@ -8,6 +9,15 @@ import 'codemirror/lib/codemirror.css'
 // import sampleRobot from '!raw-loader!./sampleRobot.raw'
 //
 import sampleRobot from '!raw-loader!./sampleRobot.raw.py'
+
+function getModeFromLanguage(language) {
+  switch (language) {
+    case 'javascript':
+      return 'text/javascript'
+    case 'python':
+      return 'python'
+  }
+}
 
 customElements.define(
   'code-editor',
@@ -28,7 +38,7 @@ customElements.define(
     connectedCallback() {
       this._editor = CodeMirror(this, {
         tabSize: 2,
-        mode: 'text/javascript',
+        mode: getModeFromLanguage(window.language),
         lineNumbers: true,
         matchBrackets: true,
         autoRefresh: true,
