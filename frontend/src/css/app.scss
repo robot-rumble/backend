@@ -76,6 +76,11 @@ $grid: rgba(135, 135, 135, .1);
           }
         }
 
+        &.terrain {
+          background: $light-grey;
+          z-index: -1;
+        }
+
         .health-bar {
           position: absolute;
           margin: auto;

@@ -18,6 +18,8 @@ let app = Elm.Main.init({
 })
 
 app.ports.startEval.subscribe(async (code) => {
+  localStorage.setItem('code', code)
+
   let time = Date.now()
 
   let func

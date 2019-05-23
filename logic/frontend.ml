@@ -14,6 +14,6 @@ let main (input : input Js.t) callback =
   let run (robot_input : string) =
     Lwt.wrap (fun () -> input##run robot_input |> Js.to_string)
   in
-  Logic.start run 29 >|= Js.string >|= callback
+  Logic.start run 49 >|= Js.string >|= callback
 
 let _ = Js.export "main" main
