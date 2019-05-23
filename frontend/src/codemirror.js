@@ -24,7 +24,7 @@ customElements.define(
   class extends HTMLElement {
     constructor() {
       super()
-      this._value = sampleRobot
+      this._value = localStorage.getItem('code') || sampleRobot
     }
 
     // get value() {
