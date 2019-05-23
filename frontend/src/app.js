@@ -7,13 +7,15 @@ import './codemirror'
 
 const realm = SES.makeSESRootRealm({ consoleMode: 'allow', errorStackMode: 'allow' })
 
+let rpPromise = import('rustpython_wasm')
+
 let app = Elm.Main.init({
   node: document.getElementById('root'),
   windowWidth: window.innerWidth,
 })
 
 app.ports.startEval.subscribe((code) => {
-  import('rustpython_wasm').then((rp) => {
+  rpPromise.then((rp) => {
     let time = Date.now()
 
     rp.vmStore.destroy('robot')
