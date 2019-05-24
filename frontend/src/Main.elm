@@ -173,7 +173,9 @@ viewEditor model =
 
 viewGame : Model -> Html Msg
 viewGame model =
-    div []
+    div [ style "width" "40%"
+        , style "max-width" "500px"
+        ]
         [ viewGameBar model
         , viewGameViewer model
         ]
@@ -195,7 +197,7 @@ viewGameViewer model =
             in
             div []
                 [ game
-                , div [class "d-flex", class "justify-content-center", class "mt-2"]
+                , div [class "d-flex", class "justify-content-center", class "mt-3"]
                   [ button
                         [onClick <| GotRenderMsg (ChangeTurn Previous)
                         , disabled (state.turn == 0)
@@ -279,7 +281,9 @@ gameRenderer divs =
     let gridTemplateRows = "repeat(" ++ String.fromInt map_size ++ ", 1fr)"
         gridTemplateColumns = "repeat(" ++ String.fromInt map_size ++ ", 1fr)"
     in
-    div [class "renderer"
-        , style "grid-template-rows" gridTemplateRows
-        , style "grid-template-columns" gridTemplateColumns
-        ] <| List.append (gameGrid) divs
+    div [class "renderer-wrapper"] [
+        div [class "renderer"
+            , style "grid-template-rows" gridTemplateRows
+            , style "grid-template-columns" gridTemplateColumns
+            ] <| List.append (gameGrid) divs
+    ]
