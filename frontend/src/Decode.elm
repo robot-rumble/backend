@@ -1,4 +1,4 @@
-module Decode exposing (Coords, Id, Output, State, Team, Unit, UnitType, Terrain, TerrainType(..), ObjDetails(..), decodeOutput)
+module Decode exposing (..)
 
 import Basics
 import Dict exposing (Dict)
@@ -63,17 +63,33 @@ decodeOutput =
     decodeValue outputDecoder
 
 
-type alias Output =
+type alias Output = Result CompileError Outcome
+
+type alias Outcome =
     { winner : String
     , turns : Array State
+    }
+
+type alias CompileError =
+    { message : String
+    , col : Int
+    , row : Int
     }
 
 
 outputDecoder : Decoder Output
 outputDecoder =
-    succeed Output
-        |> required "winner" string
-        |> required "turns" (array stateDecoder)
+    oneOf
+        [ succeed Outcome
+            |> required "winner" string
+            |> required "turns" (array stateDecoder)
+            |> map Ok
+        , succeed CompileError
+            |> required "message" string
+            |> required "col" int
+            |> required "row" int
+            |> map Err
+        ]
 
 
 type alias State =
@@ -117,7 +133,7 @@ basicObjDecoder =
         |> required "id" string
 
 
-type ObjDetails = UnitObj Unit | TerrainObj Terrain
+type ObjDetails = UnitDetails Unit | TerrainDetails Terrain
 
 
 type alias Unit =
@@ -135,7 +151,7 @@ unitDecoder =
         |> required "type_" (string |> stringAsUnion [ ( "Soldier", Soldier ) ])
         |> required "health" int
         |> required "team" string
-        |> map UnitObj
+        |> map UnitDetails
 
 
 type alias Terrain =
@@ -149,5 +165,5 @@ terrainDecoder : Decoder ObjDetails
 terrainDecoder =
     succeed Terrain
         |> required "type_" (string |> stringAsUnion [ ( "Wall", Wall ) ])
-        |> map TerrainObj
+        |> map TerrainDetails
 
