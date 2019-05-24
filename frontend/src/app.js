@@ -33,7 +33,7 @@ app.ports.startEval.subscribe(async (code) => {
     try {
       vm.exec(code)
     } catch (err) {
-      console.error(err)
+      app.ports.getOutput.send(err)
     }
 
     func = (args) => vm.eval('main')([args])

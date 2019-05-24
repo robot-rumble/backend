@@ -42,18 +42,21 @@ type alias Model =
     { key : Nav.Key
     , url : Url.Url
     , code : String
-    , renderState : Maybe RenderState
+    , renderState : RenderState
     }
 
-type alias RenderState =
-   { data : RR.Output
+type RenderState = Render RenderStateVal | Error RR.CompileError | NoRender
+
+type alias RenderStateVal =
+   { data : RR.Outcome
    , turn : Int
    }
 
 
+
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
-    (Model key url "" Nothing, Cmd.none )
+    (Model key url "" NoRender, Cmd.none )
 
 
 
@@ -90,24 +93,30 @@ update msg model =
         GotOutput output ->
           case RR.decodeOutput output of
             Ok data ->
-              ( { model | renderState = Just { data = data, turn = 0 } }, Cmd.none )
+              ( { model | renderState =
+              case data of
+                Ok outcome ->
+                  Render { data = outcome, turn = 0 }
+                Err compileError ->
+                  Error compileError
+              }, Cmd.none )
 
             Err error ->
               ( model, Cmd.none )
-
 
         Run ->
             ( model, startEval model.code )
 
         GotRenderMsg renderMsg ->
             case model.renderState of
-                Just state -> ( { model | renderState = Just <| updateRender renderMsg state }, Cmd.none )
-                Nothing -> ( model, Cmd.none )
+                Render state -> ( { model | renderState = Render <| updateRender renderMsg state }, Cmd.none )
+                Error error -> ( model, Cmd.none )
+                NoRender -> ( model, Cmd.none )
 
         CodeChanged code ->
             ( { model | code = code }, Cmd.none )
 
-updateRender : RenderMsg -> RenderState -> RenderState
+updateRender : RenderMsg -> RenderStateVal -> RenderStateVal
 updateRender msg model =
     case msg of
         ChangeTurn dir -> ( { model | turn = model.turn +
@@ -178,7 +187,7 @@ viewGameBar model =
 viewGameViewer : Model -> Html Msg
 viewGameViewer model =
     case model.renderState of
-        Just state ->
+        Render state ->
             let game =
                     case Array.get state.turn state.data.turns of
                        Just turn -> gameRenderer (gameObjs turn)
@@ -200,7 +209,14 @@ viewGameViewer model =
                         ] [text "\u{2192}"]
                   ]
             ]
-        Nothing ->
+
+        Error error ->
+            div []
+                [ gameRenderer []
+                , p [class "error", class "mt-3"] [text error.message]
+                ]
+
+        NoRender ->
             gameRenderer []
 
 
@@ -219,11 +235,11 @@ gameObjs state =
              , style "grid-row" <| String.fromInt (y + 1)
             ] ++ (
              case details of
-                RR.UnitObj unit ->
+                RR.UnitDetails unit ->
                    [ class "unit"
                    , class <| "team-" ++ unit.team
                    ]
-                RR.TerrainObj terrain ->
+                RR.TerrainDetails terrain ->
                    [ class "terrain"
                    , class <| "type-" ++ (
                       case terrain.type_ of
@@ -233,7 +249,7 @@ gameObjs state =
              ))
             [
              case details of
-                RR.UnitObj unit ->
+                RR.UnitDetails unit ->
                    let health_perc = (toFloat unit.health) / (toFloat max_health) * health_bar_width
                    in
                    div
