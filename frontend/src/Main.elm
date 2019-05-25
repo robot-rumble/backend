@@ -200,13 +200,19 @@ viewGame model =
 
 viewGameBar : Model -> Html Msg
 viewGameBar model =
-    div []
+    div [ class "progress-holder" ]
         [ case model.renderState of
             Loading turn ->
                 let progress_perc = (toFloat turn) / (toFloat model.totalTurns) * 100 in
                 div [class "progress", class "mb-3", style "width" <| to_perc progress_perc] []
-            _ ->
-                button [onClick Run, class "button", class "mb-3"] [text "run"]
+            _ -> div [] []
+           ,  button [onClick Run, class "button", class "mb-3"
+                 , style "visibility" <|
+                     case model.renderState of
+                        Loading turn -> "hidden"
+                        _ -> "visible"
+                 ] [text "run"]
+
         ]
 
 viewGameViewer : Model -> Html Msg
