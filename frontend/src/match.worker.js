@@ -5,8 +5,10 @@ let rpPromise = import('rustpython_wasm')
 let errorToObj = (e) => ({
   message: e.message,
   // elm expects a null value for missing field
-  col: e.col || null,
   row: e.row || null,
+  col: e.col || null,
+  endrow: e.endrow || null,
+  endcol: e.endcol || null,
 })
 
 self.addEventListener('message', ({ data: { code, turnNum } }) => {
