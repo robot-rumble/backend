@@ -107,6 +107,11 @@ $grid: rgba(135, 135, 135, .1);
     }
 }
 
+.progress {
+  height: 3vw;
+  background: red;
+}
+
 code-editor {
   .CodeMirror {
     height: 100%;

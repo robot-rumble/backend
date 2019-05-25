@@ -146,12 +146,13 @@ let map_size = 19
 let team_unit_num = 6
 let attack_strength = 1
 
-let rec run_turn run max_turn turn objs (map : (Coords.t, id, 'a) Map.t)
-    state_list =
+let rec run_turn run turn_callback max_turn turn objs
+    (map : (Coords.t, id, 'a) Map.t) state_list =
   let state = {turn= turn + 1; objs= Map.to_alist objs} in
   let state_list = state :: state_list in
   if turn = max_turn then Lwt.return state_list
   else
+    let _ = turn_callback state.turn in
     let input_teams = create_teams objs team_names in
     let input_map = create_array_map map map_size in
     let input_state =
@@ -221,9 +222,9 @@ let rec run_turn run max_turn turn objs (map : (Coords.t, id, 'a) Map.t)
       Map.fold dead_objs ~init:map ~f:(fun ~key:_ ~data:(basic, _) acc ->
           Map.remove acc basic.coords )
     in
-    run_turn run max_turn (turn + 1) objs map state_list
+    run_turn run turn_callback max_turn (turn + 1) objs map state_list
 
-let start run max_turn =
+let start run turn_callback max_turn =
   Random.self_init ();
   let terrains, map = create_map Rect map_size in
   let map, units =
@@ -240,7 +241,7 @@ let start run max_turn =
     |> List.map ~f:(fun ((base, _) as obj) -> (base.id, obj))
     |> Map.of_alist_exn (module String)
   in
-  run_turn run max_turn 0 objs map []
+  run_turn run turn_callback max_turn 0 objs map []
   >|= fun states ->
   {turns= List.rev states; winner= determine_winner @@ List.hd_exn states}
   |> Logic_j.string_of_main_output

@@ -22,7 +22,7 @@ import Json.Encode
 -- MAIN
 
 
-main : Program () Model Msg
+main : Program Flags Model Msg
 main =
     Browser.application
         { init = init
@@ -43,9 +43,10 @@ type alias Model =
     , url : Url.Url
     , code : String
     , renderState : RenderState
+    , totalTurns : Int
     }
 
-type RenderState = Render RenderStateVal | Error RR.CompileError | NoRender
+type RenderState = Loading Int | Render RenderStateVal | Error RR.CompileError | NoRender
 
 type alias RenderStateVal =
    { data : RR.Outcome
@@ -54,10 +55,14 @@ type alias RenderStateVal =
 
 
 
-init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
+init : Flags -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
-    (Model key url "" NoRender, Cmd.none )
+    (Model key url "" NoRender flags.totalTurns, Cmd.none )
 
+
+type alias Flags =
+    { totalTurns: Int
+    }
 
 
 -- UPDATE
@@ -69,6 +74,7 @@ type Msg
     = LinkClicked Browser.UrlRequest
     | UrlChanged Url.Url
     | GotOutput Decode.Value
+    | GotProgress Int
     | Run
     | GotRenderMsg RenderMsg
     | CodeChanged String
@@ -104,14 +110,17 @@ update msg model =
             Err error ->
               ( model, Cmd.none )
 
+        GotProgress turn ->
+            let _ = Debug.log "turn" turn in
+            ( { model | renderState = Loading turn }, Cmd.none)
+
         Run ->
             ( model, startEval model.code )
 
         GotRenderMsg renderMsg ->
             case model.renderState of
                 Render state -> ( { model | renderState = Render <| updateRender renderMsg state }, Cmd.none )
-                Error error -> ( model, Cmd.none )
-                NoRender -> ( model, Cmd.none )
+                _ -> ( model, Cmd.none )
 
         CodeChanged code ->
             ( { model | code = code }, Cmd.none )
@@ -128,13 +137,22 @@ updateRender msg model =
 
 -- SUBSCRIPTIONS
 
+port getProgress : (Int -> msg) -> Sub msg
 port getOutput : (Decode.Value -> msg) -> Sub msg
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    getOutput GotOutput
+    Sub.batch [
+        getOutput GotOutput,
+        getProgress GotProgress
+    ]
 
 -- VIEW
+
+
+to_perc : Float -> String
+to_perc float =
+    String.fromFloat float ++ "%"
 
 
 view : Model -> Browser.Document Msg
@@ -184,7 +202,13 @@ viewGame model =
 viewGameBar : Model -> Html Msg
 viewGameBar model =
     div []
-        [ button [onClick Run, class "button", class "mb-3"] [text "run"] ]
+        [ case model.renderState of
+            Loading turn ->
+                let progress_perc = (toFloat turn) / (toFloat model.totalTurns) * 100 in
+                div [class "progress", class "mb-3", style "width" <| to_perc progress_perc] []
+            _ ->
+                button [onClick Run, class "button", class "mb-3"] [text "run"]
+        ]
 
 viewGameViewer : Model -> Html Msg
 viewGameViewer model =
@@ -218,13 +242,12 @@ viewGameViewer model =
                 , p [class "error", class "mt-3"] [text error.message]
                 ]
 
-        NoRender ->
+        _ ->
             gameRenderer []
 
 
 map_size = 19
 max_health = 5
-health_bar_width = 100
 
 gameObjs : RR.State -> List (Html Msg)
 gameObjs state =
@@ -252,12 +275,12 @@ gameObjs state =
             [
              case details of
                 RR.UnitDetails unit ->
-                   let health_perc = (toFloat unit.health) / (toFloat max_health) * health_bar_width
+                   let health_perc = (toFloat unit.health) / (toFloat max_health) * 100
                    in
                    div
                       [ class "health-bar"
-                      , style "width" <| String.fromFloat health_perc ++ "%"
-                      , style "height" <| String.fromFloat health_perc ++ "%"
+                      , style "width" <| to_perc health_perc
+                      , style "height" <| to_perc health_perc
                       ] []
                 _ -> div [] []
             ]

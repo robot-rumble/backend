@@ -1,68 +1,34 @@
 import { Elm } from './Main.elm'
 import './css/app.scss'
 
-import { main } from 'logic'
-import SES from 'ses'
 import './codemirror'
 
-const realm = SES.makeSESRootRealm({ consoleMode: 'allow', errorStackMode: 'allow' })
-
-let rpPromise = import('rustpython_wasm')
-
 window.language = 'python'
-window.turnNum = 30
+window.turnNum = 10
 
 let app = Elm.Main.init({
   node: document.getElementById('root'),
-  windowWidth: window.innerWidth,
+  flags: {
+    totalTurns: window.turnNum,
+  },
 })
 
-app.ports.startEval.subscribe(async (code) => {
+const matchWorker = new Worker('./worker.js')
+
+app.ports.startEval.subscribe((code) => {
   localStorage.setItem('code', code)
-
-  let time = Date.now()
-
-  let func
-  if (window.language === 'python') {
-    let rp = await rpPromise
-    rp.vmStore.destroy('robot')
-    const vm = rp.vmStore.init('robot', false)
-
-    vm.addToScope('print', (val) => console.log(val))
-
-    try {
-      vm.exec(code)
-    } catch (err) {
-      app.ports.getOutput.send(err)
-    }
-
-    func = (args) => vm.eval('main')([args])
-  } else if (window.language === 'js') {
-    func = realm.eval(`(args) => {
-      ${code};
-      main(args)
-    }`)
-  }
-
-  const run = (args) => {
-    try {
-      return JSON.stringify(func(JSON.parse(args), {}))
-    } catch (e) {
-      console.log('Inside Error!')
-      console.log(e.message)
-      console.error(new Error(e))
-    }
-  }
-
-  try {
-    let result = main({ run, turn_num: window.turnNum }, (result) => {
-      console.log('=========FINAL=========')
-      console.log(`Time taken: ${(Date.now() - time) / 1000}`)
-      app.ports.getOutput.send(JSON.parse(result))
-    })
-  } catch (e) {
-    console.log('Root Error!')
-    console.log(e.message)
-    console.error(new Error(e))
-  }
+  matchWorker.postMessage(code)
 })
+
+matchWorker.onmessage = ({ data }) => {
+  if (data.type === 'error') {
+    console.log('Worker Error')
+    console.error(data.data)
+  } else if (data.type === 'robotError') {
+    console.log('Robot Error')
+    console.log(data.data)
+  } else {
+    console.log(app.ports)
+    app.ports[data.type].send(data.data)
+  }
+}
