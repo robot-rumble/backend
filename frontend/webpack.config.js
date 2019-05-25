@@ -1,8 +1,8 @@
 const path = require('path')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
-module.exports = {
-  mode: process.env.NODE_ENV,
+let browserConfig = {
+  mode: process.env.NODE_ENV || 'development',
   stats: 'minimal',
   entry: {
     app: ['@babel/polyfill', './src/app.js'],
@@ -16,9 +16,7 @@ module.exports = {
       {
         test: /\.js$/,
         exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader',
-        },
+        use: { loader: 'babel-loader' },
       },
       {
         test: /\.(sa|sc|c)ss$/,
@@ -58,8 +56,16 @@ module.exports = {
     stats: 'minimal',
     host: '0.0.0.0',
   },
-  node: {
-    fs: 'empty',
+}
+
+let workerConfig = {
+  mode: process.env.NODE_ENV || 'development',
+  stats: 'minimal',
+  entry: ['@babel/polyfill', './src/match.worker.js'],
+  target: 'webworker',
+  output: {
+    path: path.join(__dirname, 'dist'),
+    filename: 'worker.js',
   },
   resolve: {
     alias: {
@@ -69,4 +75,9 @@ module.exports = {
           : path.join(__dirname, '../logic/_build/default/frontend.js'),
     },
   },
+  node: {
+    fs: 'empty',
+  },
 }
+
+module.exports = [browserConfig, workerConfig]
