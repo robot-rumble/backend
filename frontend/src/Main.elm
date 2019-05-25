@@ -192,6 +192,7 @@ viewEditor model =
                 Decode.at [ "target", "value" ] <|
                     Decode.string
         , style "width" "60%"
+        , class "pr-6"
         ] ++ case model.renderState of
             Error error ->
                 case error.errorLoc of
