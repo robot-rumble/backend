@@ -69,6 +69,7 @@ type alias Flags =
 
 
 port startEval : String -> Cmd msg
+port reportDecodeError : String -> Cmd msg
 
 type Msg
     = LinkClicked Browser.UrlRequest
@@ -108,13 +109,13 @@ update msg model =
               }, Cmd.none )
 
             Err error ->
-              ( model, Cmd.none )
+              ( model, reportDecodeError <| Decode.errorToString error )
 
         GotProgress turn ->
             ( { model | renderState = Loading turn }, Cmd.none)
 
         Run ->
-            ( model, startEval model.code )
+            ( { model | renderState = Loading 0 }, startEval model.code )
 
         GotRenderMsg renderMsg ->
             case model.renderState of
@@ -187,8 +188,11 @@ viewEditor model =
         , style "width" "60%"
         ] ++ case model.renderState of
             Error error ->
-                [property "errorLoc" <|
-                    RR.errorEncoder error]
+                case error.errorLoc of
+                Just errorLoc ->
+                    [property "errorLoc" <|
+                        RR.errorLocEncoder errorLoc]
+                Nothing -> []
             _ -> []
         )
         []

@@ -72,12 +72,15 @@ type alias Outcome =
 
 type alias Error =
     { message : String
-    , row : Maybe Int
-    , col : Maybe Int
-    , endrow : Maybe Int
-    , endcol : Maybe Int
+    , errorLoc : Maybe ErrorLoc
     }
 
+type alias ErrorLoc =
+    { line : Int
+    , ch : Int
+    , endline : Int
+    , endch : Int
+    }
 
 outputDecoder : Decoder Output
 outputDecoder =
@@ -88,12 +91,18 @@ outputDecoder =
             |> map Ok
         , succeed Error
             |> required "message" string
-            |> custom (field "row" (nullable int))
-            |> custom (field "col" (nullable int))
-            |> custom (field "endrow" (nullable int))
-            |> custom (field "endcol" (nullable int))
+            |> custom (field "errorLoc" (nullable errorLocDecoder))
             |> map Err
         ]
+
+errorLocDecoder : Decoder ErrorLoc
+errorLocDecoder =
+    succeed ErrorLoc
+    |> required "line" int
+    |> required "ch" int
+    |> required "endline" int
+    |> required "endch" int
+
 
 nullableIntEncoder : Maybe Int -> Encode.Value
 nullableIntEncoder val =
@@ -101,13 +110,13 @@ nullableIntEncoder val =
         Just int -> Encode.int int
         Nothing -> Encode.null
 
-errorEncoder : Error -> Encode.Value
-errorEncoder error =
+errorLocEncoder : ErrorLoc -> Encode.Value
+errorLocEncoder errorLoc =
     Encode.object
-        [ ( "row", nullableIntEncoder error.row )
-        , ( "col", nullableIntEncoder error.col )
-        , ( "endrow", nullableIntEncoder error.endrow )
-        , ( "endcol", nullableIntEncoder error.endcol )
+        [ ( "line", Encode.int errorLoc.line )
+        , ( "ch", Encode.int errorLoc.ch )
+        , ( "endline", Encode.int errorLoc.endline )
+        , ( "endch", Encode.int errorLoc.endch )
         ]
 
 
