@@ -25,6 +25,7 @@ matchWorker.onmessage = ({ data }) => {
   if (data.type === 'error') {
     console.log('Worker Error!')
     console.error(data.data)
+    app.ports.getError.send(null)
   } else {
     if (data.type === 'getOutput') console.log(data.data)
     app.ports[data.type].send(data.data)
