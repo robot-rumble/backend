@@ -111,7 +111,6 @@ update msg model =
               ( model, Cmd.none )
 
         GotProgress turn ->
-            let _ = Debug.log "turn" turn in
             ( { model | renderState = Loading turn }, Cmd.none)
 
         Run ->
