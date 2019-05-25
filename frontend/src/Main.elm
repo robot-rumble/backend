@@ -46,7 +46,7 @@ type alias Model =
     , totalTurns : Int
     }
 
-type RenderState = Loading Int | Render RenderStateVal | Error RR.Error | NoRender
+type RenderState = Loading Int | Render RenderStateVal | Error RR.Error | NoRender | InternalError
 
 type alias RenderStateVal =
    { data : RR.Outcome
@@ -79,6 +79,7 @@ type Msg
     | Run
     | GotRenderMsg RenderMsg
     | CodeChanged String
+    | GotError
 
 type RenderMsg = ChangeTurn Direction
 type Direction = Next | Previous
@@ -125,6 +126,9 @@ update msg model =
         CodeChanged code ->
             ( { model | code = code }, Cmd.none )
 
+        GotError ->
+            ( { model | renderState = InternalError }, Cmd.none )
+
 updateRender : RenderMsg -> RenderStateVal -> RenderStateVal
 updateRender msg model =
     case msg of
@@ -139,12 +143,14 @@ updateRender msg model =
 
 port getProgress : (Int -> msg) -> Sub msg
 port getOutput : (Decode.Value -> msg) -> Sub msg
+port getError : (() -> msg) -> Sub msg
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.batch [
         getOutput GotOutput,
-        getProgress GotProgress
+        getProgress GotProgress,
+        getError (always GotError)
     ]
 
 -- VIEW
@@ -201,10 +207,14 @@ viewGame : Model -> Html Msg
 viewGame model =
     div [ style "width" "40%"
         , style "max-width" "500px"
-        ]
-        [ viewGameBar model
-        , viewGameViewer model
-        ]
+        ] (case model.renderState of
+            InternalError ->
+                [p [class "internal-error"] [text "Internal Error! Please check back soon."]]
+            _ ->
+                [ viewGameBar model
+                , viewGameViewer model
+                ]
+        )
 
 
 viewGameBar : Model -> Html Msg
