@@ -46,7 +46,7 @@ type alias Model =
     , totalTurns : Int
     }
 
-type RenderState = Loading Int | Render RenderStateVal | Error RR.CompileError | NoRender
+type RenderState = Loading Int | Render RenderStateVal | Error RR.Error | NoRender
 
 type alias RenderStateVal =
    { data : RR.Outcome
@@ -103,8 +103,8 @@ update msg model =
               case data of
                 Ok outcome ->
                   Render { data = outcome, turn = 0 }
-                Err compileError ->
-                  Error compileError
+                Err error ->
+                  Error error
               }, Cmd.none )
 
             Err error ->
@@ -180,12 +180,17 @@ viewUI model =
 viewEditor : Model -> Html Msg
 viewEditor model =
     Html.node "code-editor"
-        [ Html.Events.on "editorChanged" <|
+        ([ Html.Events.on "editorChanged" <|
             Decode.map CodeChanged <|
                 Decode.at [ "target", "value" ] <|
                     Decode.string
         , style "width" "60%"
-        ]
+        ] ++ case model.renderState of
+            Error error ->
+                [property "errorLoc" <|
+                    RR.errorEncoder error]
+            _ -> []
+        )
         []
 
 viewGame : Model -> Html Msg

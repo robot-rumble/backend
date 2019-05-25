@@ -58,22 +58,24 @@ type alias Team =
     String
 
 
-decodeOutput : Value -> Result Error Output
+decodeOutput : Value -> Result Json.Decode.Error Output
 decodeOutput =
     decodeValue outputDecoder
 
 
-type alias Output = Result CompileError Outcome
+type alias Output = Result Error Outcome
 
 type alias Outcome =
     { winner : String
     , turns : Array State
     }
 
-type alias CompileError =
+type alias Error =
     { message : String
-    , col : Maybe Int
     , row : Maybe Int
+    , col : Maybe Int
+    , endrow : Maybe Int
+    , endcol : Maybe Int
     }
 
 
@@ -84,11 +86,28 @@ outputDecoder =
             |> required "winner" string
             |> required "turns" (array stateDecoder)
             |> map Ok
-        , succeed CompileError
+        , succeed Error
             |> required "message" string
-            |> custom (field "col" (nullable int))
             |> custom (field "row" (nullable int))
+            |> custom (field "col" (nullable int))
+            |> custom (field "endrow" (nullable int))
+            |> custom (field "endcol" (nullable int))
             |> map Err
+        ]
+
+nullableIntEncoder : Maybe Int -> Encode.Value
+nullableIntEncoder val =
+    case val of
+        Just int -> Encode.int int
+        Nothing -> Encode.null
+
+errorEncoder : Error -> Encode.Value
+errorEncoder error =
+    Encode.object
+        [ ( "row", nullableIntEncoder error.row )
+        , ( "col", nullableIntEncoder error.col )
+        , ( "endrow", nullableIntEncoder error.endrow )
+        , ( "endcol", nullableIntEncoder error.endcol )
         ]
 
 
