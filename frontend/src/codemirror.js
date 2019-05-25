@@ -7,8 +7,9 @@ import 'codemirror/lib/codemirror.css'
 // eslint-disable-next-line import/no-webpack-loader-syntax
 // import robotLib from '!raw-loader!./robotLib.raw'
 // import sampleRobot from '!raw-loader!./sampleRobot.raw'
-//
-import sampleRobot from '!raw-loader!./sampleRobot.raw.py'
+
+import stdlib from './stdlib.raw.py'
+import sampleRobot from './sampleRobot.raw.py'
 
 function getModeFromLanguage(language) {
   switch (language) {
@@ -24,7 +25,6 @@ customElements.define(
   class extends HTMLElement {
     constructor() {
       super()
-      this._value = localStorage.getItem('code') || sampleRobot
       this.marks = []
       this.lastRunCount = 0
     }
@@ -58,7 +58,7 @@ customElements.define(
     }
 
     get value() {
-      return this._value
+      return this._editor.getValue() + '\n' + stdlib
     }
 
     connectedCallback() {
@@ -68,7 +68,7 @@ customElements.define(
         lineNumbers: true,
         matchBrackets: true,
         autoRefresh: true,
-        value: this._value,
+        value: localStorage.getItem('code') || sampleRobot,
         extraKeys: {
           Tab: (cm) => cm.execCommand('indentMore'),
           'Shift-Tab': (cm) => cm.execCommand('indentLess'),
@@ -77,7 +77,7 @@ customElements.define(
 
       this._editor.on('changes', () => {
         this.clearMarks()
-        this._value = this._editor.getValue()
+        localStorage.setItem('code', this._editor.getValue())
         this.dispatchEvent(new CustomEvent('editorChanged'))
       })
 
