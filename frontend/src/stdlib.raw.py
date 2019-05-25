@@ -1,6 +1,7 @@
 def check_enum(val, options):
+  options_string = ' / '.join(options)
   if not val in options:
-    raise Exception(f'"{val}" must be one of {options}')
+    raise Exception(f'"{val}" must be one of {options_string}')
 
 def direction_action(func):
   def wrapper(direction):
@@ -47,6 +48,12 @@ def main(main_input):
 
   for id in state['teams'][team]:
     current_action = None
+    try:
+      robot
+    except NameError:
+      raise Exception('You must define a "robot" function.')
+    if robot.__code__.co_argcount != 2:
+      raise Exception('Your "robot" function must accept two values: the current turn and robot details.')
     robot(state['turn'], state['objs'][id])
     if not current_action:
       raise Exception('Robot did not call any actions!')
