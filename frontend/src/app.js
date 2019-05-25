@@ -17,7 +17,6 @@ const app = Elm.Main.init({
 const matchWorker = new Worker('./worker.js')
 
 app.ports.startEval.subscribe((code) => {
-  localStorage.setItem('code', code)
   window.runCount++
   matchWorker.postMessage({ code, turnNum: window.turnNum })
 })

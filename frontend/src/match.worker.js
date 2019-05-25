@@ -59,6 +59,14 @@ self.addEventListener('message', ({ data: { code, turnNum } }) => {
       })
     })
     .catch((e) => {
-      self.postMessage({ type: 'error', data: errorToObj(e) })
+      let data
+      if (e.message) {
+        // JS error
+        data = errorToObj(e)
+      } else {
+        // OCAML error
+        data = e
+      }
+      self.postMessage({ type: 'error', data })
     })
 })
