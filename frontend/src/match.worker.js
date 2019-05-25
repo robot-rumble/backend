@@ -22,7 +22,7 @@ let errorToObj = (e) => {
 self.addEventListener('message', ({ data: { code, turnNum } }) => {
   rpPromise
     .then((rp) => {
-      const time = Date.now()
+      const startTime = Date.now()
 
       rp.vmStore.destroy('robot')
       const vm = rp.vmStore.init('robot', false)
@@ -54,8 +54,7 @@ self.addEventListener('message', ({ data: { code, turnNum } }) => {
       const turnCallback = (turn) => self.postMessage({ type: 'getProgress', data: turn })
 
       runLogic({ run, turnNum, turnCallback }, (output) => {
-        console.log('=========FINAL=========')
-        console.log(`Time taken: ${(Date.now() - time) / 1000}`)
+        console.log(`Time taken: ${(Date.now() - startTime) / 1000}s`)
         self.postMessage({ type: 'getOutput', data: JSON.parse(output) })
       })
     })
