@@ -4,7 +4,7 @@ import Basics
 import Dict exposing (Dict)
 import Array exposing (Array)
 import Json.Decode exposing (..)
-import Json.Decode.Pipeline exposing (required)
+import Json.Decode.Pipeline exposing (required, custom)
 import Json.Encode as Encode
 
 arrayAsTuple2 : Decoder a -> Decoder b -> Decoder ( a, b )
@@ -72,8 +72,8 @@ type alias Outcome =
 
 type alias CompileError =
     { message : String
-    , col : Int
-    , row : Int
+    , col : Maybe Int
+    , row : Maybe Int
     }
 
 
@@ -86,8 +86,9 @@ outputDecoder =
             |> map Ok
         , succeed CompileError
             |> required "message" string
-            |> required "col" int
-            |> required "row" int
+            |> custom (field "col" (nullable int))
+            |> custom (field "row" (nullable int))
+            |> Debug.log "lo"
             |> map Err
         ]
 

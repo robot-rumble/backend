@@ -1,61 +1,52 @@
-import { main } from 'logic'
+import { main as runLogic } from 'logic'
 
 let rpPromise = import('rustpython_wasm')
 
 let errorToObj = (e) => ({
   message: e.message,
-  col: e.col,
-  row: e.row,
+  // elm expects a null value for missing field
+  col: e.col || null,
+  row: e.row || null,
 })
 
-self.addEventListener('message', ({ data: code }) => {
+self.addEventListener('message', ({ data: { code, turnNum } }) => {
   rpPromise
     .then((rp) => {
-      let time = Date.now()
+      const time = Date.now()
 
-      let language = 'python'
-      let turnNum = 10
+      rp.vmStore.destroy('robot')
+      const vm = rp.vmStore.init('robot', false)
 
-      let func
-      if (language === 'python') {
-        rp.vmStore.destroy('robot')
-        const vm = rp.vmStore.init('robot', false)
+      vm.addToScope('print', (val) => console.log(val))
 
-        vm.addToScope('print', (val) => console.log(val))
+      try {
+        vm.exec(code)
+      } catch (e) {
+        self.postMessage({
+          type: 'getOutput',
+          data: errorToObj(e),
+        })
+        return
+      }
 
+      const main = (args) => vm.eval('main')([args])
+      const run = (args) => {
+        args = JSON.parse(args)
         try {
-          vm.exec(code)
+          return JSON.stringify(main(args, {}))
         } catch (e) {
           self.postMessage({
             type: 'getOutput',
             data: errorToObj(e),
           })
-          return
-        }
-
-        func = (args) => vm.eval('main')([args])
-      } else if (language === 'js') {
-        func = realm.eval(`(args) => {
-        ${code};
-        main(args)
-      }`)
-      }
-
-      const run = (args) => {
-        args = JSON.parse(args)
-        try {
-          return JSON.stringify(func(args, {}))
-        } catch (e) {
-          self.postMessage({ type: 'robotError', data: errorToObj(e) })
         }
       }
+      const turnCallback = (turn) => self.postMessage({ type: 'getProgress', data: turn })
 
-      let callback = (turn) => self.postMessage({ type: 'getProgress', data: turn })
-
-      main({ run, turnNum, turnCallback: callback }, (result) => {
+      runLogic({ run, turnNum, turnCallback }, (output) => {
         console.log('=========FINAL=========')
         console.log(`Time taken: ${(Date.now() - time) / 1000}`)
-        self.postMessage({ type: 'getOutput', data: JSON.parse(result) })
+        self.postMessage({ type: 'getOutput', data: JSON.parse(output) })
       })
     })
     .catch((e) => {
