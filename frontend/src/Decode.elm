@@ -88,7 +88,6 @@ outputDecoder =
             |> required "message" string
             |> custom (field "col" (nullable int))
             |> custom (field "row" (nullable int))
-            |> Debug.log "lo"
             |> map Err
         ]
 

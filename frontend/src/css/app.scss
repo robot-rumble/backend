@@ -107,10 +107,16 @@ $grid: rgba(135, 135, 135, .1);
     }
 }
 
-.progress {
-  height: 3vw;
-  background: red;
+.progress-holder {
+  position: relative;
+
+  .progress {
+    background: $blue;
+    position: absolute;
+    height: 100%;
+  }
 }
+
 
 code-editor {
   .CodeMirror {
