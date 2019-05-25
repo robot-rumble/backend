@@ -23,18 +23,16 @@ app.ports.startEval.subscribe((code) => {
 })
 
 matchWorker.onmessage = ({ data }) => {
-  console.log(data)
   if (data.type === 'error') {
-    console.log('Worker Error')
+    console.log('Worker Error!')
     console.error(data.data)
-  } else if (data.type === 'robotError') {
-    console.log('Robot Error')
-    console.log(data.data)
   } else {
+    if (data.type === 'getOutput') console.log(data.data)
     app.ports[data.type].send(data.data)
   }
 }
 
 app.ports.reportDecodeError.subscribe((error) => {
+  console.log('Decode Error!')
   console.error(error)
 })
