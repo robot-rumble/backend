@@ -25,11 +25,37 @@ customElements.define(
     constructor() {
       super()
       this._value = localStorage.getItem('code') || sampleRobot
+      this.marks = []
+      this.lastRunCount = 0
     }
 
-    // get value() {
-    //   return robotLib + ';' + this._value
-    // }
+    clearMarks() {
+      this.marks.forEach((mark) => mark.clear())
+      this.marks = []
+    }
+
+    set errorLoc(errorLoc) {
+      if (errorLoc && window.runCount !== this.lastRunCount) {
+        this.lastRunCount = window.runCount
+
+        let from = { line: errorLoc.line - 1, ch: errorLoc.ch - 1 }
+        let to = { line: errorLoc.endline - 1, ch: errorLoc.endch - 1 }
+
+        let mark = this._editor.markText(from, to, {
+          className: 'inline-error',
+        })
+
+        // error is in area that doesn't have a character, eg no colon in python function definition
+        if (!mark.lines.length) {
+          this._editor.replaceRange(' ', from, to)
+          mark = this._editor.markText(from, to, {
+            className: 'inline-error',
+          })
+        }
+
+        this.marks.push(mark)
+      }
+    }
 
     get value() {
       return this._value
@@ -50,6 +76,7 @@ customElements.define(
       })
 
       this._editor.on('changes', () => {
+        this.clearMarks()
         this._value = this._editor.getValue()
         this.dispatchEvent(new CustomEvent('editorChanged'))
       })

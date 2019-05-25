@@ -2,14 +2,22 @@ import { main as runLogic } from 'logic'
 
 let rpPromise = import('rustpython_wasm')
 
-let errorToObj = (e) => ({
-  message: e.message,
+let errorToObj = (e) => {
   // elm expects a null value for missing field
-  row: e.row || null,
-  col: e.col || null,
-  endrow: e.endrow || null,
-  endcol: e.endcol || null,
-})
+  let errorLoc = null
+  if (e.row && e.col && e.endrow && e.endcol) {
+    errorLoc = {
+      line: e.row,
+      ch: e.col,
+      endline: e.endrow,
+      endch: e.endcol,
+    }
+  }
+  return {
+    message: e.message,
+    errorLoc,
+  }
+}
 
 self.addEventListener('message', ({ data: { code, turnNum } }) => {
   rpPromise
