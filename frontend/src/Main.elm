@@ -110,7 +110,7 @@ update msg model =
               }, Cmd.none )
 
             Err error ->
-              ( model, reportDecodeError <| Decode.errorToString error )
+              ( { model | renderState = InternalError }, reportDecodeError <| Decode.errorToString error )
 
         GotProgress turn ->
             ( { model | renderState = Loading turn }, Cmd.none)
@@ -208,14 +208,10 @@ viewGame : Model -> Html Msg
 viewGame model =
     div [ style "width" "40%"
         , style "max-width" "500px"
-        ] (case model.renderState of
-            InternalError ->
-                [p [class "internal-error"] [text "Internal Error! Please check back soon."]]
-            _ ->
-                [ viewGameBar model
-                , viewGameViewer model
-                ]
-        )
+        ]
+        [ viewGameBar model
+        , viewGameViewer model
+        ]
 
 
 viewGameBar : Model -> Html Msg
@@ -265,6 +261,12 @@ viewGameViewer model =
             div []
                 [ gameRenderer []
                 , p [class "error", class "mt-3"] [text error.message]
+                ]
+
+        InternalError ->
+            div []
+                [ gameRenderer []
+                , p [class "internal-error", class "mt-3"] [text "Internal Error! Please try again later."]
                 ]
 
         _ ->
