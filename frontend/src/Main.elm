@@ -14,7 +14,8 @@ import Array
 import Dict
 import Tuple exposing (first, second)
 
-import Decode as RR
+import Data
+import Router
 import Json.Decode as Decode
 import Json.Encode
 
@@ -40,16 +41,16 @@ main =
 
 type alias Model =
     { key : Nav.Key
-    , url : Url.Url
+    , route : Router.Route
     , code : String
     , renderState : RenderState
     , totalTurns : Int
     }
 
-type RenderState = Loading Int | Render RenderStateVal | Error RR.Error | NoRender | InternalError
+type RenderState = Loading Int | Render RenderStateVal | Error Data.Error | NoRender | InternalError
 
 type alias RenderStateVal =
-   { data : RR.Outcome
+   { data : Data.Outcome
    , turn : Int
    }
 
@@ -57,7 +58,7 @@ type alias RenderStateVal =
 
 init : Flags -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
-    (Model key url "" NoRender flags.totalTurns, Cmd.none )
+    (Model key Router.Home "" NoRender flags.totalTurns, Cmd.none )
 
 
 type alias Flags =
@@ -96,10 +97,14 @@ update msg model =
                     ( model, Nav.load href )
 
         UrlChanged url ->
-            ( { model | url = url }, Cmd.none )
+          case Router.parse url of
+            Just route ->
+               ( { model | route = route }, Cmd.none )
+            Nothing ->
+               ( model, Nav.replaceUrl model.key "/")
 
         GotOutput output ->
-          case RR.decodeOutput output of
+          case Data.decodeOutput output of
             Ok data ->
               ( { model | renderState =
               case data of
@@ -170,6 +175,11 @@ view model =
 viewUI : Model -> Html Msg
 viewUI model =
     div []
+        []
+
+viewRobot : Model -> Html Msg
+viewRobot model =
+   div []
         [ p [ class "mt-5"
             , class "w-75"
             , class "mx-auto"
@@ -182,7 +192,7 @@ viewUI model =
           ] [ viewEditor model
             , viewGame model
             ]
-        ]
+         ]
 
 viewEditor : Model -> Html Msg
 viewEditor model =
@@ -198,7 +208,7 @@ viewEditor model =
                 case error.errorLoc of
                 Just errorLoc ->
                     [property "errorLoc" <|
-                        RR.errorLocEncoder errorLoc]
+                        Data.errorLocEncoder errorLoc]
                 Nothing -> []
             _ -> []
         )
@@ -276,7 +286,7 @@ viewGameViewer model =
 map_size = 19
 max_health = 5
 
-gameObjs : RR.State -> List (Html Msg)
+gameObjs : Data.State -> List (Html Msg)
 gameObjs state =
     Dict.values state.objs
     |> List.map (\(basic, details) ->
@@ -287,21 +297,21 @@ gameObjs state =
              , style "grid-row" <| String.fromInt (y + 1)
             ] ++ (
              case details of
-                RR.UnitDetails unit ->
+                Data.UnitDetails unit ->
                    [ class "unit"
                    , class <| "team-" ++ unit.team
                    ]
-                RR.TerrainDetails terrain ->
+                Data.TerrainDetails terrain ->
                    [ class "terrain"
                    , class <| "type-" ++ (
                       case terrain.type_ of
-                         RR.Wall -> "wall"
+                         Data.Wall -> "wall"
                       )
                    ]
              ))
             [
              case details of
-                RR.UnitDetails unit ->
+                Data.UnitDetails unit ->
                    let health_perc = (toFloat unit.health) / (toFloat max_health) * 100
                    in
                    div

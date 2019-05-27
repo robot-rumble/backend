@@ -1,4 +1,4 @@
-module Decode exposing (..)
+module Data exposing (..)
 
 import Basics
 import Dict exposing (Dict)
