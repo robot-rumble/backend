@@ -124,12 +124,21 @@ viewUI model =
 viewEditor : Model -> Html Msg
 viewEditor model =
     Html.node "code-editor"
-        [ Html.Events.on "editorChanged" <|
+        ([ Html.Events.on "editorChanged" <|
             Decode.map CodeChanged <|
                 Decode.at [ "target", "value" ] <|
                     Decode.string
         , style "width" "60%"
-        ]
+        , class "pr-6"
+        ] ++ case model.gameState of
+            Error error ->
+                case error.errorLoc of
+                Just errorLoc ->
+                    [property "errorLoc" <|
+                        Data.errorLocEncoder errorLoc]
+                Nothing -> []
+            _ -> []
+        )
         []
 
 viewGame : Model -> Html Msg
