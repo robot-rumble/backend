@@ -23,6 +23,12 @@ defmodule RobotWeb.ConnCase do
 
       # The default endpoint for testing
       @endpoint RobotWeb.Endpoint
+
+      def string_map(map) do
+        map
+        |> Enum.map(fn {k, v} -> {Atom.to_string(k), v} end)
+        |> Map.new()
+      end
     end
   end
 

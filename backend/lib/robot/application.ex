@@ -12,8 +12,8 @@ defmodule Robot.Application do
       Robot.Repo,
       # Start the endpoint when the application starts
       RobotWeb.Endpoint
-      # Starts a worker by calling: Robot.Worker.start_link(arg)
-      # {Robot.Worker, arg},
+      # Starts a worker by calling: RobotWeb.Worker.start_link(arg)
+      # {RobotWeb.Worker, arg},
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

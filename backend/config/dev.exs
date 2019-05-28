@@ -8,7 +8,7 @@ use Mix.Config
 # with webpack to recompile .js and .css sources.
 config :robot, RobotWeb.Endpoint,
   http: [port: 4000],
-  debug_errors: true,
+  debug_errors: false,
   code_reloader: false,
   check_origin: false,
   watchers: []
@@ -51,6 +51,6 @@ config :phoenix, :plug_init_mode, :runtime
 config :robot, Robot.Repo,
   username: "postgres",
   password: "postgres",
-  hostname: "db",
+  hostname: System.get_env("DB_HOST") || "db",
   database: "robot_dev",
   pool_size: 10
