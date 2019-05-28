@@ -14,7 +14,7 @@ const app = Elm.Main.init({
   },
 })
 
-const matchWorker = new Worker('./worker.js')
+const matchWorker = new Worker('/worker.js')
 
 app.ports.startEval.subscribe((code) => {
   window.runCount++
