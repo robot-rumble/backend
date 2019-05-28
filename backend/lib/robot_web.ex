@@ -24,6 +24,10 @@ defmodule RobotWeb do
       import Plug.Conn
       import RobotWeb.Gettext
       alias RobotWeb.Router.Helpers, as: Routes
+      import RobotWeb.Auth, only: [force_authenticated: 2]
+      import RobotWeb.Helpers
+      alias RobotWeb.Helpers.MapExtras
+      import Ecto.Query
     end
   end
 

@@ -7,6 +7,12 @@
 # General application configuration
 use Mix.Config
 
+config :robot, Robot.Repo,
+  database: "robot_repo",
+  username: "user",
+  password: "pass",
+  hostname: "localhost"
+
 config :robot,
   ecto_repos: [Robot.Repo]
 

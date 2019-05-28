@@ -41,7 +41,10 @@ defmodule Robot.MixProject do
       {:phoenix_html, "~> 2.11"},
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
-      {:plug_cowboy, "~> 2.0"}
+      {:plug_cowboy, "~> 2.0"},
+      {:comeonin, "~> 4.1.1"},
+      {:bcrypt_elixir, "~> 1.0"},
+      {:guardian, "~> 1.1"}
     ]
   end
 
