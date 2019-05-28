@@ -1,5 +1,5 @@
 def robot(turn, robot):
   if turn % 2 == 0:
-    move('right')
+    return move('right')
   else:
-    attack('down')
+    return attack('down')

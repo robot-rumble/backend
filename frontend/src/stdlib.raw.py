@@ -5,10 +5,9 @@ def check_enum(val, options):
 
 def direction_action(func):
   def wrapper(direction):
-    global current_action
     direction = direction.capitalize()
     check_enum(direction, ['Left', 'Right', 'Up', 'Down'])
-    current_action = {
+    return {
       'type_': func.__name__.capitalize(),
       'direction': direction
     }
@@ -47,16 +46,15 @@ def main(main_input):
   actions = {}
 
   for id in state['teams'][team]:
-    current_action = None
     try:
       robot
     except NameError:
       raise Exception('You must define a "robot" function.')
     if robot.__code__.co_argcount != 2:
       raise Exception('Your "robot" function must accept two values: the current turn and robot details.')
-    robot(state['turn'], state['objs'][id])
+    current_action = robot(state['turn'], state['objs'][id])
     if not current_action:
-      raise Exception('Robot did not call any actions!')
+      raise Exception('Robot did not return an action!')
     actions[id] = current_action
 
   return { 'actions': actions }
