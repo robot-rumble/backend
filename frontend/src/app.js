@@ -11,6 +11,7 @@ const app = Elm.Main.init({
   node: document.getElementById('root'),
   flags: {
     totalTurns: window.turnNum,
+    auth: localStorage.getItem('auth'),
   },
 })
 
