@@ -7,7 +7,7 @@ import Json.Decode as Decode
 
 import Data
 import Component.Game as Game
-import Api
+import Auth
 
 
 -- MODEL
@@ -101,7 +101,7 @@ to_perc : Float -> String
 to_perc float =
     String.fromFloat float ++ "%"
 
-view : Model -> Api.Auth -> ( String, Html Msg, Html Msg )
+view : Model -> Auth.Auth -> ( String, Html Msg, Html Msg )
 view model auth =
     ( "Robot Rumble", viewHeader model, viewUI model )
 

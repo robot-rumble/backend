@@ -1,6 +1,4 @@
-module Api exposing (
-        allUsers, currentUser, user, createUser, Auth(..), authUserDecoder
-    )
+module Api exposing (..)
 
 import Url
 import Url.Builder exposing (relative)
@@ -8,6 +6,8 @@ import Json.Decode exposing (..)
 import Json.Decode.Pipeline exposing (required, custom)
 import Json.Encode as Encode
 import Http
+
+type alias Error = Http.Error
 
 type alias Endpoint val = (String, Decoder val)
 
@@ -39,13 +39,6 @@ robotDecoder = succeed Robot
     |> required "code" string
     |> required "slug" string
 
-type Auth = LoggedIn AuthUser | LoggedOut
-
-type alias AuthUser = { jwt : String, user : User }
-
-authUserDecoder = succeed AuthUser
-    |> required "jwt" string
-    |> required "user" userDecoder
 
 
 makeRequest : Request val body -> (Result Http.Error val -> msg) -> Cmd msg
@@ -65,3 +58,54 @@ allUsers = Get ("/user", list userDecoder) |> makeRequest
 currentUser body = Post ("/users/me", userDecoder) body |> makeRequest
 user username = Get ("/" ++ username, userDecoder) |> makeRequest
 createUser body = Post ("/", userDecoder) body |> makeRequest
+
+
+type alias SignUpBody = {
+        username : String,
+        password : String,
+        email : String
+    }
+
+signUpEncoder body = Encode.object [
+        ("username", Encode.string body.username),
+        ("password", Encode.string body.password),
+        ("email", Encode.string body.email)
+    ]
+
+signUp body =
+    Post ( "/users", userDecoder ) (signUpEncoder body) |> makeRequest
+
+
+
+type alias AuthUser = { jwt : String, user : User }
+
+authUserDecoder = succeed AuthUser
+    |> required "jwt" string
+    |> required "user" userDecoder
+
+
+userEncoder body = Encode.object [
+                ("id", Encode.string body.id),
+                ("username", Encode.string body.username),
+                ("email", Encode.string body.email)
+        ]
+
+authUserEncoder body = Encode.object [
+        ("jwt", Encode.string body.jwt ),
+        ("user", userEncoder body.user)
+    ]
+
+
+type alias LogInBody = {
+        username : String,
+        password : String
+    }
+
+logInEncoder body = Encode.object [
+        ("username", Encode.string body.username),
+        ("password", Encode.string body.password)
+    ]
+
+
+logIn body =
+    Post ("/sessions", authUserDecoder ) (logInEncoder body) |> makeRequest
