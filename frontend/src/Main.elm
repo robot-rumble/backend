@@ -20,7 +20,10 @@ import Json.Decode as Decode
 import Json.Encode
 
 import Page.Robot
+import Page.Enter
+
 import Api
+import Auth
 
 
 -- MAIN
@@ -30,7 +33,8 @@ main =
     Browser.application
         { init = init
         , view = view
-        , update = update , subscriptions = subscriptions
+        , update = update
+        , subscriptions = subscriptions
         , onUrlChange = UrlChanged
         , onUrlRequest = LinkClicked
         }
@@ -44,11 +48,12 @@ type alias Model = ( BaseModel, PageModel )
 type alias BaseModel =
     { key : Nav.Key
     , flags : Flags
-    , auth : Api.Auth
+    , auth : Auth.Auth
     }
 
 type PageModel
     = RobotModel Page.Robot.Model
+    | EnterModel Page.Enter.Model
     | NotFound
     | Redirect
 
@@ -63,14 +68,8 @@ type alias Flags =
 
 init : Flags -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
-    let auth = case Decode.decodeValue Api.authUserDecoder flags.auth of
-            Ok user ->
-                Api.LoggedIn user
-            Err _ ->
-                Api.LoggedOut
-    in
-    initPageModel url ( BaseModel key flags Api.LoggedOut, Redirect )
-
+    let auth = Auth.initAuth flags.auth in
+    initPageModel url ( BaseModel key flags auth, Redirect )
 
 
 -- UPDATE
@@ -82,6 +81,7 @@ type Msg
 
 type PageMsg
     = RobotMsg Page.Robot.Msg
+    | EnterMsg Page.Enter.Msg
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update rootMsg rootModel =
@@ -110,6 +110,7 @@ initPageModel url ( baseModel, pageModel ) =
             Just route -> case route of
                 Route.Robot user robot -> Page.Robot.init user robot baseModel.flags.totalTurns |> toRoot RobotModel RobotMsg
                 Route.Home -> Page.Robot.init "" "" baseModel.flags.totalTurns |> toRoot RobotModel RobotMsg
+                Route.Enter -> Page.Enter.init baseModel.key |> toRoot EnterModel EnterMsg
                 _ -> ( NotFound, Cmd.none )
     in
     ( (baseModel, newPageModel), newCmd )
@@ -117,13 +118,19 @@ initPageModel url ( baseModel, pageModel ) =
 updatePageModel : PageMsg -> Model -> ( Model, Cmd Msg )
 updatePageModel pageMsg ( baseModel, pageModel ) =
     let toRoot newPageModel newPageMsg ( newModel, newCmd ) =
-            ( newPageModel newModel, newCmd |> Cmd.map newPageMsg |> Cmd.map Page )
+            ( baseModel, newPageModel newModel, newCmd |> Cmd.map newPageMsg |> Cmd.map Page )
+        toAuth newPageModel newPageMsg ( newModel, newCmd, authCmd ) =
+            let ( newAuth, newAuthCmd ) = Auth.processCmd authCmd baseModel.auth
+                newPageCmd = newCmd |> Cmd.map newPageMsg |> Cmd.map Page
+            in
+            ( { baseModel | auth = newAuth }, newPageModel newModel, Cmd.batch [newPageCmd, newAuthCmd] )
     in
-    let ( newPageModel, newCmd ) = case ( pageMsg, pageModel ) of
+    let ( newBaseModel, newPageModel, newCmd ) = case ( pageMsg, pageModel ) of
             ( RobotMsg msg, RobotModel model ) -> Page.Robot.update msg model |> toRoot RobotModel RobotMsg
-            ( _, _ ) -> ( pageModel, Cmd.none )
+            ( EnterMsg msg, EnterModel model ) -> Page.Enter.update msg model |> toAuth EnterModel EnterMsg
+            ( _, _ ) -> ( baseModel, pageModel, Cmd.none )
     in
-    ( (baseModel, newPageModel), newCmd )
+    ( (newBaseModel, newPageModel), newCmd )
 
 
 -- SUBSCRIPTIONS
@@ -149,7 +156,9 @@ view ( baseModel, pageModel ) =
     in
     let ( title, header, body ) = case pageModel of
             RobotModel model -> Page.Robot.view model baseModel.auth |> toRoot RobotMsg
-            _ -> ( "", div [] [], div [] [] )
+            EnterModel model -> Page.Enter.view model baseModel.auth |> toRoot EnterMsg
+            NotFound -> ( "404", div [] [], div [] [text "not found"] )
+            Redirect -> ( "Redirecting...", div [] [], div [] [text "redirecting..."])
     in
     { title = title
     , body = [viewPage baseModel header body]
@@ -172,10 +181,10 @@ viewHeader baseModel header =
             [ Route.a Route.Warehouse [text "warehouse"]
             , Route.a Route.Rules [text "rules"]
             ] ++ case baseModel.auth of
-                Api.LoggedIn user -> [
+                Auth.LoggedIn user -> [
                         Route.a Route.Profile [text "profile"]
                     ]
-                Api.LoggedOut -> [
+                Auth.LoggedOut -> [
                         Route.a Route.Enter [text "login / signup"]
                     ]
             )

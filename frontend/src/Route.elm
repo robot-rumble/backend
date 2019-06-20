@@ -1,10 +1,11 @@
-module Route exposing (Route(..), parse, a)
+module Route exposing (Route(..), parse, a, push)
 
 import Url.Parser exposing (..)
 import Url.Builder
 import Url
 import Html
 import Html.Attributes
+import Browser.Navigation as Nav
 
 type Route
     = Robot String String
@@ -17,11 +18,11 @@ type Route
 routeParser : Parser (Route -> a) a
 routeParser =
     oneOf
-        [ map Robot (string </> string)
-        , map Warehouse (s "warehouse")
+        [ map Warehouse (s "warehouse")
         , map Profile (s "profile")
         , map Rules (s "rules")
         , map Enter (s "enter")
+        , map Robot (string </> string)
         , map Home top
         ]
 
@@ -43,3 +44,7 @@ toString route =
 a : Route -> List (Html.Html msg) -> Html.Html msg
 a route =
     Html.a [Html.Attributes.href <| toString route]
+
+push : Nav.Key -> Route -> Cmd msg
+push key route =
+    Nav.pushUrl key (toString route)
