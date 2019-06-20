@@ -26,7 +26,7 @@ defmodule RobotWeb.UserController do
   def create(_conn, %{"user" => user_params}) do
     changeset = User.create_changeset(%User{}, user_params)
 
-    Repo.insert(changeset)
+    Repo.insert(changeset) |> IO.inspect()
   end
 
   def update(conn, %{"user" => user_params}) do

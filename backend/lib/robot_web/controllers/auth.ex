@@ -3,7 +3,7 @@ defmodule RobotWeb.Auth do
   import RobotWeb.Helpers
 
   def authenticate(username, password) do
-    user = Robot.Repo.get_by(RobotWeb.User, username: username)
+    user = Robot.Repo.get_by(Robot.User, username: username)
 
     cond do
       user && Comeonin.Bcrypt.checkpw(password, user.password_hash) ->

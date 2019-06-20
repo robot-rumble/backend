@@ -82,7 +82,9 @@ update msg model =
         GotSignup result ->
             case result of
                 Ok _ -> (model, Route.push model.key Route.Home, Auth.None)
-                Err _ -> ({ model | error = Just "problem" }, Cmd.none, Auth.None)
+                Err err ->
+                    let _ = Debug.log "err" err in
+                    ({ model | error = Just "problem" }, Cmd.none, Auth.None)
 
         GotLogin result ->
             case result of
@@ -94,7 +96,7 @@ update msg model =
 
 view : Model -> Auth.Auth -> ( String, Html Msg, Html Msg )
 view model auth =
-    ( "Codingworkshops", div [] [], viewBody model )
+    ( "Robot Rumble", div [] [], viewBody model )
 
 
 viewBody : Model -> Html Msg
@@ -103,4 +105,9 @@ viewBody model =
         [ input [ value <| Maybe.withDefault "" model.username, onInput (Username >> GotInput) ] []
         , input [ value <| Maybe.withDefault "" model.password, onInput (Password >> GotInput) ] []
         , input [ value <| Maybe.withDefault "" model.email, onInput (Email >> GotInput) ] []
+        , button [ onClick LogIn ] [ text "login" ]
+        , button [ onClick SignUp ] [ text "signup" ]
+        , case model.error of
+            Just error -> p [] [text error]
+            Nothing -> div [] []
         ]
