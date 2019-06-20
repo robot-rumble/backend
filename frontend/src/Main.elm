@@ -20,6 +20,7 @@ import Json.Decode as Decode
 import Json.Encode
 
 import Page.Robot
+import Api
 
 
 -- MAIN
@@ -29,8 +30,7 @@ main =
     Browser.application
         { init = init
         , view = view
-        , update = update
-        , subscriptions = subscriptions
+        , update = update , subscriptions = subscriptions
         , onUrlChange = UrlChanged
         , onUrlRequest = LinkClicked
         }
@@ -44,6 +44,7 @@ type alias Model = ( BaseModel, PageModel )
 type alias BaseModel =
     { key : Nav.Key
     , flags : Flags
+    , auth : Api.Auth
     }
 
 type PageModel
@@ -52,14 +53,24 @@ type PageModel
     | Redirect
 
 
+-- INIT
 
-init : Flags -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
-init flags url key =
-    initPageModel url ( BaseModel key flags, Redirect )
 
 type alias Flags =
     { totalTurns: Int
+    , auth : Decode.Value
     }
+
+init : Flags -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
+init flags url key =
+    let auth = case Decode.decodeValue Api.authUserDecoder flags.auth of
+            Ok user ->
+                Api.LoggedIn user
+            Err _ ->
+                Api.LoggedOut
+    in
+    initPageModel url ( BaseModel key flags Api.LoggedOut, Redirect )
+
 
 
 -- UPDATE
@@ -99,6 +110,7 @@ initPageModel url ( baseModel, pageModel ) =
             Just route -> case route of
                 Route.Robot user robot -> Page.Robot.init user robot baseModel.flags.totalTurns |> toRoot RobotModel RobotMsg
                 Route.Home -> Page.Robot.init "" "" baseModel.flags.totalTurns |> toRoot RobotModel RobotMsg
+                _ -> ( NotFound, Cmd.none )
     in
     ( (baseModel, newPageModel), newCmd )
 
@@ -130,14 +142,54 @@ subscriptions ( baseModel, pageModel ) =
 
 view : Model -> Browser.Document Msg
 view ( baseModel, pageModel ) =
-    let toRoot pageMsg ( title, body ) =
-            ( title, body |> Html.map pageMsg |> Html.map Page )
+    let toRoot pageMsg ( title, header, body ) =
+            ( title
+            , header |> Html.map pageMsg |> Html.map Page
+            , body |> Html.map pageMsg |> Html.map Page )
     in
-    let ( title, body ) = case pageModel of
-            RobotModel model -> Page.Robot.view model |> toRoot RobotMsg
-            _ -> ( "", div [] [] )
+    let ( title, header, body ) = case pageModel of
+            RobotModel model -> Page.Robot.view model baseModel.auth |> toRoot RobotMsg
+            _ -> ( "", div [] [], div [] [] )
     in
     { title = title
-    , body = [body]
+    , body = [viewPage baseModel header body]
     }
+
+viewPage : BaseModel -> Html Msg -> Html Msg -> Html Msg
+viewPage baseModel header body =
+    div []
+        [ viewHeader baseModel header
+        , body
+        , viewFooter baseModel
+        ]
+
+
+viewHeader : BaseModel -> Html Msg -> Html Msg
+viewHeader baseModel header =
+    div [ class "d-flex" ]
+        [ header
+        , div [] (
+            [ Route.a Route.Warehouse [text "warehouse"]
+            , Route.a Route.Rules [text "rules"]
+            ] ++ case baseModel.auth of
+                Api.LoggedIn user -> [
+                        Route.a Route.Profile [text "profile"]
+                    ]
+                Api.LoggedOut -> [
+                        Route.a Route.Enter [text "login / signup"]
+                    ]
+            )
+        ]
+
+viewFooter : BaseModel -> Html Msg
+viewFooter baseModel =
+    div [ class "d-flex" ]
+        [ text "Made with <> by Chicode NFP"
+        , div []
+            [ a [] [text "github"]
+            , text "-"
+            , a [] [text "report a bug"]
+            ]
+        ]
+
 
