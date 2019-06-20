@@ -16,13 +16,13 @@ type Request val bodyVal
     | Post (Endpoint val) Encode.Value
 
 type alias User =
-    { id : String
+    { id : Int
     , username : String
     , email : String
     }
 
 userDecoder = succeed User
-    |> required "id" string
+    |> required "id" int
     |> required "username" string
     |> required "email" string
 
@@ -40,16 +40,19 @@ robotDecoder = succeed Robot
     |> required "slug" string
 
 
+baseUrl = "http://localhost:4000/api/v1"
 
 makeRequest : Request val body -> (Result Http.Error val -> msg) -> Cmd msg
 makeRequest request msg =
     case request of
-        Get (url, decoder) -> Http.get {
-                url = url,
+        Get (url, decoder) ->
+            Http.get {
+                url = baseUrl ++ url,
                 expect = Http.expectJson msg decoder
             }
-        Post (url, decoder) body -> Http.post {
-                url = url,
+        Post (url, decoder) body ->
+            Http.post {
+                url = baseUrl ++ url,
                 expect = Http.expectJson msg decoder,
                 body = Http.jsonBody body
             }
@@ -67,9 +70,11 @@ type alias SignUpBody = {
     }
 
 signUpEncoder body = Encode.object [
-        ("username", Encode.string body.username),
-        ("password", Encode.string body.password),
-        ("email", Encode.string body.email)
+        ("user", Encode.object [
+            ("username", Encode.string body.username),
+            ("password", Encode.string body.password),
+            ("email", Encode.string body.email)
+        ])
     ]
 
 signUp body =
@@ -85,7 +90,7 @@ authUserDecoder = succeed AuthUser
 
 
 userEncoder body = Encode.object [
-                ("id", Encode.string body.id),
+                ("id", Encode.int body.id),
                 ("username", Encode.string body.username),
                 ("email", Encode.string body.email)
         ]
@@ -102,8 +107,10 @@ type alias LogInBody = {
     }
 
 logInEncoder body = Encode.object [
-        ("username", Encode.string body.username),
-        ("password", Encode.string body.password)
+        ("session", Encode.object [
+            ("username", Encode.string body.username),
+            ("password", Encode.string body.password)
+        ])
     ]
 
 
