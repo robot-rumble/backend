@@ -9,9 +9,9 @@ import Browser.Navigation as Nav
 
 type Route
     = Robot String String
+    | User String
     | Home
     | Warehouse
-    | Profile
     | Rules
     | Enter
 
@@ -19,10 +19,10 @@ routeParser : Parser (Route -> a) a
 routeParser =
     oneOf
         [ map Warehouse (s "warehouse")
-        , map Profile (s "profile")
         , map Rules (s "rules")
         , map Enter (s "enter")
         , map Robot (string </> string)
+        , map User (string)
         , map Home top
         ]
 
@@ -33,8 +33,8 @@ toString : Route -> String
 toString route =
     let pieces = case route of
             Robot user robot -> [user, robot]
+            User user -> [user]
             Warehouse -> ["warehouse"]
-            Profile -> ["profile"]
             Rules -> ["rules"]
             Enter -> ["enter"]
             Home -> []
