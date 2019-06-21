@@ -3,8 +3,8 @@ defmodule Robot.Helpers do
 
   def custom_change(changeset, field, destination, change_func) do
     case changeset do
-      %Ecto.Changeset{valid?: true, changes: %{^field => val}} ->
-        put_change(changeset, destination, change_func.(val))
+      %Ecto.Changeset{valid?: true, changes: changes} ->
+        put_change(changeset, destination, change_func.(Map.get(changes, field)))
 
       _ ->
         changeset

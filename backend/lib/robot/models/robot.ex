@@ -26,7 +26,8 @@ defmodule Robot.Robot do
     robot
     |> Robot.Repo.preload([:author])
     |> cast(attrs, [:name, :code, :description])
-    |> validate_required([:name, :code])
+    |> validate_required([:name])
+    |> default(:code, "")
     |> validate_length(:name, min: 1, max: 60)
     |> custom_change(:name, :slug, &slugify/1)
     |> assoc_constraint(:author)

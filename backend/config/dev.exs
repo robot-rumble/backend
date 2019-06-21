@@ -9,7 +9,7 @@ use Mix.Config
 config :robot, RobotWeb.Endpoint,
   http: [port: 4000],
   debug_errors: false,
-  code_reloader: false,
+  code_reloader: true,
   check_origin: false,
   watchers: []
 
@@ -54,7 +54,3 @@ config :robot, Robot.Repo,
   hostname: System.get_env("DB_HOST") || "db",
   database: "robot_dev",
   pool_size: 10
-
-config :robot, RobotWeb.Guardian,
-  issuer: "robot",
-  secret_key: "qq9uvOUie3icWIrUTHyYXcXHtYGqw+OjSnvKCYKJjZxzSqrXZsOIUVE+GqqLzp62"

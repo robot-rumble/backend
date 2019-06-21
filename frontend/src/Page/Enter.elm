@@ -15,7 +15,8 @@ import Api
 
 
 type alias Model =
-    { key : Nav.Key
+    { auth : Auth.Auth
+    , key : Nav.Key
     , username : Maybe String
     , password : Maybe String
     , email : Maybe String
@@ -23,9 +24,9 @@ type alias Model =
     }
 
 
-init : Nav.Key -> ( Model, Cmd Msg )
-init key =
-    ( Model key Nothing Nothing Nothing Nothing, Cmd.none )
+init : Auth.Auth -> Nav.Key -> ( Model, Cmd Msg )
+init auth key =
+    ( Model auth key Nothing Nothing Nothing Nothing, Cmd.none )
 
 
 
@@ -94,8 +95,8 @@ update msg model =
 -- VIEW
 
 
-view : Model -> Auth.Auth -> ( String, Html Msg, Html Msg )
-view model auth =
+view : Model -> ( String, Html Msg, Html Msg )
+view model =
     ( "Robot Rumble", div [] [], viewBody model )
 
 
