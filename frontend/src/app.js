@@ -7,11 +7,18 @@ window.turnNum = 10
 window.language = 'python'
 window.runCount = 0
 
+let auth
+try {
+  auth = JSON.parse(localStorage.getItem('auth'))
+} catch (e) {
+  localStorage.removeItem('auth')
+}
+
 const app = Elm.Main.init({
   node: document.getElementById('root'),
   flags: {
     totalTurns: window.turnNum,
-    auth: localStorage.getItem('auth'),
+    auth,
   },
 })
 
@@ -36,4 +43,8 @@ matchWorker.onmessage = ({ data }) => {
 app.ports.reportDecodeError.subscribe((error) => {
   console.log('Decode Error!')
   console.error(error)
+})
+
+app.ports.storeAuth.subscribe((auth) => {
+  localStorage.setItem('auth', JSON.stringify(auth))
 })
