@@ -120,9 +120,9 @@ initPageModel url ( baseModel, pageModel ) =
     let ( newPageModel, newCmd ) = case Route.parse url of
             Nothing -> ( NotFound, Cmd.none )
             Just route -> case route of
-                Route.Robot user robot -> Page.Robot.init baseModel.auth user robot baseModel.flags.totalTurns |> toRoot RobotModel RobotMsg
+                Route.Robot user robot -> Page.Robot.init baseModel.auth user robot baseModel.flags.totalTurns False |> toRoot RobotModel RobotMsg
                 Route.User user -> (Loading, Api.user user User |> Cmd.map GotData)
-                Route.Home -> Page.Robot.init baseModel.auth "" "" baseModel.flags.totalTurns |> toRoot RobotModel RobotMsg
+                Route.Home -> Page.Robot.init baseModel.auth "" "" baseModel.flags.totalTurns True |> toRoot RobotModel RobotMsg
                 Route.Enter -> Page.Enter.init baseModel.auth baseModel.key |> toRoot EnterModel EnterMsg
                 _ -> ( NotFound, Cmd.none )
     in
@@ -204,16 +204,16 @@ view ( baseModel, pageModel ) =
 
 viewPage : BaseModel -> Html Msg -> Html Msg -> Html Msg
 viewPage baseModel header body =
-    div []
+    div [ class "root" ]
         [ viewHeader baseModel header
-        , body
+        , div [class "body"] [body]
         , viewFooter baseModel
         ]
 
 
 viewHeader : BaseModel -> Html Msg -> Html Msg
 viewHeader baseModel header =
-    div [ class "d-flex" ]
+    div [ class "header" ]
         [ header
         , div [] (
             [ Route.a Route.Warehouse [text "warehouse"]
@@ -230,12 +230,12 @@ viewHeader baseModel header =
 
 viewFooter : BaseModel -> Html Msg
 viewFooter baseModel =
-    div [ class "d-flex" ]
+    div [ class "footer" ]
         [ text "Made with <> by Chicode NFP"
         , div []
-            [ a [] [text "github"]
+            [ a [href "https://github.com/chicode/robot-frontend/tree/master"] [text "github"]
             , text "-"
-            , a [] [text "report a bug"]
+            , a [href "https://github.com/chicode/robot-rumble/issues/new"] [text "report a bug"]
             ]
         ]
 

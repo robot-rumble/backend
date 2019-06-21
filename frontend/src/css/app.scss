@@ -2,7 +2,7 @@ $spacers: (
   6: 5rem,
   7: 10rem,
 );
-$font-size-base: 1.3rem;
+$font-size-base: 1.5rem;
 $line-height-base: 1.2;
 
 @import "node_modules/bootstrap/scss/bootstrap-grid";
@@ -21,12 +21,37 @@ $orange: #EF8509;
 $dark-blue: #39ACFF;
 $light-red: #FCDEE7;
 $light-blue: #CAE9FF;
+$dark-grey: rgb(100, 100, 100);
 $grey: rgb(200, 200, 200);
 $light-grey: rgb(240, 240, 240);
 $code-font: Fantasque;
 
-body {
+html, body, .root {
   font-family: $code-font;
+  height: 100%;
+}
+
+.root {
+  display: flex;
+  flex-direction: column;
+}
+
+.body {
+  flex: 1 0 auto;
+  padding: 0 2rem;
+}
+
+.footer {
+  flex-shrink: 0;
+}
+
+a {
+  margin: 0.5rem;
+}
+
+input {
+  background: $light-grey;
+  padding: 0.5rem;
 }
 
 .arrow-button {
@@ -46,6 +71,22 @@ body {
     border-color: $light-blue;
     color: $blue;
   }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  padding: 2rem;
+  margin-bottom: 3rem;
+  border-bottom: 2px solid $light-grey;
+}
+
+.footer {
+  color: $dark-grey;
+  display: flex;
+  border-top: 2px solid $light-grey;
+  justify-content: space-between;
+  padding: 1rem 2rem;
 }
 
 $grid: rgba(135, 135, 135, .1);

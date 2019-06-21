@@ -18,6 +18,7 @@ type alias Model =
     , code : String
     , gameState : GameState
     , totalTurns : Int
+    , isDemo : Bool
     }
 
 type GameState
@@ -25,9 +26,9 @@ type GameState
     | Game Game.Model | Error Data.Error | NoGame | InternalError
 
 
-init : Auth.Auth -> String -> String -> Int -> ( Model, Cmd Msg )
-init auth user robot totalTurns =
-    ( Model auth "" "" NoGame totalTurns, Cmd.none )
+init : Auth.Auth -> String -> String -> Int -> Bool -> ( Model, Cmd Msg )
+init auth user robot totalTurns isDemo =
+    ( Model auth "" "" NoGame totalTurns isDemo, Cmd.none )
 
 
 -- UPDATE
@@ -108,19 +109,20 @@ view model =
 
 viewHeader : Model -> Html Msg
 viewHeader model =
-    div [] []
+    div [] [text <| if model.isDemo then "Robot Rumble Demo" else model.name]
 
 viewUI : Model -> Html Msg
 viewUI model =
     div []
-        [ p [ class "mt-5"
+        [ if model.isDemo then
+          p [ class "mb-5"
             , class "w-75"
             , class "mx-auto"
             ] [text "Welcome to Robot Rumble! This demo allows you to code a robot and run it against itself. The robot's code is a function that returns the type and direction of an action. The arena on the right is a way to battle the robot against itself. The code is open source at https://github.com/chicode/robot-rumble."]
+          else div [] []
         , div
           [ class "d-flex"
           , class "justify-content-around"
-          , class "mt-6"
           , class "mx-6"
           ] [ viewEditor model
             , viewGame model
