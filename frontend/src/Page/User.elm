@@ -68,16 +68,16 @@ view model =
 viewBody : Model -> Html Msg
 viewBody model =
     div []
-        [ h1 [] [ text "Robots"]
+        [ p [] [ text "Robots"]
         , div [] (
             List.map (\robot ->
                 Route.a (Route.Robot model.user.username robot.name) [text robot.name]
               ) model.user.robots
           )
         , case model.auth of
-            Auth.LoggedIn _ -> div []
-                [ input [value <| Maybe.withDefault "" model.robotName, onInput GotInput] []
-                , button [onClick CreateRobot] [text "create robot"]
+            Auth.LoggedIn _ -> div [ class "mt-3 d-flex" ]
+                [ input [value <| Maybe.withDefault "" model.robotName, onInput GotInput, class "mr-4"] []
+                , button [onClick CreateRobot, class "button"] [text "create robot"]
                 , case model.error of
                     Just error -> p [] [text error]
                     Nothing -> div [] []
