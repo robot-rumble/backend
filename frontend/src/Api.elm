@@ -57,10 +57,10 @@ makeRequest request msg =
                 body = Http.jsonBody body
             }
 
-allUsers = Get ("/user", list userDecoder) |> makeRequest
+allUsers = Get ("/users", list userDecoder) |> makeRequest
 currentUser body = Post ("/users/me", userDecoder) body |> makeRequest
-user username = Get ("/" ++ username, userDecoder) |> makeRequest
-createUser body = Post ("/", userDecoder) body |> makeRequest
+user username = Get ("/users/" ++ username, userDecoder) |> makeRequest
+createUser body = Post ("/users", userDecoder) body |> makeRequest
 
 
 type alias SignUpBody = {

@@ -18,9 +18,11 @@ import Data
 import Route
 import Json.Decode as Decode
 import Json.Encode
+import Http
 
 import Page.Robot
 import Page.Enter
+import Page.User
 
 import Api
 import Auth
@@ -54,8 +56,10 @@ type alias BaseModel =
 type PageModel
     = RobotModel Page.Robot.Model
     | EnterModel Page.Enter.Model
+    | UserModel Page.User.Model
     | NotFound
-    | Redirect
+    | Error
+    | Loading
 
 
 -- INIT
@@ -69,7 +73,7 @@ type alias Flags =
 init : Flags -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
     let auth = Auth.initAuth flags.auth in
-    initPageModel url ( BaseModel key flags auth, Redirect )
+    initPageModel url ( BaseModel key flags auth, Loading )
 
 
 -- UPDATE
@@ -78,10 +82,15 @@ type Msg
     = LinkClicked Browser.UrlRequest
     | UrlChanged Url.Url
     | Page PageMsg
+    | GotData DataRequest
 
 type PageMsg
     = RobotMsg Page.Robot.Msg
     | EnterMsg Page.Enter.Msg
+    | UserMsg Page.User.Msg
+
+type DataRequest
+    = User (Result Api.Error Api.User)
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update rootMsg rootModel =
@@ -100,6 +109,9 @@ update rootMsg rootModel =
         Page pageMsg ->
             updatePageModel pageMsg rootModel
 
+        GotData request ->
+            initDataPageModel request rootModel
+
 initPageModel : Url.Url -> Model -> ( Model, Cmd Msg )
 initPageModel url ( baseModel, pageModel ) =
     let toRoot newPageModel newPageMsg ( newModel, newCmd ) =
@@ -109,9 +121,29 @@ initPageModel url ( baseModel, pageModel ) =
             Nothing -> ( NotFound, Cmd.none )
             Just route -> case route of
                 Route.Robot user robot -> Page.Robot.init user robot baseModel.flags.totalTurns |> toRoot RobotModel RobotMsg
+                Route.User user -> (Loading, Api.user user User |> Cmd.map GotData)
                 Route.Home -> Page.Robot.init "" "" baseModel.flags.totalTurns |> toRoot RobotModel RobotMsg
                 Route.Enter -> Page.Enter.init baseModel.key |> toRoot EnterModel EnterMsg
                 _ -> ( NotFound, Cmd.none )
+    in
+    ( (baseModel, newPageModel), newCmd )
+
+initDataPageModel : DataRequest -> Model -> ( Model, Cmd Msg )
+initDataPageModel request ( baseModel, pageModel ) =
+    let toRoot newPageModel newPageMsg ( newModel, newCmd ) =
+            ( newPageModel newModel, newCmd |> Cmd.map newPageMsg |> Cmd.map Page )
+        handleError result f = case result of
+            Ok data -> f data
+            Err error -> (
+                case error of
+                    Http.BadStatus _ -> NotFound
+                    _ -> Error
+                , Cmd.none)
+    in
+    let ( newPageModel, newCmd ) = case request of
+            User result -> handleError result (\user ->
+                    Page.User.init user |> toRoot UserModel UserMsg
+                )
     in
     ( (baseModel, newPageModel), newCmd )
 
@@ -128,6 +160,7 @@ updatePageModel pageMsg ( baseModel, pageModel ) =
     let ( newBaseModel, newPageModel, newCmd ) = case ( pageMsg, pageModel ) of
             ( RobotMsg msg, RobotModel model ) -> Page.Robot.update msg model |> toRoot RobotModel RobotMsg
             ( EnterMsg msg, EnterModel model ) -> Page.Enter.update msg model |> toAuth EnterModel EnterMsg
+            ( UserMsg msg, UserModel model ) -> Page.User.update msg model |> toRoot UserModel UserMsg
             ( _, _ ) -> ( baseModel, pageModel, Cmd.none )
     in
     ( (newBaseModel, newPageModel), newCmd )
@@ -147,6 +180,9 @@ subscriptions ( baseModel, pageModel ) =
 
 -- VIEW
 
+barePage : String -> ( String, Html Msg, Html Msg )
+barePage message = ( message, div [] [], div [] [text message] )
+
 view : Model -> Browser.Document Msg
 view ( baseModel, pageModel ) =
     let toRoot pageMsg ( title, header, body ) =
@@ -157,8 +193,10 @@ view ( baseModel, pageModel ) =
     let ( title, header, body ) = case pageModel of
             RobotModel model -> Page.Robot.view model baseModel.auth |> toRoot RobotMsg
             EnterModel model -> Page.Enter.view model baseModel.auth |> toRoot EnterMsg
-            NotFound -> ( "404", div [] [], div [] [text "not found"] )
-            Redirect -> ( "Redirecting...", div [] [], div [] [text "redirecting..."])
+            UserModel model -> Page.User.view model baseModel.auth |> toRoot UserMsg
+            NotFound -> barePage "404"
+            Loading -> barePage "Loading..."
+            Error -> barePage "Something went wrong"
     in
     { title = title
     , body = [viewPage baseModel header body]
@@ -182,7 +220,7 @@ viewHeader baseModel header =
             , Route.a Route.Rules [text "rules"]
             ] ++ case baseModel.auth of
                 Auth.LoggedIn user -> [
-                        Route.a Route.Profile [text "profile"]
+                        Route.a (Route.User user.user.username) [text "profile"]
                     ]
                 Auth.LoggedOut -> [
                         Route.a Route.Enter [text "login / signup"]
