@@ -15,30 +15,6 @@ type Request val bodyVal
     = Get (Endpoint val)
     | Post (Endpoint val) Encode.Value
 
-type alias User =
-    { id : Int
-    , username : String
-    , email : String
-    }
-
-userDecoder = succeed User
-    |> required "id" int
-    |> required "username" string
-    |> required "email" string
-
-type alias Robot =
-    { id : String
-    , name : String
-    , code : String
-    , slug : String
-    }
-
-robotDecoder = succeed Robot
-    |> required "id" string
-    |> required "name" string
-    |> required "code" string
-    |> required "slug" string
-
 
 baseUrl = "http://localhost:4000/api/v1"
 
@@ -57,10 +33,89 @@ makeRequest request msg =
                 body = Http.jsonBody body
             }
 
+
+-- USER
+
+type alias User =
+    { id : Int
+    , username : String
+    , email : String
+    , robots : List Robot
+    }
+
+userDecoder = succeed User
+    |> required "id" int
+    |> required "username" string
+    |> required "email" string
+    |> required "robots" (list robotDecoder)
+
+
 allUsers = Get ("/users", list userDecoder) |> makeRequest
-currentUser body = Post ("/users/me", userDecoder) body |> makeRequest
 user username = Get ("/users/" ++ username, userDecoder) |> makeRequest
-createUser body = Post ("/users", userDecoder) body |> makeRequest
+
+
+-- ROBOT
+
+type alias Robot =
+    { id : Int
+    , name : String
+    , code : String
+    , slug : String
+    }
+
+robotDecoder = succeed Robot
+    |> required "id" int
+    |> required "name" string
+    |> required "code" string
+    |> required "slug" string
+
+
+type alias CreateRobotBody =
+    { jwt : String
+    , name : String
+    }
+
+createRobotEncoder body = Encode.object [
+        ("jwt", Encode.string body.jwt),
+        ("robot", Encode.object [
+            ("name", Encode.string body.name)
+        ])
+    ]
+
+createRobot body =
+    Post ("/robots", robotDecoder ) (createRobotEncoder body) |> makeRequest
+
+
+-- AUTH
+
+type alias BareUser =
+    { id : Int
+    , username : String
+    , email : String
+    }
+
+bareUserDecoder = succeed BareUser
+    |> required "id" int
+    |> required "username" string
+    |> required "email" string
+
+bareUserEncoder body = Encode.object [
+                ("id", Encode.int body.id),
+                ("username", Encode.string body.username),
+                ("email", Encode.string body.email)
+        ]
+
+
+type alias AuthUser = { jwt : String, user : BareUser }
+
+authUserDecoder = succeed AuthUser
+    |> required "jwt" string
+    |> required "user" bareUserDecoder
+
+authUserEncoder body = Encode.object [
+        ("jwt", Encode.string body.jwt ),
+        ("user", bareUserEncoder body.user)
+    ]
 
 
 type alias SignUpBody = {
@@ -81,26 +136,6 @@ signUp body =
     Post ( "/users", userDecoder ) (signUpEncoder body) |> makeRequest
 
 
-
-type alias AuthUser = { jwt : String, user : User }
-
-authUserDecoder = succeed AuthUser
-    |> required "jwt" string
-    |> required "user" userDecoder
-
-
-userEncoder body = Encode.object [
-                ("id", Encode.int body.id),
-                ("username", Encode.string body.username),
-                ("email", Encode.string body.email)
-        ]
-
-authUserEncoder body = Encode.object [
-        ("jwt", Encode.string body.jwt ),
-        ("user", userEncoder body.user)
-    ]
-
-
 type alias LogInBody = {
         username : String,
         password : String
@@ -112,7 +147,6 @@ logInEncoder body = Encode.object [
             ("password", Encode.string body.password)
         ])
     ]
-
 
 logIn body =
     Post ("/sessions", authUserDecoder ) (logInEncoder body) |> makeRequest

@@ -120,10 +120,10 @@ initPageModel url ( baseModel, pageModel ) =
     let ( newPageModel, newCmd ) = case Route.parse url of
             Nothing -> ( NotFound, Cmd.none )
             Just route -> case route of
-                Route.Robot user robot -> Page.Robot.init user robot baseModel.flags.totalTurns |> toRoot RobotModel RobotMsg
+                Route.Robot user robot -> Page.Robot.init baseModel.auth user robot baseModel.flags.totalTurns |> toRoot RobotModel RobotMsg
                 Route.User user -> (Loading, Api.user user User |> Cmd.map GotData)
-                Route.Home -> Page.Robot.init "" "" baseModel.flags.totalTurns |> toRoot RobotModel RobotMsg
-                Route.Enter -> Page.Enter.init baseModel.key |> toRoot EnterModel EnterMsg
+                Route.Home -> Page.Robot.init baseModel.auth "" "" baseModel.flags.totalTurns |> toRoot RobotModel RobotMsg
+                Route.Enter -> Page.Enter.init baseModel.auth baseModel.key |> toRoot EnterModel EnterMsg
                 _ -> ( NotFound, Cmd.none )
     in
     ( (baseModel, newPageModel), newCmd )
@@ -142,7 +142,7 @@ initDataPageModel request ( baseModel, pageModel ) =
     in
     let ( newPageModel, newCmd ) = case request of
             User result -> handleError result (\user ->
-                    Page.User.init user |> toRoot UserModel UserMsg
+                    Page.User.init baseModel.auth user baseModel.key |> toRoot UserModel UserMsg
                 )
     in
     ( (baseModel, newPageModel), newCmd )
@@ -191,9 +191,9 @@ view ( baseModel, pageModel ) =
             , body |> Html.map pageMsg |> Html.map Page )
     in
     let ( title, header, body ) = case pageModel of
-            RobotModel model -> Page.Robot.view model baseModel.auth |> toRoot RobotMsg
-            EnterModel model -> Page.Enter.view model baseModel.auth |> toRoot EnterMsg
-            UserModel model -> Page.User.view model baseModel.auth |> toRoot UserMsg
+            RobotModel model -> Page.Robot.view model |> toRoot RobotMsg
+            EnterModel model -> Page.Enter.view model |> toRoot EnterMsg
+            UserModel model -> Page.User.view model |> toRoot UserMsg
             NotFound -> barePage "404"
             Loading -> barePage "Loading..."
             Error -> barePage "Something went wrong"

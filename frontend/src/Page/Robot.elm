@@ -13,7 +13,8 @@ import Auth
 -- MODEL
 
 type alias Model =
-    { name : String
+    { auth : Auth.Auth
+    , name : String
     , code : String
     , gameState : GameState
     , totalTurns : Int
@@ -24,9 +25,9 @@ type GameState
     | Game Game.Model | Error Data.Error | NoGame | InternalError
 
 
-init : String -> String -> Int -> ( Model, Cmd Msg )
-init user robot totalTurns =
-    ( Model "" "" NoGame totalTurns, Cmd.none )
+init : Auth.Auth -> String -> String -> Int -> ( Model, Cmd Msg )
+init auth user robot totalTurns =
+    ( Model auth "" "" NoGame totalTurns, Cmd.none )
 
 
 -- UPDATE
@@ -101,8 +102,8 @@ to_perc : Float -> String
 to_perc float =
     String.fromFloat float ++ "%"
 
-view : Model -> Auth.Auth -> ( String, Html Msg, Html Msg )
-view model auth =
+view : Model -> ( String, Html Msg, Html Msg )
+view model =
     ( "Robot Rumble", viewHeader model, viewUI model )
 
 viewHeader : Model -> Html Msg
