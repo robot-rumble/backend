@@ -46,7 +46,12 @@ html, body, .root {
 }
 
 a {
+  color: $dark-blue;
   margin: 0.5rem;
+}
+
+a:hover {
+  color: $dark-blue;
 }
 
 input {
