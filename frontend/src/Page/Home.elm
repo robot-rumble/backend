@@ -38,5 +38,5 @@ viewBody : Model -> Html msg
 viewBody model =
     div []
         [ p [] [text "Welcome to Robot Rumble!"]
-        , p [] [text "To get started, sign in or view the", Route.a Route.Demo [text "demo"]]
+        , p [] [text "To get started, sign in or view the ", Route.a Route.Demo [text "demo"], text "."]
         ]
