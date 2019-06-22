@@ -67,7 +67,6 @@ customElements.define(
 
       let initialValue
       if (this.code && localCode) {
-        console.log(this.lastEdit, localLastEdit)
         initialValue = this.lastEdit > localLastEdit ? this.code : localCode
       } else {
         initialValue = this.code || localCode || sampleRobot
