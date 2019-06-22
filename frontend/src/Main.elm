@@ -91,6 +91,7 @@ type PageMsg
 
 type DataRequest
     = User (Result Api.Error Api.User)
+    | Robot (Result Api.Error Api.Robot)
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update rootMsg rootModel =
@@ -120,9 +121,9 @@ initPageModel url ( baseModel, pageModel ) =
     let ( newPageModel, newCmd ) = case Route.parse url of
             Nothing -> ( NotFound, Cmd.none )
             Just route -> case route of
-                Route.Robot user robot -> Page.Robot.init baseModel.auth user robot baseModel.flags.totalTurns False |> toRoot RobotModel RobotMsg
-                Route.User user -> (Loading, Api.user user User |> Cmd.map GotData)
-                Route.Home -> Page.Robot.init baseModel.auth "" "" baseModel.flags.totalTurns True |> toRoot RobotModel RobotMsg
+                Route.Robot user robot -> (Loading, Api.getRobot user robot Robot |> Cmd.map GotData)
+                Route.User user -> (Loading, Api.getUser user User |> Cmd.map GotData)
+                Route.Home -> Page.Robot.init baseModel.auth Nothing baseModel.flags.totalTurns |> toRoot RobotModel RobotMsg
                 Route.Enter -> Page.Enter.init baseModel.auth baseModel.key |> toRoot EnterModel EnterMsg
                 _ -> ( NotFound, Cmd.none )
     in
@@ -143,6 +144,10 @@ initDataPageModel request ( baseModel, pageModel ) =
     let ( newPageModel, newCmd ) = case request of
             User result -> handleError result (\user ->
                     Page.User.init baseModel.auth user baseModel.key |> toRoot UserModel UserMsg
+                )
+
+            Robot result -> handleError result (\robot ->
+                    Page.Robot.init baseModel.auth (Just robot) baseModel.flags.totalTurns |> toRoot RobotModel RobotMsg
                 )
     in
     ( (baseModel, newPageModel), newCmd )

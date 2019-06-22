@@ -24,8 +24,8 @@ defmodule RobotWeb.Router do
         get("/", RobotController, :index)
         get("/:username/:slug", RobotController, :show)
         post("/", RobotController, :create)
-        patch("/:id", RobotController, :update)
-        delete("/:id", RobotController, :delete)
+        post("/:id/update", RobotController, :update)
+        post("/:id/delete", RobotController, :delete)
       end
 
       post("/sessions", SessionController, :create)

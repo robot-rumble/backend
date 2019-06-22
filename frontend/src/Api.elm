@@ -1,7 +1,7 @@
 module Api exposing (..)
 
 import Url
-import Url.Builder exposing (relative)
+import Url.Builder exposing (relative, crossOrigin)
 import Json.Decode exposing (..)
 import Json.Decode.Pipeline exposing (required, custom)
 import Json.Encode as Encode
@@ -9,7 +9,7 @@ import Http
 
 type alias Error = Http.Error
 
-type alias Endpoint val = (String, Decoder val)
+type alias Endpoint val = (List String, Decoder val)
 
 type Request val bodyVal
     = Get (Endpoint val)
@@ -23,12 +23,12 @@ makeRequest request msg =
     case request of
         Get (url, decoder) ->
             Http.get {
-                url = baseUrl ++ url,
+                url = crossOrigin baseUrl url [],
                 expect = Http.expectJson msg decoder
             }
         Post (url, decoder) body ->
             Http.post {
-                url = baseUrl ++ url,
+                url = crossOrigin baseUrl url [],
                 expect = Http.expectJson msg decoder,
                 body = Http.jsonBody body
             }
@@ -50,8 +50,8 @@ userDecoder = succeed User
     |> required "robots" (list robotDecoder)
 
 
-allUsers = Get ("/users", list userDecoder) |> makeRequest
-user username = Get ("/users/" ++ username, userDecoder) |> makeRequest
+allUsers = Get (["users"], list userDecoder) |> makeRequest
+getUser user = Get (["users", user], userDecoder) |> makeRequest
 
 
 -- ROBOT
@@ -82,8 +82,25 @@ createRobotEncoder body = Encode.object [
         ])
     ]
 
+type alias UpdateRobotBody =
+    { jwt : String
+    , code : String
+    }
+
+updateRobotEncoder body = Encode.object [
+        ("jwt", Encode.string body.jwt),
+        ("robot", Encode.object [
+            ("code", Encode.string body.code)
+        ])
+    ]
+
+getRobot user robot = Get (["robots", user, robot], robotDecoder) |> makeRequest
+
 createRobot body =
-    Post ("/robots", robotDecoder ) (createRobotEncoder body) |> makeRequest
+    Post (["robots"], robotDecoder) (createRobotEncoder body) |> makeRequest
+
+updateRobot id body =
+    Post (["robots", String.fromInt id, "update"], robotDecoder) (updateRobotEncoder body) |> makeRequest
 
 
 -- AUTH
@@ -133,7 +150,7 @@ signUpEncoder body = Encode.object [
     ]
 
 signUp body =
-    Post ( "/users", userDecoder ) (signUpEncoder body) |> makeRequest
+    Post ( ["users"], userDecoder ) (signUpEncoder body) |> makeRequest
 
 
 type alias LogInBody = {
@@ -149,4 +166,4 @@ logInEncoder body = Encode.object [
     ]
 
 logIn body =
-    Post ("/sessions", authUserDecoder ) (logInEncoder body) |> makeRequest
+    Post (["sessions"], authUserDecoder ) (logInEncoder body) |> makeRequest
