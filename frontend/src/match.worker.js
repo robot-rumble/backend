@@ -1,5 +1,5 @@
-import { main as runLogic } from 'logic'
 import stdlib from './stdlib.raw.py'
+import { main as runLogic } from 'logic'
 
 let rpPromise = import('rustpython_wasm')
 
@@ -20,7 +20,7 @@ let errorToObj = (e) => {
   }
 }
 
-self.addEventListener('message', ({ data: { code, turnNum } }) => {
+self.addEventListener('message', ({ data }) => {
   rpPromise
     .then((rp) => {
       const startTime = Date.now()
@@ -30,7 +30,7 @@ self.addEventListener('message', ({ data: { code, turnNum } }) => {
 
       vm.addToScope('print', (val) => console.log(val))
 
-      let code = code + '\n' + stdlib
+      let code = data.code + '\n' + stdlib
 
       try {
         vm.exec(code)
@@ -56,7 +56,7 @@ self.addEventListener('message', ({ data: { code, turnNum } }) => {
       }
       const turnCallback = (turn) => self.postMessage({ type: 'getProgress', data: turn })
 
-      runLogic({ run, turnNum, turnCallback }, (output) => {
+      runLogic({ run, turnNum: data.turnNum, turnCallback }, (output) => {
         console.log(`Time taken: ${(Date.now() - startTime) / 1000}s`)
         self.postMessage({ type: 'getOutput', data: JSON.parse(output) })
       })
