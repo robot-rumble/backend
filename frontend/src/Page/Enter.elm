@@ -85,7 +85,7 @@ update msg model =
                 Ok _ -> (model, Route.push model.key Route.Home, Auth.None)
                 Err err ->
                     let _ = Debug.log "err" err in
-                    ({ model | error = Just "problem" }, Cmd.none, Auth.None)
+                    ({ model | error = Just "one of your inputs is bad" }, Cmd.none, Auth.None)
 
         GotLogin result ->
             case result of
@@ -102,13 +102,13 @@ view model =
 
 viewBody : Model -> Html Msg
 viewBody model =
-    div []
-        [ input [ value <| Maybe.withDefault "" model.username, onInput (Username >> GotInput) ] []
-        , input [ value <| Maybe.withDefault "" model.password, onInput (Password >> GotInput) ] []
-        , input [ value <| Maybe.withDefault "" model.email, onInput (Email >> GotInput) ] []
-        , button [ onClick LogIn ] [ text "login" ]
-        , button [ onClick SignUp ] [ text "signup" ]
+    div [class "form"]
+        [ input [ placeholder "username", value <| Maybe.withDefault "" model.username, onInput (Username >> GotInput) ] []
+        , input [ placeholder "password",  value <| Maybe.withDefault "" model.password, onInput (Password >> GotInput) ] []
+        , button [ onClick LogIn, class "button", class "mb-4" ] [ text "login" ]
+        , input [ placeholder "email", value <| Maybe.withDefault "" model.email, onInput (Email >> GotInput) ] []
+        , button [ onClick SignUp, class "button" ] [ text "signup" ]
         , case model.error of
-            Just error -> p [] [text error]
+            Just error -> p [ class "error" ] [text error]
             Nothing -> div [] []
         ]
