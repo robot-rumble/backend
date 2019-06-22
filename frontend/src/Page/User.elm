@@ -67,7 +67,7 @@ viewBody : Model -> Html Msg
 viewBody model =
     div []
         [ p [] [ text "Robots"]
-        , div [] (
+        , div [ class "list" ] (
             List.map (\robot ->
                 Route.a (Route.Robot model.user.username robot.name) [text robot.name]
               ) model.user.robots

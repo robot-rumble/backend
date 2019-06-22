@@ -47,7 +47,12 @@ html, body, .root {
 
 a, .a {
   color: $dark-blue;
-  margin: 0.5rem;
+}
+
+.list {
+  & > * {
+    margin-right: 0.5rem;
+  }
 }
 
 a:hover, .a {
