@@ -233,7 +233,7 @@ viewHeader : BaseModel -> Html Msg -> Html Msg
 viewHeader baseModel header =
     div [ class "header" ]
         [ header
-        , div [] (
+        , div [ class "list" ] (
             [ Route.a Route.Warehouse [text "warehouse"]
             , Route.a Route.Rules [text "rules"]
             ] ++ case baseModel.auth of
