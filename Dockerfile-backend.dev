@@ -3,6 +3,9 @@ WORKDIR /backend
 
 RUN mix local.hex --force && mix local.rebar --force
 
+# necessary for bcrypt_elixir
+RUN apk add build-base
+
 COPY backend/mix.exs backend/mix.lock ./
 RUN mix do deps.get, deps.compile
 
