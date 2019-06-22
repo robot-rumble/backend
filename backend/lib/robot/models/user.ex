@@ -35,8 +35,7 @@ defmodule Robot.User do
     user
     |> cast(attrs, [:email, :password])
     |> custom_validation(:email, &valid_email?/1, "Invalid email address")
-    |> validate_length(:password, min: 6, max: 50)
+    |> validate_length(:password, min: 1, max: 50)
     |> custom_change(:password, :password_hash, false, &Comeonin.Bcrypt.hashpwsalt/1)
   end
 end
-
