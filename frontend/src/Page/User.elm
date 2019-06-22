@@ -33,8 +33,8 @@ type Msg
     | GotInput String
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update : Msg -> Model -> Api.Key -> ( Model, Cmd Msg )
+update msg model apiKey =
     case msg of
         CreateRobot -> case model.robotName of
             Just name ->
@@ -43,7 +43,7 @@ update msg model =
                         (model, Api.createRobot {
                             jwt = auth.jwt,
                             name = name
-                        } GotRobot)
+                        } GotRobot apiKey)
                     Auth.LoggedOut -> (model, Cmd.none)
 
             Nothing ->

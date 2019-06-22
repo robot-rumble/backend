@@ -15,7 +15,6 @@ import Api
 
 type alias Model =
     { auth : Auth.Auth
-    , key : Route.Key
     , username : Maybe String
     , password : Maybe String
     , email : Maybe String
@@ -23,9 +22,9 @@ type alias Model =
     }
 
 
-init : Auth.Auth -> Route.Key -> ( Model, Cmd Msg )
-init auth key =
-    ( Model auth key Nothing Nothing Nothing Nothing, Cmd.none )
+init : Auth.Auth -> ( Model, Cmd Msg )
+init auth =
+    ( Model auth Nothing Nothing Nothing Nothing, Cmd.none )
 
 
 
@@ -50,8 +49,8 @@ type Input
     | Email String
 
 
-update : Msg -> Model -> ( Model, Cmd Msg, Auth.AuthCmd )
-update msg model =
+update : Msg -> Model -> Route.Key -> Api.Key -> ( Model, Cmd Msg, Auth.AuthCmd )
+update msg model routeKey apiKey =
     case msg of
         GotInput input -> (
             case input of
@@ -68,26 +67,26 @@ update msg model =
         SignUp ->
             case (model.username, model.password, model.email) of
                 (Just username, Just password, Just email) ->
-                    (model, Api.signUp (Api.SignUpBody username password email) GotSignup, Auth.None)
+                    (model, Api.signUp (Api.SignUpBody username password email) GotSignup apiKey, Auth.None)
                 _ ->
                     ({ model | error = Just "missing fields" }, Cmd.none, Auth.None)
 
         LogIn ->
             case (model.username, model.password) of
                 (Just username, Just password) ->
-                    (model, Api.logIn (Api.LogInBody username password) GotLogin, Auth.None)
+                    (model, Api.logIn (Api.LogInBody username password) GotLogin apiKey, Auth.None)
                 _ ->
                     ({ model | error = Just "missing fields" }, Cmd.none, Auth.None)
 
         GotSignup result ->
             case result of
-                Ok _ -> (model, Route.push model.key Route.Home, Auth.None)
+                Ok _ -> (model, Route.push routeKey Route.Home, Auth.None)
                 Err err ->
                     ({ model | error = Just "one of your inputs is bad" }, Cmd.none, Auth.None)
 
         GotLogin result ->
             case result of
-                Ok authUser -> (model, Route.push model.key <| Route.User authUser.user.username, Auth.LogIn authUser)
+                Ok authUser -> (model, Route.push routeKey <| Route.User authUser.user.username, Auth.LogIn authUser)
                 Err _ -> ({ model | error = Just "invalid username or password" }, Cmd.none, Auth.None)
 
 -- VIEW
