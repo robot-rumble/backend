@@ -1,4 +1,5 @@
 import { main as runLogic } from 'logic'
+import stdlib from './stdlib.raw.py'
 
 let rpPromise = import('rustpython_wasm')
 
@@ -28,6 +29,8 @@ self.addEventListener('message', ({ data: { code, turnNum } }) => {
       const vm = rp.vmStore.init('robot', false)
 
       vm.addToScope('print', (val) => console.log(val))
+
+      let code = code + '\n' + stdlib
 
       try {
         vm.exec(code)
