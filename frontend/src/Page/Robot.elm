@@ -133,9 +133,21 @@ view model =
 
 viewHeader : Model -> Html Msg
 viewHeader model =
-    div [] [text <| case model.robot of
-        Just robot -> robot.name
-        Nothing -> "Robot Rumble Demo"]
+    case model.robot of
+        Nothing -> div [] [ p [] [text "Robot Rumble Demo"] ]
+        Just robot -> div [ class "d-flex align-items-center" ] (
+            [ p [class "m-0 mr-3"] [text robot.name] ]
+            ++ case (model.robot, model.auth) of
+                (Just _, Auth.LoggedIn _) -> [
+                        button [onClick Save, class "button", class "mr-3"] [text "publish"],
+                        p [class "m-0 text-muted"] [text <| case model.publishStatus of
+                                Publishing -> "loading..."
+                                Published -> "published"
+                                None -> ""
+                        ]
+                    ]
+                (_, _) -> []
+            )
 
 viewUI : Model -> Html Msg
 viewUI model =
@@ -211,19 +223,8 @@ viewBar model =
                 , class "d-flex"
                 , class "mb-3"
                 , class "align-items-center"
-                ] (
+                ]
                 [ button [onClick Run, class "button", class "mr-3"] [text "run"]]
-                ++ case (model.robot, model.auth) of
-                    (Just _, Auth.LoggedIn _) -> [
-                            button [onClick Save, class "button", class "mr-3"] [text "publish"],
-                            p [class "m-0"] [text <| case model.publishStatus of
-                                    Publishing -> "loading..."
-                                    Published -> "published"
-                                    None -> ""
-                            ]
-                        ]
-                    (_, _) -> []
-                )
 
         ]
 
