@@ -21,7 +21,13 @@ type alias Model =
     , gameState : GameState
     , totalTurns : Int
     , robot : Maybe Api.Robot
+    , publishStatus : PublishStatus
     }
+
+type PublishStatus
+    = None
+    | Publishing
+    | Published
 
 type GameState
     = Loading Int
@@ -34,7 +40,7 @@ init auth maybeRobot totalTurns =
             Just robot -> robot.code
             Nothing -> ""
     in
-    ( Model auth code NoGame totalTurns maybeRobot, Cmd.none )
+    ( Model auth code NoGame totalTurns maybeRobot None, Cmd.none )
 
 
 -- UPDATE
@@ -74,10 +80,13 @@ update msg model apiKey =
 
         Save ->
             case (model.robot, model.auth) of
-                (Just robot, Auth.LoggedIn auth) -> ( model, Api.updateRobot robot.id { jwt = auth.jwt, code = model.code } SaveDone apiKey )
+                (Just robot, Auth.LoggedIn auth) -> (
+                        { model | publishStatus = Publishing },
+                        Api.updateRobot robot.id { jwt = auth.jwt, code = model.code } SaveDone apiKey
+                    )
                 (_, _) -> (model, Cmd.none)
 
-        SaveDone _ -> (model, Cmd.none)
+        SaveDone _ -> ({ model | publishStatus = Published }, Cmd.none)
 
         CodeChanged code ->
             ( { model | code = code }, Cmd.none )
@@ -201,12 +210,20 @@ viewBar model =
                         _ -> "visible"
                 , class "d-flex"
                 , class "mb-3"
-                ]
-                [ button [onClick Run, class "button", class "mr-3"] [text "run"]
-                , case (model.robot, model.auth) of
-                    (Just _, Auth.LoggedIn _) -> button [onClick Save, class "button"] [text "publish"]
-                    (_, _) -> div [] []
-                ]
+                , class "align-items-center"
+                ] (
+                [ button [onClick Run, class "button", class "mr-3"] [text "run"]]
+                ++ case (model.robot, model.auth) of
+                    (Just _, Auth.LoggedIn _) -> [
+                            button [onClick Save, class "button", class "mr-3"] [text "publish"],
+                            p [class "m-0"] [text <| case model.publishStatus of
+                                    Publishing -> "loading..."
+                                    Published -> "published"
+                                    None -> ""
+                            ]
+                        ]
+                    (_, _) -> []
+                )
 
         ]
 
