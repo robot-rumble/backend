@@ -8,21 +8,19 @@ import Auth
 import Api
 import Route
 
-import Browser.Navigation as Nav
-
 
 -- MODEL
 
 type alias Model =
     { auth : Auth.Auth
     , user : Api.User
-    , key : Nav.Key
+    , key : Route.Key
     , robotName : Maybe String
     , error : Maybe String
     }
 
 
-init : Auth.Auth -> Api.User -> Nav.Key -> ( Model, Cmd Msg )
+init : Auth.Auth -> Api.User -> Route.Key -> ( Model, Cmd Msg )
 init auth user key =
     ( Model auth user key Nothing Nothing, Cmd.none )
 

@@ -6,17 +6,16 @@ import Html.Events exposing (..)
 import Json.Decode as Decode
 
 import Route
-import Browser.Navigation as Nav
 
 import Auth
 import Api
 
--- MODEL
 
+-- MODEL
 
 type alias Model =
     { auth : Auth.Auth
-    , key : Nav.Key
+    , key : Route.Key
     , username : Maybe String
     , password : Maybe String
     , email : Maybe String
@@ -24,7 +23,7 @@ type alias Model =
     }
 
 
-init : Auth.Auth -> Nav.Key -> ( Model, Cmd Msg )
+init : Auth.Auth -> Route.Key -> ( Model, Cmd Msg )
 init auth key =
     ( Model auth key Nothing Nothing Nothing Nothing, Cmd.none )
 

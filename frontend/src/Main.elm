@@ -83,6 +83,7 @@ type Msg
     | UrlChanged Url.Url
     | Page PageMsg
     | GotData DataRequest
+    | Auth Auth.AuthCmd
 
 type PageMsg
     = RobotMsg Page.Robot.Msg
@@ -94,12 +95,12 @@ type DataRequest
     | Robot (Result Api.Error Api.Robot)
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update rootMsg rootModel =
+update rootMsg (( baseModel, pageModel ) as rootModel) =
     case rootMsg of
         LinkClicked urlRequest ->
             case urlRequest of
                 Browser.Internal url ->
-                    ( rootModel, Nav.pushUrl (first rootModel).key (Url.toString url) )
+                    ( rootModel, Nav.pushUrl baseModel.key (Url.toString url) )
 
                 Browser.External href ->
                     ( rootModel, Nav.load href )
@@ -112,6 +113,10 @@ update rootMsg rootModel =
 
         GotData request ->
             initDataPageModel request rootModel
+
+        Auth authCmd ->
+            let (auth, cmd) = Auth.processCmd authCmd baseModel.auth baseModel.key in
+            (({ baseModel | auth = auth }, pageModel), cmd)
 
 initPageModel : Url.Url -> Model -> ( Model, Cmd Msg )
 initPageModel url ( baseModel, pageModel ) =
@@ -157,7 +162,7 @@ updatePageModel pageMsg ( baseModel, pageModel ) =
     let toRoot newPageModel newPageMsg ( newModel, newCmd ) =
             ( baseModel, newPageModel newModel, newCmd |> Cmd.map newPageMsg |> Cmd.map Page )
         toAuth newPageModel newPageMsg ( newModel, newCmd, authCmd ) =
-            let ( newAuth, newAuthCmd ) = Auth.processCmd authCmd baseModel.auth
+            let ( newAuth, newAuthCmd ) = Auth.processCmd authCmd baseModel.auth baseModel.key
                 newPageCmd = newCmd |> Cmd.map newPageMsg |> Cmd.map Page
             in
             ( { baseModel | auth = newAuth }, newPageModel newModel, Cmd.batch [newPageCmd, newAuthCmd] )
@@ -225,7 +230,8 @@ viewHeader baseModel header =
             , Route.a Route.Rules [text "rules"]
             ] ++ case baseModel.auth of
                 Auth.LoggedIn user -> [
-                        Route.a (Route.User user.user.username) [text "profile"]
+                        Route.a (Route.User user.user.username) [text "profile"],
+                        button [class "d-inline-block", onClick <| Auth Auth.LogOut, class "a"] [text "logout"]
                     ]
                 Auth.LoggedOut -> [
                         Route.a Route.Enter [text "login / signup"]
