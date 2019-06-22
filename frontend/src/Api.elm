@@ -61,6 +61,7 @@ type alias Robot =
     , name : String
     , code : String
     , slug : String
+    , last_edit : Int
     }
 
 robotDecoder = succeed Robot
@@ -68,6 +69,7 @@ robotDecoder = succeed Robot
     |> required "name" string
     |> required "code" string
     |> required "slug" string
+    |> required "last_edit" int
 
 
 type alias CreateRobotBody =

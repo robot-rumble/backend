@@ -77,7 +77,7 @@ viewBody model =
                 [ input [value <| Maybe.withDefault "" model.robotName, onInput GotInput, class "mr-4"] []
                 , button [onClick CreateRobot, class "button"] [text "create robot"]
                 , case model.error of
-                    Just error -> p [] [text error]
+                    Just error -> p [class "error", class "ml-5"] [text error]
                     Nothing -> div [] []
                 ]
             Auth.LoggedOut -> div [] []

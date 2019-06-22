@@ -35,7 +35,10 @@ defmodule RobotWeb.RobotController do
     robot = Repo.get!(Robot, id)
 
     with {:ok} <- verify_ownership(conn, robot) do
-      changeset = Robot.changeset(robot, robot_params)
+      {:ok, time} = DateTime.now("Etc/UTC")
+      time = DateTime.to_unix(time)
+      IO.inspect(Map.merge(robot_params, %{last_edit: time}))
+      changeset = Robot.changeset(robot, Map.merge(robot_params, %{"last_edit" => time}))
       Repo.update(changeset)
     end
   end
