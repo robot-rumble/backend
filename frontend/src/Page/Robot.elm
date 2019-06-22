@@ -4,21 +4,23 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Json.Decode as Decode
+import Json.Encode as Encode
 
 import Data
 import Component.Game as Game
+
 import Auth
+import Api
 
 
 -- MODEL
 
 type alias Model =
     { auth : Auth.Auth
-    , name : String
     , code : String
     , gameState : GameState
     , totalTurns : Int
-    , isDemo : Bool
+    , robot : Maybe Api.Robot
     }
 
 type GameState
@@ -26,9 +28,13 @@ type GameState
     | Game Game.Model | Error Data.Error | NoGame | InternalError
 
 
-init : Auth.Auth -> String -> String -> Int -> Bool -> ( Model, Cmd Msg )
-init auth user robot totalTurns isDemo =
-    ( Model auth "" "" NoGame totalTurns isDemo, Cmd.none )
+init : Auth.Auth -> Maybe Api.Robot -> Int -> ( Model, Cmd Msg )
+init auth maybeRobot totalTurns =
+    let code = case maybeRobot of
+            Just robot -> robot.code
+            Nothing -> ""
+    in
+    ( Model auth code NoGame totalTurns maybeRobot, Cmd.none )
 
 
 -- UPDATE
@@ -49,6 +55,8 @@ port reportDecodeError : String -> Cmd msg
 
 type Msg
     = Run
+    | Save
+    | SaveDone (Result Api.Error Api.Robot)
     | CodeChanged String
 
     | GotOutput Decode.Value
@@ -63,6 +71,13 @@ update msg model =
     case msg of
         Run ->
             ( { model | gameState = Loading 0 }, startEval model.code )
+
+        Save ->
+            case (model.robot, model.auth) of
+                (Just robot, Auth.LoggedIn auth) -> ( model, Api.updateRobot robot.id { jwt = auth.jwt, code = robot.code } SaveDone )
+                (_, _) -> (model, Cmd.none)
+
+        SaveDone _ -> (model, Cmd.none)
 
         CodeChanged code ->
             ( { model | code = code }, Cmd.none )
@@ -109,17 +124,20 @@ view model =
 
 viewHeader : Model -> Html Msg
 viewHeader model =
-    div [] [text <| if model.isDemo then "Robot Rumble Demo" else model.name]
+    div [] [text <| case model.robot of
+        Just robot -> robot.name
+        Nothing -> "Robot Rumble Demo"]
 
 viewUI : Model -> Html Msg
 viewUI model =
     div []
-        [ if model.isDemo then
-          p [ class "mb-5"
-            , class "w-75"
-            , class "mx-auto"
-            ] [text "Welcome to Robot Rumble! This demo allows you to code a robot and run it against itself. The robot's code is a function that returns the type and direction of an action. The arena on the right is a way to battle the robot against itself. The code is open source at https://github.com/chicode/robot-rumble."]
-          else div [] []
+        [ case model.robot of
+            Just robot -> div [] []
+            Nothing ->
+              p [ class "mb-5"
+                , class "w-75"
+                , class "mx-auto"
+                ] [text "Welcome to Robot Rumble! This demo allows you to code a robot and run it against itself. The robot's code is a function that returns the type and direction of an action. The arena on the right is a way to battle the robot against itself. The code is open source at https://github.com/chicode/robot-rumble."]
         , div
           [ class "d-flex"
           , class "justify-content-around"
@@ -136,6 +154,11 @@ viewEditor model =
             Decode.map CodeChanged <|
                 Decode.at [ "target", "value" ] <|
                     Decode.string
+        , property "robotName" <| Encode.string (
+            case model.robot of
+                Just robot -> robot.name
+                Nothing -> "demo"
+        )
         , style "width" "60%"
         , class "pr-6"
         ] ++ case model.gameState of
@@ -166,12 +189,16 @@ viewBar model =
                 let progress_perc = (toFloat turn) / (toFloat model.totalTurns) * 100 in
                 div [class "progress", class "mb-3", style "width" <| to_perc progress_perc] []
             _ -> div [] []
-           ,  button [onClick Run, class "button", class "mb-3"
-                 , style "visibility" <|
+          , div [style "visibility" <|
                      case model.gameState of
                         Loading turn -> "hidden"
                         _ -> "visible"
-                 ] [text "run"]
+                ]
+                [ button [onClick Run, class "button", class "mb-3"] [text "run"]
+                , case (model.robot, model.auth) of
+                    (Just _, Auth.LoggedIn _) -> button [onClick Save, class "button"] [text "save"]
+                    (_, _) -> div [] []
+                ]
 
         ]
 

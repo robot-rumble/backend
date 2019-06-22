@@ -1,10 +1,16 @@
 defmodule Robot.Helpers do
   import Ecto.Changeset
 
-  def custom_change(changeset, field, destination, change_func) do
+  def custom_change(changeset, field, destination, allow_nil, change_func) do
     case changeset do
       %Ecto.Changeset{valid?: true, changes: changes} ->
-        put_change(changeset, destination, change_func.(Map.get(changes, field)))
+        field = Map.get(changes, field)
+
+        if field || allow_nil do
+          put_change(changeset, destination, change_func.(field))
+        else
+          changeset
+        end
 
       _ ->
         changeset
@@ -22,7 +28,7 @@ defmodule Robot.Helpers do
   end
 
   def default(changeset, field, default_val) do
-    custom_change(changeset, field, field, fn val ->
+    custom_change(changeset, field, field, true, fn val ->
       if is_nil(val) do
         default_val
       else

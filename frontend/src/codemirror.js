@@ -57,6 +57,11 @@ customElements.define(
       }
     }
 
+    // for some reason using `name` causes recursion error
+    set robotName(name) {
+      this.name = name
+    }
+
     get value() {
       return this._editor.getValue() + '\n' + stdlib
     }
@@ -68,7 +73,7 @@ customElements.define(
         lineNumbers: true,
         matchBrackets: true,
         autoRefresh: true,
-        value: localStorage.getItem('code') || sampleRobot,
+        value: localStorage.getItem('code_' + this.name) || sampleRobot,
         extraKeys: {
           Tab: (cm) => cm.execCommand('indentMore'),
           'Shift-Tab': (cm) => cm.execCommand('indentLess'),
@@ -77,7 +82,7 @@ customElements.define(
 
       this._editor.on('changes', () => {
         this.clearMarks()
-        localStorage.setItem('code', this._editor.getValue())
+        localStorage.setItem('code_' + this.name, this._editor.getValue())
         this.dispatchEvent(new CustomEvent('editorChanged'))
       })
 
