@@ -252,7 +252,7 @@ viewFooter baseModel =
         [ text "Made with <> by Chicode NFP"
         , div []
             [ a [href "https://github.com/chicode/robot-frontend/tree/master"] [text "github"]
-            , text "-"
+            , text " - "
             , a [href "https://github.com/chicode/robot-rumble/issues/new"] [text "report a bug"]
             ]
         ]
