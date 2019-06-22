@@ -193,8 +193,10 @@ viewBar model =
                      case model.gameState of
                         Loading turn -> "hidden"
                         _ -> "visible"
+                , class "d-flex"
+                , class "mb-3"
                 ]
-                [ button [onClick Run, class "button", class "mb-3"] [text "run"]
+                [ button [onClick Run, class "button", class "mr-3"] [text "run"]
                 , case (model.robot, model.auth) of
                     (Just _, Auth.LoggedIn _) -> button [onClick Save, class "button"] [text "save"]
                     (_, _) -> div [] []
