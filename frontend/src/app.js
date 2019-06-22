@@ -19,6 +19,10 @@ const app = Elm.Main.init({
   flags: {
     totalTurns: window.turnNum,
     auth,
+    endpoint:
+      process.env.NODE_ENV === 'production'
+        ? 'https://robotrumble.org/api/v1'
+        : 'http://localhost:4000/api/v1',
   },
 })
 

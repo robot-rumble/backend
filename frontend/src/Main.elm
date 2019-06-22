@@ -49,9 +49,10 @@ main =
 type alias Model = ( BaseModel, PageModel )
 
 type alias BaseModel =
-    { key : Nav.Key
-    , flags : Flags
+    { routeKey : Nav.Key
+    , apiKey : Api.Key
     , auth : Auth.Auth
+    , totalTurns : Int
     }
 
 type PageModel
@@ -70,12 +71,13 @@ type PageModel
 type alias Flags =
     { totalTurns: Int
     , auth : Decode.Value
+    , endpoint : String
     }
 
 init : Flags -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
-init flags url key =
+init flags url routeKey =
     let auth = Auth.initAuth flags.auth in
-    initPageModel url ( BaseModel key flags auth, Loading )
+    initPageModel url ( BaseModel routeKey flags.endpoint auth flags.totalTurns, Loading )
 
 
 -- UPDATE
@@ -103,7 +105,7 @@ update rootMsg (( baseModel, pageModel ) as rootModel) =
         LinkClicked urlRequest ->
             case urlRequest of
                 Browser.Internal url ->
-                    ( rootModel, Nav.pushUrl baseModel.key (Url.toString url) )
+                    ( rootModel, Nav.pushUrl baseModel.routeKey (Url.toString url) )
 
                 Browser.External href ->
                     ( rootModel, Nav.load href )
@@ -118,7 +120,7 @@ update rootMsg (( baseModel, pageModel ) as rootModel) =
             initDataPageModel request rootModel
 
         Auth authCmd ->
-            let (auth, cmd) = Auth.processCmd authCmd baseModel.auth baseModel.key in
+            let (auth, cmd) = Auth.processCmd authCmd baseModel.auth baseModel.routeKey in
             (({ baseModel | auth = auth }, pageModel), cmd)
 
 initPageModel : Url.Url -> Model -> ( Model, Cmd Msg )
@@ -129,10 +131,10 @@ initPageModel url ( baseModel, pageModel ) =
     let ( newPageModel, newCmd ) = case Route.parse url of
             Nothing -> ( NotFound, Cmd.none )
             Just route -> case route of
-                Route.Robot user robot -> (Loading, Api.getRobot user robot Robot |> Cmd.map GotData)
-                Route.User user -> (Loading, Api.getUser user User |> Cmd.map GotData)
-                Route.Demo -> Page.Robot.init baseModel.auth Nothing baseModel.flags.totalTurns |> toRoot RobotModel RobotMsg
-                Route.Enter -> Page.Enter.init baseModel.auth baseModel.key |> toRoot EnterModel EnterMsg
+                Route.Robot user robot -> (Loading, Api.getRobot user robot Robot baseModel.apiKey |> Cmd.map GotData)
+                Route.User user -> (Loading, Api.getUser user User baseModel.apiKey |> Cmd.map GotData)
+                Route.Demo -> Page.Robot.init baseModel.auth Nothing baseModel.totalTurns |> toRoot RobotModel RobotMsg
+                Route.Enter -> Page.Enter.init baseModel.auth |> toRoot EnterModel EnterMsg
                 Route.Home -> Page.Home.init |> toRoot HomeModel HomeMsg
                 _ -> ( NotFound, Cmd.none )
     in
@@ -145,6 +147,7 @@ initDataPageModel request ( baseModel, pageModel ) =
         handleError result f = case result of
             Ok data -> f data
             Err error -> (
+                let _ = Debug.log "error" error in
                 case error of
                     Http.BadStatus _ -> NotFound
                     _ -> Error
@@ -152,11 +155,11 @@ initDataPageModel request ( baseModel, pageModel ) =
     in
     let ( newPageModel, newCmd ) = case request of
             User result -> handleError result (\user ->
-                    Page.User.init baseModel.auth user baseModel.key |> toRoot UserModel UserMsg
+                    Page.User.init baseModel.auth user baseModel.routeKey |> toRoot UserModel UserMsg
                 )
 
             Robot result -> handleError result (\robot ->
-                    Page.Robot.init baseModel.auth (Just robot) baseModel.flags.totalTurns |> toRoot RobotModel RobotMsg
+                    Page.Robot.init baseModel.auth (Just robot) baseModel.totalTurns |> toRoot RobotModel RobotMsg
                 )
     in
     ( (baseModel, newPageModel), newCmd )
@@ -166,15 +169,15 @@ updatePageModel pageMsg ( baseModel, pageModel ) =
     let toRoot newPageModel newPageMsg ( newModel, newCmd ) =
             ( baseModel, newPageModel newModel, newCmd |> Cmd.map newPageMsg |> Cmd.map Page )
         toAuth newPageModel newPageMsg ( newModel, newCmd, authCmd ) =
-            let ( newAuth, newAuthCmd ) = Auth.processCmd authCmd baseModel.auth baseModel.key
+            let ( newAuth, newAuthCmd ) = Auth.processCmd authCmd baseModel.auth baseModel.routeKey
                 newPageCmd = newCmd |> Cmd.map newPageMsg |> Cmd.map Page
             in
             ( { baseModel | auth = newAuth }, newPageModel newModel, Cmd.batch [newPageCmd, newAuthCmd] )
     in
     let ( newBaseModel, newPageModel, newCmd ) = case ( pageMsg, pageModel ) of
-            ( RobotMsg msg, RobotModel model ) -> Page.Robot.update msg model |> toRoot RobotModel RobotMsg
-            ( EnterMsg msg, EnterModel model ) -> Page.Enter.update msg model |> toAuth EnterModel EnterMsg
-            ( UserMsg msg, UserModel model ) -> Page.User.update msg model |> toRoot UserModel UserMsg
+            ( RobotMsg msg, RobotModel model ) -> Page.Robot.update msg model baseModel.apiKey |> toRoot RobotModel RobotMsg
+            ( EnterMsg msg, EnterModel model ) -> Page.Enter.update msg model baseModel.routeKey baseModel.apiKey |> toAuth EnterModel EnterMsg
+            ( UserMsg msg, UserModel model ) -> Page.User.update msg model baseModel.apiKey |> toRoot UserModel UserMsg
             ( _, _ ) -> ( baseModel, pageModel, Cmd.none )
     in
     ( (newBaseModel, newPageModel), newCmd )

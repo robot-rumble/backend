@@ -11,24 +11,24 @@ type alias Error = Http.Error
 
 type alias Endpoint val = (List String, Decoder val)
 
+type alias Key = String
+
 type Request val bodyVal
     = Get (Endpoint val)
     | Post (Endpoint val) Encode.Value
 
 
-baseUrl = "http://localhost:4000/api/v1"
-
-makeRequest : Request val body -> (Result Http.Error val -> msg) -> Cmd msg
-makeRequest request msg =
+makeRequest : Request val body -> (Result Http.Error val -> msg) -> Key -> Cmd msg
+makeRequest request msg key =
     case request of
         Get (url, decoder) ->
             Http.get {
-                url = crossOrigin baseUrl url [],
+                url = crossOrigin key url [],
                 expect = Http.expectJson msg decoder
             }
         Post (url, decoder) body ->
             Http.post {
-                url = crossOrigin baseUrl url [],
+                url = crossOrigin key url [],
                 expect = Http.expectJson msg decoder,
                 body = Http.jsonBody body
             }

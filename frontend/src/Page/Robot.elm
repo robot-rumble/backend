@@ -66,15 +66,15 @@ type Msg
     | GameMsg Game.Msg
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update : Msg -> Model -> Api.Key -> ( Model, Cmd Msg )
+update msg model apiKey =
     case msg of
         Run ->
             ( { model | gameState = Loading 0 }, startEval model.code )
 
         Save ->
             case (model.robot, model.auth) of
-                (Just robot, Auth.LoggedIn auth) -> ( model, Api.updateRobot robot.id { jwt = auth.jwt, code = model.code } SaveDone )
+                (Just robot, Auth.LoggedIn auth) -> ( model, Api.updateRobot robot.id { jwt = auth.jwt, code = model.code } SaveDone apiKey )
                 (_, _) -> (model, Cmd.none)
 
         SaveDone _ -> (model, Cmd.none)
