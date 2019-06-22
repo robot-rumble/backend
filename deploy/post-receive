@@ -1,5 +1,8 @@
 NAME="robot"
-COMMAND="docker-compose -f $HOME/robot/docker-compose.prod.yml up --build -d"
+COMMAND="
+docker-compose -f $HOME/robot/docker-compose.prod.yml run backend mix ecto.migrate
+docker-compose -f $HOME/robot/docker-compose.prod.yml up --build -d
+"
 
 TARGET="$HOME/$NAME"
 GIT_DIR="$HOME/$NAME.git"
