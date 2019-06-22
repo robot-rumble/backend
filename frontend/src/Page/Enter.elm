@@ -101,7 +101,7 @@ viewBody : Model -> Html Msg
 viewBody model =
     div [class "form"]
         [ input [ placeholder "username", value <| Maybe.withDefault "" model.username, onInput (Username >> GotInput) ] []
-        , input [ placeholder "password",  value <| Maybe.withDefault "" model.password, onInput (Password >> GotInput) ] []
+        , input [ placeholder "password", type_ "password", value <| Maybe.withDefault "" model.password, onInput (Password >> GotInput) ] []
         , button [ onClick LogIn, class "button", class "mb-4" ] [ text "login" ]
         , input [ placeholder "email", value <| Maybe.withDefault "" model.email, onInput (Email >> GotInput) ] []
         , button [ onClick SignUp, class "button" ] [ text "signup" ]
