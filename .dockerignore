@@ -1,0 +1,11 @@
+# frontend
+*/elm-stuff
+*/dist/*
+!*/dist/index.html
+
+# backend
+*/_build
+
+# logic
+*/_build
+**/.merlin
