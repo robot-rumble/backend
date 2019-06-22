@@ -154,10 +154,15 @@ viewEditor model =
             Decode.map CodeChanged <|
                 Decode.at [ "target", "value" ] <|
                     Decode.string
-        , property "robotName" <| Encode.string (
+        , property "name" <| Encode.string (
             case model.robot of
                 Just robot -> robot.name
                 Nothing -> "demo"
+        )
+        , property "lastEdit" <| Encode.int (
+            case model.robot of
+                Just robot -> robot.last_edit
+                Nothing -> 0
         )
         , property "code" <| Encode.string model.code
         , style "width" "60%"

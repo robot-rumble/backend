@@ -56,27 +56,30 @@ customElements.define(
       }
     }
 
-    // for some reason using `name` causes recursion error
-    set robotName(name) {
-      this.name = name
-    }
-
-    set code(code) {
-      this.initialCode = code
-    }
-
     get value() {
       return this._editor.getValue()
     }
 
     connectedCallback() {
+      let localSave = JSON.parse(localStorage.getItem('code_' + this.name))
+      let localCode = localSave ? localSave.code : ''
+      let localLastEdit = localSave ? localSave.lastEdit : 0
+
+      let initialValue
+      if (this.code && localCode) {
+        console.log(this.lastEdit, localLastEdit)
+        initialValue = this.lastEdit > localLastEdit ? this.code : localCode
+      } else {
+        initialValue = this.code || localCode || sampleRobot
+      }
+
       this._editor = CodeMirror(this, {
         tabSize: 2,
         mode: getModeFromLanguage(window.language),
         lineNumbers: true,
         matchBrackets: true,
         autoRefresh: true,
-        value: this.initialCode || localStorage.getItem('code_' + this.name) || sampleRobot,
+        value: initialValue,
         extraKeys: {
           Tab: (cm) => cm.execCommand('indentMore'),
           'Shift-Tab': (cm) => cm.execCommand('indentLess'),
@@ -85,7 +88,13 @@ customElements.define(
 
       this._editor.on('changes', () => {
         this.clearMarks()
-        localStorage.setItem('code_' + this.name, this._editor.getValue())
+        localStorage.setItem(
+          'code_' + this.name,
+          JSON.stringify({
+            code: this._editor.getValue(),
+            lastEdit: Math.floor(Date.now() / 1000),
+          }),
+        )
         this.dispatchEvent(new CustomEvent('editorChanged'))
       })
 

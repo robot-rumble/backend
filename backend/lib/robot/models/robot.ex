@@ -3,7 +3,7 @@ defmodule Robot.Robot do
   import Ecto.Changeset
   import Robot.Helpers
 
-  @base_properties [:id, :name, :slug, :code]
+  @base_properties [:id, :name, :slug, :code, :last_edit]
 
   @derive {Jason.Encoder, only: @base_properties}
   schema "robots" do
@@ -11,6 +11,7 @@ defmodule Robot.Robot do
     field(:slug, :string)
     field(:code, :string)
     field(:description, :string)
+    field(:last_edit, :integer)
     belongs_to(:author, Robot.User, foreign_key: :user_id)
 
     timestamps()
@@ -25,9 +26,10 @@ defmodule Robot.Robot do
   def changeset(robot, attrs) do
     robot
     |> Robot.Repo.preload([:author])
-    |> cast(attrs, [:name, :code, :description])
+    |> cast(attrs, [:name, :code, :description, :last_edit])
     |> validate_required([:name])
     |> default(:code, "")
+    |> default(:last_edit, 0)
     |> validate_length(:name, min: 1, max: 60)
     |> custom_change(:name, :slug, false, &slugify/1)
     |> assoc_constraint(:author)

@@ -17,6 +17,7 @@ defmodule Robot.Repo.Migrations.AddUsersRobots do
       add(:slug, :string)
       add(:description, :text)
       add(:code, :text)
+      add(:last_edit, :integer)
       add(:user_id, references(:users))
 
       timestamps()
