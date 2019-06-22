@@ -40,7 +40,7 @@ type Msg
     = GotInput Input
     | SignUp
     | LogIn
-    | GotSignup (Result Api.Error Api.User)
+    | GotSignup (Result Api.Error Api.BareUser)
     | GotLogin (Result Api.Error Api.AuthUser)
 
 type Input
