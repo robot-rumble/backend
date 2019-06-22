@@ -150,7 +150,7 @@ signUpEncoder body = Encode.object [
     ]
 
 signUp body =
-    Post ( ["users"], userDecoder ) (signUpEncoder body) |> makeRequest
+    Post ( ["users"], bareUserDecoder ) (signUpEncoder body) |> makeRequest
 
 
 type alias LogInBody = {
