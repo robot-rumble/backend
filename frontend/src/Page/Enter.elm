@@ -88,7 +88,7 @@ update msg model =
 
         GotLogin result ->
             case result of
-                Ok authUser -> (model, Route.push model.key Route.Home, Auth.LogIn authUser)
+                Ok authUser -> (model, Route.push model.key <| Route.User authUser.user.username, Auth.LogIn authUser)
                 Err _ -> ({ model | error = Just "invalid username or password" }, Cmd.none, Auth.None)
 
 -- VIEW

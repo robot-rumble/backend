@@ -32,8 +32,8 @@ update msg model =
 -- VIEW
 
 
-view : Model -> Auth.Auth -> ( String, Html Msg, Html Msg )
-view model auth =
+view : Model -> ( String, Html Msg, Html Msg )
+view model =
     ( "", div [] [], viewBody model )
 
 

@@ -16,6 +16,7 @@ type Route
     | Warehouse
     | Rules
     | Enter
+    | Demo
 
 routeParser : Parser (Route -> a) a
 routeParser =
@@ -23,6 +24,7 @@ routeParser =
         [ map Warehouse (s "warehouse")
         , map Rules (s "rules")
         , map Enter (s "enter")
+        , map Demo (s "demo")
         , map Robot (string </> string)
         , map User (string)
         , map Home top
@@ -39,6 +41,7 @@ toString route =
             Warehouse -> ["warehouse"]
             Rules -> ["rules"]
             Enter -> ["enter"]
+            Demo -> ["demo"]
             Home -> []
     in
     Url.Builder.absolute pieces []

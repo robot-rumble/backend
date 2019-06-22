@@ -23,6 +23,7 @@ import Http
 import Page.Robot
 import Page.Enter
 import Page.User
+import Page.Home
 
 import Api
 import Auth
@@ -57,6 +58,7 @@ type PageModel
     = RobotModel Page.Robot.Model
     | EnterModel Page.Enter.Model
     | UserModel Page.User.Model
+    | HomeModel Page.Home.Model
     | NotFound
     | Error
     | Loading
@@ -89,6 +91,7 @@ type PageMsg
     = RobotMsg Page.Robot.Msg
     | EnterMsg Page.Enter.Msg
     | UserMsg Page.User.Msg
+    | HomeMsg Page.Home.Msg
 
 type DataRequest
     = User (Result Api.Error Api.User)
@@ -128,8 +131,9 @@ initPageModel url ( baseModel, pageModel ) =
             Just route -> case route of
                 Route.Robot user robot -> (Loading, Api.getRobot user robot Robot |> Cmd.map GotData)
                 Route.User user -> (Loading, Api.getUser user User |> Cmd.map GotData)
-                Route.Home -> Page.Robot.init baseModel.auth Nothing baseModel.flags.totalTurns |> toRoot RobotModel RobotMsg
+                Route.Demo -> Page.Robot.init baseModel.auth Nothing baseModel.flags.totalTurns |> toRoot RobotModel RobotMsg
                 Route.Enter -> Page.Enter.init baseModel.auth baseModel.key |> toRoot EnterModel EnterMsg
+                Route.Home -> Page.Home.init |> toRoot HomeModel HomeMsg
                 _ -> ( NotFound, Cmd.none )
     in
     ( (baseModel, newPageModel), newCmd )
@@ -204,6 +208,7 @@ view ( baseModel, pageModel ) =
             RobotModel model -> Page.Robot.view model |> toRoot RobotMsg
             EnterModel model -> Page.Enter.view model |> toRoot EnterMsg
             UserModel model -> Page.User.view model |> toRoot UserMsg
+            HomeModel model -> Page.Home.view model |> toRoot HomeMsg
             NotFound -> barePage "404"
             Loading -> barePage "Loading..."
             Error -> barePage "Something went wrong"
