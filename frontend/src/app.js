@@ -48,3 +48,7 @@ app.ports.reportDecodeError.subscribe((error) => {
 app.ports.storeAuth.subscribe((auth) => {
   localStorage.setItem('auth', JSON.stringify(auth))
 })
+
+app.ports.removeAuth.subscribe(() => {
+  localStorage.removeItem('auth')
+})

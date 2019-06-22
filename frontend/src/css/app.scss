@@ -45,12 +45,12 @@ html, body, .root {
   flex-shrink: 0;
 }
 
-a {
+a, .a {
   color: $dark-blue;
   margin: 0.5rem;
 }
 
-a:hover {
+a:hover, .a {
   color: $dark-blue;
 }
 

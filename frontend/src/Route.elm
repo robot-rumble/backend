@@ -1,4 +1,4 @@
-module Route exposing (Route(..), parse, a, push)
+module Route exposing (Route(..), parse, a, push, Key)
 
 import Url.Parser exposing (..)
 import Url.Builder
@@ -6,6 +6,8 @@ import Url
 import Html
 import Html.Attributes
 import Browser.Navigation as Nav
+
+type alias Key = Nav.Key
 
 type Route
     = Robot String String
