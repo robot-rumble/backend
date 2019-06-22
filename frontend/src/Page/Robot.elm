@@ -74,7 +74,7 @@ update msg model =
 
         Save ->
             case (model.robot, model.auth) of
-                (Just robot, Auth.LoggedIn auth) -> ( model, Api.updateRobot robot.id { jwt = auth.jwt, code = robot.code } SaveDone )
+                (Just robot, Auth.LoggedIn auth) -> ( model, Api.updateRobot robot.id { jwt = auth.jwt, code = model.code } SaveDone )
                 (_, _) -> (model, Cmd.none)
 
         SaveDone _ -> (model, Cmd.none)
@@ -159,6 +159,7 @@ viewEditor model =
                 Just robot -> robot.name
                 Nothing -> "demo"
         )
+        , property "code" <| Encode.string model.code
         , style "width" "60%"
         , class "pr-6"
         ] ++ case model.gameState of

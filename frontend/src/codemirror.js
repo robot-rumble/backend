@@ -8,7 +8,6 @@ import 'codemirror/lib/codemirror.css'
 // import robotLib from '!raw-loader!./robotLib.raw'
 // import sampleRobot from '!raw-loader!./sampleRobot.raw'
 
-import stdlib from './stdlib.raw.py'
 import sampleRobot from './sampleRobot.raw.py'
 
 function getModeFromLanguage(language) {
@@ -62,8 +61,12 @@ customElements.define(
       this.name = name
     }
 
+    set code(code) {
+      this.initialCode = code
+    }
+
     get value() {
-      return this._editor.getValue() + '\n' + stdlib
+      return this._editor.getValue()
     }
 
     connectedCallback() {
@@ -73,7 +76,7 @@ customElements.define(
         lineNumbers: true,
         matchBrackets: true,
         autoRefresh: true,
-        value: localStorage.getItem('code_' + this.name) || sampleRobot,
+        value: this.initialCode || localStorage.getItem('code_' + this.name) || sampleRobot,
         extraKeys: {
           Tab: (cm) => cm.execCommand('indentMore'),
           'Shift-Tab': (cm) => cm.execCommand('indentLess'),

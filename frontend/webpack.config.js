@@ -78,6 +78,19 @@ let workerConfig = {
   node: {
     fs: 'empty',
   },
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: { loader: 'babel-loader' },
+      },
+      {
+        test: /\.raw.*$/,
+        use: 'raw-loader',
+      },
+    ],
+  },
 }
 
 module.exports = [browserConfig, workerConfig]
