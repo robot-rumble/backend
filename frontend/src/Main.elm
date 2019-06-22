@@ -147,7 +147,6 @@ initDataPageModel request ( baseModel, pageModel ) =
         handleError result f = case result of
             Ok data -> f data
             Err error -> (
-                let _ = Debug.log "error" error in
                 case error of
                     Http.BadStatus _ -> NotFound
                     _ -> Error

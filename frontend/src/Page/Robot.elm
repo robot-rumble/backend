@@ -199,7 +199,7 @@ viewBar model =
                 ]
                 [ button [onClick Run, class "button", class "mr-3"] [text "run"]
                 , case (model.robot, model.auth) of
-                    (Just _, Auth.LoggedIn _) -> button [onClick Save, class "button"] [text "save"]
+                    (Just _, Auth.LoggedIn _) -> button [onClick Save, class "button"] [text "publish"]
                     (_, _) -> div [] []
                 ]
 
