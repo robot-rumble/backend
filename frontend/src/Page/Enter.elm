@@ -83,7 +83,6 @@ update msg model =
             case result of
                 Ok _ -> (model, Route.push model.key Route.Home, Auth.None)
                 Err err ->
-                    let _ = Debug.log "err" err in
                     ({ model | error = Just "one of your inputs is bad" }, Cmd.none, Auth.None)
 
         GotLogin result ->
