@@ -20,7 +20,7 @@ let main (input : input Js.t) callback =
   and run2 (robot_input : string) =
     Lwt.wrap (fun () -> input##run2 robot_input |> Js.to_string)
   and turn_callback turn = input##turnCallback turn in
-  Logic.start run1 run2 turn_callback input##.turnNum
+  Logic.start run1 run2 turn_callback (input##.turnNum - 1)
   >|= Js.string >|= callback
 
 let _ = Js.export "main" main

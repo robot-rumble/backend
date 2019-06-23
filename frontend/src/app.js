@@ -28,9 +28,9 @@ const app = Elm.Main.init({
 
 const matchWorker = new Worker('/worker.js')
 
-app.ports.startEval.subscribe(([code1, code2]) => {
+app.ports.startEval.subscribe(([code1, code2, turnNum]) => {
   window.runCount++
-  matchWorker.postMessage({ code1, code2, turnNum: window.turnNum })
+  matchWorker.postMessage({ code1, code2, turnNum })
 })
 
 matchWorker.onmessage = ({ data }) => {
