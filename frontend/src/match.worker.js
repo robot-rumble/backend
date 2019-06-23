@@ -4,7 +4,7 @@ import { main as runLogic } from 'logic'
 let rpPromise = import('rustpython_wasm')
 
 // to fix some weird bug
-self.Window = {}
+self.Window = self.constructor
 
 let errorToObj = (e) => {
   // elm expects a null value for missing field
@@ -45,7 +45,8 @@ self.addEventListener('message', ({ data }) => {
         return
       }
 
-      const main = (args) => vm.eval('main')([args])
+      const main = (args) =>
+        vm.eval('main')([args, Math.random])
       const run = (args) => {
         args = JSON.parse(args)
         try {
