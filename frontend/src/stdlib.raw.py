@@ -4,14 +4,15 @@ def _check_enum(val, options):
     raise Exception(f'"{val}" must be one of {options_string}')
 
 def _direction_action(name):
-  def wrapper(direction):
+  name = name.capitalize()
+  def action(direction):
     direction = direction.capitalize()
     _check_enum(direction, ['Left', 'Right', 'Up', 'Down'])
     return {
-      'type_': name.capitalize(),
+      'type_': name,
       'direction': direction
     }
-  return wrapper
+  return action
 
 move = _direction_action("move")
 attack = _direction_action("attack")
@@ -38,13 +39,14 @@ def main(main_input):
     xs = state['map'][x]
     return xs and xs[y]
 
-  def other_team():
-    if team == "red":
-      return "blue"
-    elif team == "blue":
-      return "red"
-    else:
-      raise Exception("team is neither red nor blue")
+  if team == "red":
+    _other_team = "blue"
+  elif team == "blue":
+    _other_team = "red"
+  else:
+    raise Exception("team is neither red nor blue")
+
+  other_team = lambda: _other_team
 
   global current_action
   actions = {}
