@@ -234,7 +234,7 @@ viewHeader baseModel header =
         [ header
         , div [ class "list" ] (
             [ Route.a Route.Warehouse [text "warehouse"]
-            , Route.a Route.Rules [text "rules"]
+            , a [href "https://gist.github.com/cmsparks/7fa3c6169982b48b7052fc72d21a4c25"] [text "rules"]
             ] ++ case baseModel.auth of
                 Auth.LoggedIn user -> [
                         Route.a (Route.User user.user.username) [text "profile"],
