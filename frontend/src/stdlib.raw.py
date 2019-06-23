@@ -1,29 +1,24 @@
-def check_enum(val, options):
-  options_string = ' / '.join(options)
+def _check_enum(val, options):
   if not val in options:
+    options_string = ' / '.join(options)
     raise Exception(f'"{val}" must be one of {options_string}')
 
-def direction_action(func):
+def _direction_action(name):
   def wrapper(direction):
     direction = direction.capitalize()
-    check_enum(direction, ['Left', 'Right', 'Up', 'Down'])
+    _check_enum(direction, ['Left', 'Right', 'Up', 'Down'])
     return {
-      'type_': func.__name__.capitalize(),
+      'type_': name.capitalize(),
       'direction': direction
     }
   return wrapper
 
-@direction_action
-def move():
-  pass
-
-@direction_action
-def attack():
-  pass
-
+move = _direction_action("move")
+attack = _direction_action("attack")
 
 def main(main_input):
-  global obj_by_id, objs_by_team, ids_by_team, obj_by_loc, id_by_loc, move, attack
+  global obj_by_id, objs_by_team, ids_by_team
+  global obj_by_loc, id_by_loc, move, attack, other_team
 
   state = main_input['state']
   team = main_input['team']
@@ -41,6 +36,13 @@ def main(main_input):
   def id_by_loc(x, y):
     return state['map'][x][y]
 
+  def other_team():
+    if team == "red":
+      return "blue"
+    elif team == "blue":
+      return "red"
+    else:
+      raise Exception("team is neither red nor blue")
 
   global current_action
   actions = {}
