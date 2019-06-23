@@ -32,6 +32,7 @@ type PublishStatus
     = None
     | Publishing
     | Published
+    | NotAllowed
 
 type Opponent
     = Yourself
@@ -111,7 +112,9 @@ update msg model apiKey =
                     )
                 (_, _) -> (model, Cmd.none)
 
-        SaveDone _ -> ({ model | publishStatus = Published }, Cmd.none)
+        SaveDone result -> case result of
+            Ok _ -> ({ model | publishStatus = Published }, Cmd.none)
+            Err _ -> ({ model | publishStatus = NotAllowed }, Cmd.none)
 
         CodeChanged code ->
             ( { model | code = code }, Cmd.none )
@@ -186,16 +189,17 @@ viewHeader model =
         Nothing -> div [] [ p [] [text "Robot Rumble Demo"] ]
         Just robot -> div [ class "d-flex align-items-center" ] (
             [ p [class "m-0 mr-3"] [text robot.name] ]
-            ++ case (model.robot, model.auth) of
-                (Just _, Auth.LoggedIn _) -> [
+            ++ case (model.auth) of
+                (Auth.LoggedIn _) -> [
                         button [onClick Save, class "button", class "mr-3"] [text "publish"],
                         p [class "m-0 text-muted"] [text <| case model.publishStatus of
                                 Publishing -> "loading..."
                                 Published -> "published"
+                                NotAllowed -> "not allowed!"
                                 None -> ""
                         ]
                     ]
-                (_, _) -> []
+                _ -> []
             )
 
 viewUI : Model -> Html Msg
