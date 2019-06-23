@@ -8,7 +8,7 @@ import 'codemirror/lib/codemirror.css'
 // import robotLib from '!raw-loader!./robotLib.raw'
 // import sampleRobot from '!raw-loader!./sampleRobot.raw'
 
-import sampleRobot from './sampleRobot.raw.py'
+import sampleRobot from './robots/sample.raw.py'
 
 function getModeFromLanguage(language) {
   switch (language) {
