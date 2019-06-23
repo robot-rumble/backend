@@ -3,6 +3,9 @@ import { main as runLogic } from 'logic'
 
 let rpPromise = import('rustpython_wasm')
 
+// to fix some weird bug
+self.Window = {}
+
 let errorToObj = (e) => {
   // elm expects a null value for missing field
   let errorLoc = null
