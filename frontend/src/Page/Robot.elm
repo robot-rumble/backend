@@ -146,8 +146,10 @@ update msg model apiKey =
                 _ -> ( model, Cmd.none )
 
         StartChoosingOpponent ->
-            ( { model | gameState = ChoosingOpponent }, Cmd.none )
-
+            ( { model | gameState = case model.gameState of
+                ChoosingOpponent -> NoGame
+                _ -> ChoosingOpponent
+            }, Cmd.none )
 
         ChooseOpponent opponent ->
             ( { model | opponent = opponent, gameState = NoGame }, Cmd.none )
@@ -307,11 +309,13 @@ viewViewer model =
                 ]
 
         ChoosingOpponent ->
-            div []
-                [ button [class "a", onClick <| ChooseOpponent Yourself] [text "yourself"]
-                , input [class "input", value model.inputUser, onInput (UserInput >> GotInput), placeholder "user" ] []
-                , input [class "input", value model.inputRobot, onInput (RobotInput >> GotInput), placeholder "robot" ] []
-                , button [class "button", onClick SearchOpponent] [text "select"]
+            div [ class "mt-4" ]
+                [ button [class "a", class "mb-3", onClick <| ChooseOpponent Yourself] [text "yourself"]
+                , div [class "d-flex", class "list"]
+                    [ input [class "input", style "max-width" "9rem", value model.inputUser, onInput (UserInput >> GotInput), placeholder "user" ] []
+                    , input [class "input", style "max-width" "9rem", value model.inputRobot, onInput (RobotInput >> GotInput), placeholder "robot" ] []
+                    , button [class "button", onClick SearchOpponent] [text "select"]
+                    ]
                 , case model.error of
                     Just error -> p [class "error"] [text error]
                     Nothing -> div [] []
