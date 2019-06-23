@@ -69,7 +69,7 @@ subscriptions _ =
         getError (always GotError)
     ]
 
-port startEval : (String, String) -> Cmd msg
+port startEval : (String, String, Int) -> Cmd msg
 port reportDecodeError : String -> Cmd msg
 
 type Msg
@@ -91,6 +91,8 @@ type Msg
 
     | GotInput Input
 
+    | ChangeTotalTurns String
+
 type Input
     = UserInput String
     | RobotInput String
@@ -102,7 +104,7 @@ update msg model apiKey =
             ( { model | gameState = Loading 0 }, startEval (model.code, case model.opponent of
                 Yourself -> model.code
                 Robot robot -> robot.code
-            ))
+            , model.totalTurns))
 
         Save ->
             case (model.robot, model.auth) of
@@ -172,6 +174,12 @@ update msg model apiKey =
                 RobotInput robot ->
                     { model | inputRobot = robot }
             , Cmd.none)
+
+        ChangeTotalTurns turns ->
+            case String.toInt turns of
+                Just int -> ( { model | totalTurns = int }, Cmd.none )
+                Nothing -> ( model, Cmd.none )
+
 
 -- VIEW
 
@@ -269,27 +277,35 @@ viewBar model =
                 let progress_perc = (toFloat turn) / (toFloat model.totalTurns) * 100 in
                 div [class "progress", class "mb-3", style "width" <| to_perc progress_perc] []
             _ -> div [] []
-          , div [style "visibility" <|
-                     case model.gameState of
-                        Loading turn -> "hidden"
-                        _ -> "visible"
-                , class "d-flex"
+          , div [ class "d-flex"
+                , class "justify-content-between"
+                , style "visibility" <|
+                         case model.gameState of
+                            Loading turn -> "hidden"
+                            _ -> "visible"
                 , class "mb-3"
-                , class "align-items-center"
                 ]
-                [ button [onClick Run, class "button"] [text "run"]
-                , p [class "mx-3 my-0"] [text "vs"]
-                , button [ onClick StartChoosingOpponent
-                         , class "a"
-                         , class "text-red"
-                         , disabled <| case model.robot of
-                            Just _ -> False
-                            Nothing -> True
-                         ]
-                         [ text <| case model.opponent of
-                            Yourself -> "yourself"
-                            Robot robot -> robot.name
-                        ]
+                [ div [
+                     class "d-flex"
+                    , class "align-items-center"
+                    ]
+                    [ button [onClick Run, class "button"] [text "run"]
+                    , p [class "mx-3 my-0"] [text "vs"]
+                    , button [ onClick StartChoosingOpponent
+                             , class "a"
+                             , class "text-red"
+                             , disabled <| case model.robot of
+                                Just _ -> False
+                                Nothing -> True
+                             ]
+                             [ text <| case model.opponent of
+                                Yourself -> "yourself"
+                                Robot robot -> robot.name
+                            ]
+                    ]
+                ,   div [] [
+                        input [style "max-width" "4rem", class "py-0", value <| String.fromInt model.totalTurns, type_ "number", onInput ChangeTotalTurns] []
+                    ]
                 ]
 
         ]
