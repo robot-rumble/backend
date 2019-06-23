@@ -30,7 +30,7 @@ def main(main_input):
   def objs_by_team(team):
     return [obj_by_id(id) for id in ids_by_team(team)]
   def ids_by_team(team):
-    return state['teams'].get(team)
+    return state['teams'][team]
 
   def obj_by_loc(x, y):
     id = id_by_loc(x, y)
