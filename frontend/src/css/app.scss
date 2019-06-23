@@ -26,6 +26,13 @@ $grey: rgb(200, 200, 200);
 $light-grey: rgb(240, 240, 240);
 $code-font: Fantasque;
 
+.text-red {
+  color: $red !important;
+}
+.text-blue {
+  color: $blue !important;
+}
+
 html, body, .root {
   font-family: $code-font;
   height: 100%;

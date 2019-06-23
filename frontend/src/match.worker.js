@@ -1,5 +1,6 @@
 import stdlib from './stdlib.raw.py'
 import { main as runLogic } from 'logic'
+import _ from 'lodash'
 
 let rpPromise = import('rustpython_wasm')
 
@@ -28,39 +29,44 @@ self.addEventListener('message', ({ data }) => {
     .then((rp) => {
       const startTime = Date.now()
 
-      rp.vmStore.destroy('robot')
-      const vm = rp.vmStore.init('robot', false)
+      let vms = ['robot1', 'robot2'].map((name) => {
+        rp.vmStore.destroy(name)
+        return rp.vmStore.init(name, false)
+      })
 
-      vm.addToScope('print', (val) => console.log(val))
+      let codes = [data.code1, data.code2].map((code) => code + '\n' + stdlib)
 
-      let code = data.code + '\n' + stdlib
+      _.zip(codes, vms).forEach(([code, vm]) => {
+        vm.addToScope('print', (val) => console.log(val))
 
-      try {
-        vm.exec(code)
-      } catch (e) {
-        self.postMessage({
-          type: 'getOutput',
-          data: errorToObj(e),
-        })
-        return
-      }
-
-      const main = (args) =>
-        vm.eval('main')([args, Math.random])
-      const run = (args) => {
-        args = JSON.parse(args)
         try {
-          return JSON.stringify(main(args, {}))
+          vm.exec(code)
         } catch (e) {
           self.postMessage({
             type: 'getOutput',
             data: errorToObj(e),
           })
+          return
         }
-      }
+      })
+
+      const [run1, run2] = vms.map((vm) => {
+        const main = (args) => vm.eval('main')([args])
+        return (args) => {
+          args = JSON.parse(args)
+          try {
+            return JSON.stringify(main(args, {}))
+          } catch (e) {
+            self.postMessage({
+              type: 'getOutput',
+              data: errorToObj(e),
+            })
+          }
+        }
+      })
       const turnCallback = (turn) => self.postMessage({ type: 'getProgress', data: turn })
 
-      runLogic({ run, turnNum: data.turnNum, turnCallback }, (output) => {
+      runLogic({ run1, run2, turnNum: data.turnNum, turnCallback }, (output) => {
         console.log(`Time taken: ${(Date.now() - startTime) / 1000}s`)
         self.postMessage({ type: 'getOutput', data: JSON.parse(output) })
       })

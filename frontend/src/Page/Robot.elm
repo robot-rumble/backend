@@ -21,7 +21,11 @@ type alias Model =
     , gameState : GameState
     , totalTurns : Int
     , robot : Maybe Api.Robot
+    , opponent : Opponent
     , publishStatus : PublishStatus
+    , inputUser : String
+    , inputRobot : String
+    , error : Maybe String
     }
 
 type PublishStatus
@@ -29,9 +33,17 @@ type PublishStatus
     | Publishing
     | Published
 
+type Opponent
+    = Yourself
+    | Robot Api.Robot
+
 type GameState
     = Loading Int
-    | Game Game.Model | Error Data.Error | NoGame | InternalError
+    | ChoosingOpponent
+    | Game Game.Model
+    | Error Data.Error
+    | NoGame
+    | InternalError
 
 
 init : Auth.Auth -> Maybe Api.Robot -> Int -> ( Model, Cmd Msg )
@@ -40,7 +52,7 @@ init auth maybeRobot totalTurns =
             Just robot -> robot.code
             Nothing -> ""
     in
-    ( Model auth code NoGame totalTurns maybeRobot None, Cmd.none )
+    ( Model auth code NoGame totalTurns maybeRobot Yourself None "" "" Nothing, Cmd.none )
 
 
 -- UPDATE
@@ -56,7 +68,7 @@ subscriptions _ =
         getError (always GotError)
     ]
 
-port startEval : String -> Cmd msg
+port startEval : (String, String) -> Cmd msg
 port reportDecodeError : String -> Cmd msg
 
 type Msg
@@ -71,12 +83,25 @@ type Msg
 
     | GameMsg Game.Msg
 
+    | StartChoosingOpponent
+    | ChooseOpponent Opponent
+    | SearchOpponent
+    | GotOpponent (Result Api.Error Api.Robot)
+
+    | GotInput Input
+
+type Input
+    = UserInput String
+    | RobotInput String
 
 update : Msg -> Model -> Api.Key -> ( Model, Cmd Msg )
 update msg model apiKey =
     case msg of
         Run ->
-            ( { model | gameState = Loading 0 }, startEval model.code )
+            ( { model | gameState = Loading 0 }, startEval (model.code, case model.opponent of
+                Yourself -> model.code
+                Robot robot -> robot.code
+            ))
 
         Save ->
             case (model.robot, model.auth) of
@@ -120,6 +145,28 @@ update msg model apiKey =
                     }, Cmd.none )
                 _ -> ( model, Cmd.none )
 
+        StartChoosingOpponent ->
+            ( { model | gameState = ChoosingOpponent }, Cmd.none )
+
+
+        ChooseOpponent opponent ->
+            ( { model | opponent = opponent, gameState = NoGame }, Cmd.none )
+
+        SearchOpponent ->
+            ( model, Api.getRobot model.inputUser model.inputRobot GotOpponent apiKey)
+
+        GotOpponent result -> case result of
+            Ok robot -> ( { model | opponent = Robot robot, gameState = NoGame, inputUser = "", inputRobot = "" }, Cmd.none)
+            Err _ -> ( { model | error = Just "Robot does not exist." }, Cmd.none)
+
+        GotInput input -> (
+            case input of
+                UserInput user ->
+                    { model | inputUser = user }
+
+                RobotInput robot ->
+                    { model | inputRobot = robot }
+            , Cmd.none)
 
 -- VIEW
 
@@ -224,7 +271,20 @@ viewBar model =
                 , class "mb-3"
                 , class "align-items-center"
                 ]
-                [ button [onClick Run, class "button", class "mr-3"] [text "run"]]
+                [ button [onClick Run, class "button"] [text "run"]
+                , p [class "mx-3 my-0"] [text "vs"]
+                , button [ onClick StartChoosingOpponent
+                         , class "a"
+                         , class "text-red"
+                         , disabled <| case model.robot of
+                            Just _ -> False
+                            Nothing -> True
+                         ]
+                         [ text <| case model.opponent of
+                            Yourself -> "yourself"
+                            Robot robot -> robot.name
+                        ]
+                ]
 
         ]
 
@@ -244,6 +304,17 @@ viewViewer model =
             div []
                 [ Game.viewEmpty |> toRootMsg
                 , p [class "internal-error", class "mt-3"] [text "Internal Error! Please try again later."]
+                ]
+
+        ChoosingOpponent ->
+            div []
+                [ button [class "a", onClick <| ChooseOpponent Yourself] [text "yourself"]
+                , input [class "input", value model.inputUser, onInput (UserInput >> GotInput), placeholder "user" ] []
+                , input [class "input", value model.inputRobot, onInput (RobotInput >> GotInput), placeholder "robot" ] []
+                , button [class "button", onClick SearchOpponent] [text "select"]
+                , case model.error of
+                    Just error -> p [class "error"] [text error]
+                    Nothing -> div [] []
                 ]
 
         _ ->
