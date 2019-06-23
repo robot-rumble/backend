@@ -34,21 +34,35 @@ self.addEventListener('message', ({ data }) => {
         return rp.vmStore.init(name, false)
       })
 
-      let codes = [data.code1, data.code2].map((code) => code + '\n' + stdlib)
-
-      _.zip(codes, vms).forEach(([code, vm]) => {
+      vms.forEach((vm) => {
         vm.addToScope('print', (val) => console.log(val))
-
-        try {
-          vm.exec(code)
-        } catch (e) {
-          self.postMessage({
-            type: 'getOutput',
-            data: errorToObj(e),
-          })
-          return
-        }
       })
+
+      let codes = [data.code1, data.code2]
+
+      try {
+        _.zip(codes, vms).forEach(([code, vm]) => {
+          vm.exec(code)
+        })
+      } catch (e) {
+        self.postMessage({
+          type: 'getOutput',
+          data: errorToObj(e),
+        })
+        return
+      }
+
+      try {
+        vms.forEach((vm) => {
+          vm.exec(stdlib)
+        })
+      } catch (e) {
+        self.postMessage({
+          type: 'getOutput',
+          data: errorToObj(e),
+        })
+        return
+      }
 
       const [run1, run2] = vms.map((vm) => {
         const main = (args) => vm.eval('main')([args, Math.random])
