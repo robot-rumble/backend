@@ -51,7 +51,7 @@ self.addEventListener('message', ({ data }) => {
       })
 
       const [run1, run2] = vms.map((vm) => {
-        const main = (args) => vm.eval('main')([args])
+        const main = (args) => vm.eval('main')([args, Math.random])
         return (args) => {
           args = JSON.parse(args)
           try {
