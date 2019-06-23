@@ -4,7 +4,7 @@ open Lwt.Infix
 
 let ( >> ) f g x = f (g x)
 let identity x = x
-let team_names = ["red"; "blue"]
+let team_names = ["blue"; "red"]
 let letters = String.to_array "abcdefghijklmnopqrstuvwxyz"
 let id_length = 5
 
@@ -146,7 +146,7 @@ let map_size = 19
 let team_unit_num = 6
 let attack_strength = 1
 
-let rec run_turn run turn_callback max_turn turn objs
+let rec run_turn run1 run2 turn_callback max_turn turn objs
     (map : (Coords.t, id, 'a) Map.t) state_list =
   let state = {turn= turn + 1; objs= Map.to_alist objs} in
   let state_list = state :: state_list in
@@ -161,9 +161,11 @@ let rec run_turn run turn_callback max_turn turn objs
     let inputs =
       List.map team_names ~f:(fun team -> {team; state= input_state})
     in
-    inputs
-    |> List.map ~f:Logic_j.string_of_robot_input
-    |> List.map ~f:run |> lwt_join
+    let inputs = List.map inputs ~f:Logic_j.string_of_robot_input in
+    let inputs =
+      match inputs with [a; b] -> [run1 a; run2 b] | _ -> assert false
+    in
+    inputs |> lwt_join
     >>= fun (result : string list) ->
     let output_list = List.map result ~f:Logic_j.robot_output_of_string in
     let team_output_list = List.zip_exn team_names output_list in
@@ -222,9 +224,9 @@ let rec run_turn run turn_callback max_turn turn objs
       Map.fold dead_objs ~init:map ~f:(fun ~key:_ ~data:(basic, _) acc ->
           Map.remove acc basic.coords )
     in
-    run_turn run turn_callback max_turn (turn + 1) objs map state_list
+    run_turn run1 run2 turn_callback max_turn (turn + 1) objs map state_list
 
-let start run turn_callback max_turn =
+let start run1 run2 turn_callback max_turn =
   Random.self_init ();
   let terrains, map = create_map Rect map_size in
   let map, units =
@@ -241,7 +243,7 @@ let start run turn_callback max_turn =
     |> List.map ~f:(fun ((base, _) as obj) -> (base.id, obj))
     |> Map.of_alist_exn (module String)
   in
-  run_turn run turn_callback max_turn 0 objs map []
+  run_turn run1 run2 turn_callback max_turn 0 objs map []
   >|= fun states ->
   {turns= List.rev states; winner= determine_winner @@ List.hd_exn states}
   |> Logic_j.string_of_main_output
