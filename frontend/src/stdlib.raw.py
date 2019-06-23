@@ -17,8 +17,8 @@ def _direction_action(name):
 move = _direction_action("move")
 attack = _direction_action("attack")
 
-def main(main_input):
-  global obj_by_id, objs_by_team, ids_by_team
+def main(main_input, math_random):
+  global obj_by_id, objs_by_team, ids_by_team, rand
   global obj_by_loc, id_by_loc, move, attack, other_team
 
   state = main_input['state']
@@ -47,6 +47,8 @@ def main(main_input):
     raise Exception("team is neither red nor blue")
 
   other_team = lambda: _other_team
+
+  rand = lambda max, min: int(math_random() * (max - min + 1) + min)
 
   global current_action
   actions = {}
