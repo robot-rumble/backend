@@ -314,7 +314,8 @@ viewViewer : Model -> Html Msg
 viewViewer model =
     case model.gameState of
         Game gameModel ->
-            Game.view gameModel |> toRootMsg
+            div [] [ Game.view gameModel |> toRootMsg
+            , p [ class "mt-3" ] [text <| "winner: " ++ gameModel.data.winner] ]
 
         Error error ->
             div []
