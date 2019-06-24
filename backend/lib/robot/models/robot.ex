@@ -5,7 +5,7 @@ defmodule Robot.Robot do
 
   @base_properties [:id, :name, :slug, :code, :last_edit]
 
-  @derive {Jason.Encoder, only: @base_properties}
+  @derive {Jason.Encoder, only: [:author | @base_properties]}
   schema "robots" do
     field(:name, :string)
     field(:slug, :string)

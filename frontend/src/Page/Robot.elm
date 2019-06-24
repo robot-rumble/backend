@@ -300,7 +300,7 @@ viewBar model =
                              ]
                              [ text <| case model.opponent of
                                 Yourself -> "yourself"
-                                Robot robot -> robot.name
+                                Robot robot -> robot.author.username ++ "/" ++ robot.name
                             ]
                     ]
                 ,   div [] [
