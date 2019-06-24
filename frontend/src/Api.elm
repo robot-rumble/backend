@@ -49,12 +49,23 @@ userDecoder = succeed User
     |> required "email" string
     |> required "robots" (list robotDecoder)
 
-
 allUsers = Get (["users"], list userDecoder) |> makeRequest
 getUser user = Get (["users", user], userDecoder) |> makeRequest
 
 
 -- ROBOT
+
+type alias RobotAuthor =
+    { id : Int
+    , username : String
+    , email : String
+    }
+
+robotAuthorDecoder = succeed RobotAuthor
+    |> required "id" int
+    |> required "username" string
+    |> required "email" string
+
 
 type alias Robot =
     { id : Int
@@ -62,6 +73,7 @@ type alias Robot =
     , code : String
     , slug : String
     , last_edit : Int
+    , author : RobotAuthor
     }
 
 robotDecoder = succeed Robot
@@ -70,6 +82,7 @@ robotDecoder = succeed Robot
     |> required "code" string
     |> required "slug" string
     |> required "last_edit" int
+    |> required "author" robotAuthorDecoder
 
 
 type alias CreateRobotBody =
