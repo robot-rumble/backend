@@ -3,7 +3,8 @@
   "license": "MIT",
   "scripts": {
     "build": "webpack",
-    "watch": "webpack-dev-server --hot"
+    "watch": "webpack -w",
+    "serve": "webpack-dev-server --hot"
   },
   "dependencies": {
     "@babel/polyfill": "^7.2.5",

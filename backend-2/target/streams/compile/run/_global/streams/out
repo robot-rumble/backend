@@ -1,0 +1,28 @@
+[0m[[0m[31merror[0m] [0m[0makka.stream.impl.io.ConnectionSourceStage$$anon$1$$anon$2: Bind failed because of java.net.BindException: Address already in use[0m
+[0m[[0m[31merror[0m] [0m[0mCaused by: java.net.BindException: Address already in use[0m
+[0m[[0m[31merror[0m] [0m[0m	at sun.nio.ch.Net.bind0(Native Method)[0m
+[0m[[0m[31merror[0m] [0m[0m	at sun.nio.ch.Net.bind(Net.java:433)[0m
+[0m[[0m[31merror[0m] [0m[0m	at sun.nio.ch.Net.bind(Net.java:425)[0m
+[0m[[0m[31merror[0m] [0m[0m	at sun.nio.ch.ServerSocketChannelImpl.bind(ServerSocketChannelImpl.java:223)[0m
+[0m[[0m[31merror[0m] [0m[0m	at sun.nio.ch.ServerSocketAdaptor.bind(ServerSocketAdaptor.java:74)[0m
+[0m[[0m[31merror[0m] [0m[0m	at akka.io.TcpListener.liftedTree1$1(TcpListener.scala:59)[0m
+[0m[[0m[31merror[0m] [0m[0m	at akka.io.TcpListener.<init>(TcpListener.scala:56)[0m
+[0m[[0m[31merror[0m] [0m[0m	at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)[0m
+[0m[[0m[31merror[0m] [0m[0m	at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:62)[0m
+[0m[[0m[31merror[0m] [0m[0m	at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)[0m
+[0m[[0m[31merror[0m] [0m[0m	at java.lang.reflect.Constructor.newInstance(Constructor.java:423)[0m
+[0m[[0m[31merror[0m] [0m[0m	at akka.util.Reflect$.instantiate(Reflect.scala:68)[0m
+[0m[[0m[31merror[0m] [0m[0m	at akka.actor.ArgsReflectConstructor.produce(IndirectActorProducer.scala:101)[0m
+[0m[[0m[31merror[0m] [0m[0m	at akka.actor.Props.newActor(Props.scala:212)[0m
+[0m[[0m[31merror[0m] [0m[0m	at akka.actor.ActorCell.newActor(ActorCell.scala:648)[0m
+[0m[[0m[31merror[0m] [0m[0m	at akka.actor.ActorCell.create(ActorCell.scala:674)[0m
+[0m[[0m[31merror[0m] [0m[0m	at akka.actor.ActorCell.invokeAll$1(ActorCell.scala:547)[0m
+[0m[[0m[31merror[0m] [0m[0m	at akka.actor.ActorCell.systemInvoke(ActorCell.scala:569)[0m
+[0m[[0m[31merror[0m] [0m[0m	at akka.dispatch.Mailbox.processAllSystemMessages(Mailbox.scala:293)[0m
+[0m[[0m[31merror[0m] [0m[0m	at akka.dispatch.Mailbox.run(Mailbox.scala:228)[0m
+[0m[[0m[31merror[0m] [0m[0m	at akka.dispatch.Mailbox.exec(Mailbox.scala:241)[0m
+[0m[[0m[31merror[0m] [0m[0m	at akka.dispatch.forkjoin.ForkJoinTask.doExec(ForkJoinTask.java:260)[0m
+[0m[[0m[31merror[0m] [0m[0m	at akka.dispatch.forkjoin.ForkJoinPool$WorkQueue.runTask(ForkJoinPool.java:1339)[0m
+[0m[[0m[31merror[0m] [0m[0m	at akka.dispatch.forkjoin.ForkJoinPool.runWorker(ForkJoinPool.java:1979)[0m
+[0m[[0m[31merror[0m] [0m[0m	at akka.dispatch.forkjoin.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:107)[0m
+[0m[[0m[31merror[0m] [0m[0m(Compile / [31mrun[0m) java.lang.reflect.InvocationTargetException[0m

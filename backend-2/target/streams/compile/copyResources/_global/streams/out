@@ -1,0 +1,4 @@
+[debug] Copy resource mappings: 
+[debug] 	(/home/anton/code/web/untitled1/conf/logback.xml,/home/anton/code/web/untitled1/target/scala-2.13/classes/logback.xml)
+[debug] 	(/home/anton/code/web/untitled1/conf/routes,/home/anton/code/web/untitled1/target/scala-2.13/classes/routes)
+[debug] 	(/home/anton/code/web/untitled1/conf/application.conf,/home/anton/code/web/untitled1/target/scala-2.13/classes/application.conf)
