@@ -1,3 +1,4 @@
+  'code-editor',
 import CodeMirror from 'codemirror'
 import 'codemirror/mode/javascript/javascript.js'
 import 'codemirror/mode/python/python.js'
@@ -20,7 +21,6 @@ function getModeFromLanguage(language) {
 }
 
 customElements.define(
-  'code-editor',
   class extends HTMLElement {
     constructor() {
       super()
