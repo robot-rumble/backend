@@ -1,76 +1,63 @@
-def _check_enum(val, options):
-    if not val in options:
-        options_string = " / ".join(options)
-        raise Exception(f'"{val}" must be one of {options_string}')
+def check_enum(val, options):
+  options_string = ' / '.join(options)
+  if not val in options:
+    raise Exception(f'"{val}" must be one of {options_string}')
 
-
-def _direction_action(name):
-    name = name.capitalize()
-
-    def action(direction):
-        direction = direction.capitalize()
-        _check_enum(direction, ["Left", "Right", "Up", "Down"])
-        return {"type_": name, "direction": direction}
-
-    return action
-
-
-move = _direction_action("move")
-attack = _direction_action("attack")
-
-
-def main(main_input, math_random):
-    global obj_by_id, objs_by_team, ids_by_team, rand
-    global obj_by_loc, id_by_loc, move, attack, other_team
-
-    state = main_input["state"]
-    team = main_input["team"]
-
-    def obj_by_id(id):
-        return state["objs"][id]
-
-    def objs_by_team(team):
-        return [obj_by_id(id) for id in ids_by_team(team)]
-
-    def ids_by_team(team):
-        return state["teams"][team]
-
-    def obj_by_loc(x, y):
-        id = id_by_loc(x, y)
-        return id and obj_by_id(id)
-
-    def id_by_loc(x, y):
-        xs = state["map"][x]
-        return xs and xs[y]
-
-    if team == "red":
-        _other_team = "blue"
-    elif team == "blue":
-        _other_team = "red"
-    else:
-        raise Exception("team is neither red nor blue")
-
-    other_team = lambda: _other_team
-
-    rand = lambda max, min: int(math_random() * (max - min + 1) + min)
-
+def direction_action(func):
+  def wrapper(direction):
     global current_action
-    actions = {}
+    direction = direction.capitalize()
+    check_enum(direction, ['Left', 'Right', 'Up', 'Down'])
+    current_action = {
+      'type_': func.__name__.capitalize(),
+      'direction': direction
+    }
+  return wrapper
 
-    for id in state["teams"][team]:
-        try:
-            robot
-        except NameError:
-            raise Exception('You must define a "robot" function.')
-        if robot.__code__.co_argcount != 2:
-            raise Exception(
-                'Your "robot" function must accept two values: the current \
-turn and robot details.'
-            )
-        current_action = robot(state["turn"], state["objs"][id])
-        if not current_action:
-            raise Exception("Robot did not return an action!")
-        actions[id] = current_action
+@direction_action
+def move():
+  pass
 
-    return {"actions": actions}
+@direction_action
+def attack():
+  pass
+
+
+def main(main_input):
+  global obj_by_id, objs_by_team, ids_by_team, obj_by_loc, id_by_loc, move, attack
+
+  state = main_input['state']
+  team = main_input['team']
+
+  def obj_by_id(id):
+    return state['objs'][id]
+
+  def objs_by_team(team):
+    return [obj_by_id(id) for id in ids_by_team(team)]
+  def ids_by_team(team):
+    return state['teams'][team]
+
+  def obj_by_loc(x, y):
+    return obj_by_id(id_by_loc(x, y))
+  def id_by_loc(x, y):
+    return state['map'][x][y]
+
+
+  global current_action
+  actions = {}
+
+  for id in state['teams'][team]:
+    current_action = None
+    try:
+      robot
+    except NameError:
+      raise Exception('You must define a "robot" function.')
+    if robot.__code__.co_argcount != 2:
+      raise Exception('Your "robot" function must accept two values: the current turn and robot details.')
+    robot(state['turn'], state['objs'][id])
+    if not current_action:
+      raise Exception('Robot did not call any actions!')
+    actions[id] = current_action
+
+  return { 'actions': actions }
 
