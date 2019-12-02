@@ -7,43 +7,32 @@ window.turnNum = 10
 window.language = 'python'
 window.runCount = 0
 
-class Game extends HTMLElement {
-  connectedCallback() {
-    const app = Elm.Main.init({
-      node: this,
-      flags: {
-        totalTurns: window.turnNum,
-        auth,
-        endpoint:
-          process.env.NODE_ENV === 'production'
-            ? 'https://robotrumble.org/api/v1'
-            : 'http://localhost:4000/api/v1',
-      },
-    })
+const app = Elm.Main.init({
+  node: document.getElementById('root'),
+  flags: {
+    totalTurns: window.turnNum,
+  },
+})
 
-    const matchWorker = new Worker('/worker.js')
+const matchWorker = new Worker('./worker.js')
 
-    app.ports.startEval.subscribe(([code1, code2, turnNum]) => {
-      window.runCount++
-      matchWorker.postMessage({ code1, code2, turnNum })
-    })
+app.ports.startEval.subscribe((code) => {
+  window.runCount++
+  matchWorker.postMessage({ code, turnNum: window.turnNum })
+})
 
-    matchWorker.onmessage = ({ data }) => {
-      if (data.type === 'error') {
-        console.log('Worker Error!')
-        console.error(data.data)
-        app.ports.getError.send(null)
-      } else {
-        if (data.type === 'getOutput') console.log(data.data)
-        app.ports[data.type].send(data.data)
-      }
-    }
-
-    app.ports.reportDecodeError.subscribe((error) => {
-      console.log('Decode Error!')
-      console.error(error)
-    })
+matchWorker.onmessage = ({ data }) => {
+  if (data.type === 'error') {
+    console.log('Worker Error!')
+    console.error(data.data)
+    app.ports.getError.send(null)
+  } else {
+    if (data.type === 'getOutput') console.log(data.data)
+    app.ports[data.type].send(data.data)
   }
 }
 
-customElements.define(Game)
+app.ports.reportDecodeError.subscribe((error) => {
+  console.log('Decode Error!')
+  console.error(error)
+})

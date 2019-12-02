@@ -1,4 +1,3 @@
-  'code-editor',
 import CodeMirror from 'codemirror'
 import 'codemirror/mode/javascript/javascript.js'
 import 'codemirror/mode/python/python.js'
@@ -9,7 +8,8 @@ import 'codemirror/lib/codemirror.css'
 // import robotLib from '!raw-loader!./robotLib.raw'
 // import sampleRobot from '!raw-loader!./sampleRobot.raw'
 
-import sampleRobot from './robots/sample.raw.py'
+import stdlib from './stdlib.raw.py'
+import sampleRobot from './sampleRobot.raw.py'
 
 function getModeFromLanguage(language) {
   switch (language) {
@@ -21,6 +21,7 @@ function getModeFromLanguage(language) {
 }
 
 customElements.define(
+  'code-editor',
   class extends HTMLElement {
     constructor() {
       super()
@@ -57,28 +58,17 @@ customElements.define(
     }
 
     get value() {
-      return this._editor.getValue()
+      return this._editor.getValue() + '\n' + stdlib
     }
 
     connectedCallback() {
-      let localSave = JSON.parse(localStorage.getItem('code_' + this.name))
-      let localCode = localSave ? localSave.code : ''
-      let localLastEdit = localSave ? localSave.lastEdit : 0
-
-      let initialValue
-      if (this.code && localCode) {
-        initialValue = this.lastEdit > localLastEdit ? this.code : localCode
-      } else {
-        initialValue = this.code || localCode || sampleRobot
-      }
-
       this._editor = CodeMirror(this, {
         tabSize: 2,
         mode: getModeFromLanguage(window.language),
         lineNumbers: true,
         matchBrackets: true,
         autoRefresh: true,
-        value: initialValue,
+        value: localStorage.getItem('code') || sampleRobot,
         extraKeys: {
           Tab: (cm) => cm.execCommand('indentMore'),
           'Shift-Tab': (cm) => cm.execCommand('indentLess'),
@@ -87,13 +77,7 @@ customElements.define(
 
       this._editor.on('changes', () => {
         this.clearMarks()
-        localStorage.setItem(
-          'code_' + this.name,
-          JSON.stringify({
-            code: this._editor.getValue(),
-            lastEdit: Math.floor(Date.now() / 1000),
-          }),
-        )
+        localStorage.setItem('code', this._editor.getValue())
         this.dispatchEvent(new CustomEvent('editorChanged'))
       })
 

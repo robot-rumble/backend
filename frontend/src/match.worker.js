@@ -1,11 +1,6 @@
-import stdlib from './stdlib.raw.py'
 import { main as runLogic } from 'logic'
-import _ from 'lodash'
 
 let rpPromise = import('rustpython_wasm')
-
-// to fix some weird bug
-self.Window = self.constructor
 
 let errorToObj = (e) => {
   // elm expects a null value for missing field
@@ -24,26 +19,18 @@ let errorToObj = (e) => {
   }
 }
 
-self.addEventListener('message', ({ data }) => {
+self.addEventListener('message', ({ data: { code, turnNum } }) => {
   rpPromise
     .then((rp) => {
       const startTime = Date.now()
 
-      let vms = ['robot1', 'robot2'].map((name) => {
-        rp.vmStore.destroy(name)
-        return rp.vmStore.init(name, false)
-      })
+      rp.vmStore.destroy('robot')
+      const vm = rp.vmStore.init('robot', false)
 
-      vms.forEach((vm) => {
-        vm.addToScope('print', (val) => console.log(val))
-      })
-
-      let codes = [data.code1, data.code2]
+      vm.addToScope('print', (val) => console.log(val))
 
       try {
-        _.zip(codes, vms).forEach(([code, vm]) => {
-          vm.exec(code)
-        })
+        vm.exec(code)
       } catch (e) {
         self.postMessage({
           type: 'getOutput',
@@ -52,35 +39,21 @@ self.addEventListener('message', ({ data }) => {
         return
       }
 
-      try {
-        vms.forEach((vm) => {
-          vm.exec(stdlib)
-        })
-      } catch (e) {
-        self.postMessage({
-          type: 'getOutput',
-          data: errorToObj(e),
-        })
-        return
-      }
-
-      const [run1, run2] = vms.map((vm) => {
-        const main = (args) => vm.eval('main')([args, Math.random])
-        return (args) => {
-          args = JSON.parse(args)
-          try {
-            return JSON.stringify(main(args, {}))
-          } catch (e) {
-            self.postMessage({
-              type: 'getOutput',
-              data: errorToObj(e),
-            })
-          }
+      const main = (args) => vm.eval('main')([args])
+      const run = (args) => {
+        args = JSON.parse(args)
+        try {
+          return JSON.stringify(main(args, {}))
+        } catch (e) {
+          self.postMessage({
+            type: 'getOutput',
+            data: errorToObj(e),
+          })
         }
-      })
+      }
       const turnCallback = (turn) => self.postMessage({ type: 'getProgress', data: turn })
 
-      runLogic({ run1, run2, turnNum: data.turnNum, turnCallback }, (output) => {
+      runLogic({ run, turnNum, turnCallback }, (output) => {
         console.log(`Time taken: ${(Date.now() - startTime) / 1000}s`)
         self.postMessage({ type: 'getOutput', data: JSON.parse(output) })
       })
