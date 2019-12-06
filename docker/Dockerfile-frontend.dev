@@ -1,0 +1,14 @@
+FROM node:lts
+WORKDIR /frontend
+
+COPY frontend/package.json ./
+RUN npm install
+
+COPY frontend ./
+
+# needed for elm to install packages
+RUN node_modules/.bin/elm make src/*.elm
+
+EXPOSE 8080
+CMD npm run watch
+
