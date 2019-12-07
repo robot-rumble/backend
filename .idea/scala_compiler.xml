@@ -3,7 +3,7 @@
   <component name="ScalaCompilerConfiguration">
     <option name="incrementalityType" value="SBT" />
     <profile name="sbt 1" modules="robot_6689" />
-    <profile name="sbt 2" modules="play-scala-starter-example">
+    <profile name="sbt 2" modules="play-scala-starter-example,robot-rumble">
       <option name="deprecationWarnings" value="true" />
       <option name="uncheckedWarnings" value="true" />
       <option name="featureWarnings" value="true" />
