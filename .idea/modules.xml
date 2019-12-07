@@ -4,8 +4,8 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/src/frontend/frontend.iml" filepath="$PROJECT_DIR$/src/frontend/frontend.iml" />
       <module fileurl="file://$PROJECT_DIR$/src/logic/logic.iml" filepath="$PROJECT_DIR$/src/logic/logic.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/play-scala-starter-example.iml" filepath="$PROJECT_DIR$/.idea/modules/play-scala-starter-example.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/play-scala-starter-example-build.iml" filepath="$PROJECT_DIR$/.idea/modules/play-scala-starter-example-build.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/robot-rumble.iml" filepath="$PROJECT_DIR$/.idea/modules/robot-rumble.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/robot-rumble-build.iml" filepath="$PROJECT_DIR$/.idea/modules/robot-rumble-build.iml" />
     </modules>
   </component>
 </project>
