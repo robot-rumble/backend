@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Play Dev" type="Play2FrameworkRunConfigurations" factoryName="Play 2 App" show_console_on_std_err="false" show_console_on_std_out="false">
-    <module name="play-scala-starter-example" />
+    <module name="robot-rumble" />
     <option name="allowRunningInParallel" value="false" />
     <option name="enableSbtGlobalPlugins" value="false" />
     <option name="play2EnvVariables">
