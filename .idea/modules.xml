@@ -6,7 +6,6 @@
       <module fileurl="file://$PROJECT_DIR$/src/logic/logic.iml" filepath="$PROJECT_DIR$/src/logic/logic.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/play-scala-starter-example.iml" filepath="$PROJECT_DIR$/.idea/modules/play-scala-starter-example.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/play-scala-starter-example-build.iml" filepath="$PROJECT_DIR$/.idea/modules/play-scala-starter-example-build.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/shared-sources.iml" filepath="$PROJECT_DIR$/.idea/modules/shared-sources.iml" />
     </modules>
   </component>
 </project>
