@@ -1,12 +1,12 @@
 FROM ocaml/opam2:latest AS logic-builder
 WORKDIR /logic
 
-COPY logic/logic.opam ./
+COPY src/logic/logic.opam ./
 RUN opam pin add -yn logic ./
 RUN opam depext logic
 RUN opam install --deps-only logic
 
-COPY logic ./
+COPY src/logic ./
 
 # required for dune watch
 RUN sudo apt-get update && sudo apt-get install -y inotify-tools
