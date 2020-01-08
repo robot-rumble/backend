@@ -9,7 +9,7 @@ services:
       context: .
       dockerfile: Dockerfile-logic.dev
     volumes:
-      - ./logic:/logic
+      - ./src/logic:/logic
       - logic:/logic-output
 
   frontend:
@@ -21,8 +21,9 @@ services:
     depends_on:
       - logic
     volumes:
-      - ./frontend:/frontend
+      - ./src/frontend:/frontend
       - logic:/logic
+      - frontend:/frontend-output
 
   backend:
     build:
@@ -34,8 +35,10 @@ services:
       - db
       - logic
     volumes:
-      - ./backend:/backend
+      - .:/backend
       - logic:/logic
+      - frontend:/frontend
 
 volumes:
   logic:
+  frontend:
