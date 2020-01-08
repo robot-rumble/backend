@@ -6,5 +6,4 @@ GET        /                         controllers.HomeController.index
 GET        /signup                   controllers.UserController.create
 GET        /profile/:username        controllers.UserController.profile(username)
 
-GET        /assets/*file.wasm        controllers.AssetController.wasm(file)
 GET        /assets/*file             controllers.Assets.at(file)
