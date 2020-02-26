@@ -5,5 +5,5 @@ COPY . ./
 
 RUN sbt update
 
-EXPOSE 4000
+EXPOSE 9000
 CMD sbt run

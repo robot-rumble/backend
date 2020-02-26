@@ -9,6 +9,5 @@ COPY src/frontend ./
 # needed for elm to install packages
 RUN node_modules/.bin/elm make src/*.elm
 
-EXPOSE 8080
-CMD DOCKER=true npm run watch
+CMD npm run watch
 

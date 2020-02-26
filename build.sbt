@@ -1,3 +1,5 @@
+import play.sbt.PlayScala
+
 name := """robot-rumble"""
 
 version := "1.0-SNAPSHOT"
