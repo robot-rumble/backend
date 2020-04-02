@@ -1,4 +1,4 @@
-@(form: Form[SignupForm.Data], assetsFinder: AssetsFinder)(implicit request: MessagesRequestHeader)
+@(form: Form[LoginForm.Data], assetsFinder: AssetsFinder)(implicit request: MessagesRequestHeader)
 @main("Login", assetsFinder) {
 
   @helper.form(routes.UserController.postCreate()) {

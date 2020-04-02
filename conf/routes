@@ -5,6 +5,10 @@
 GET         /                         controllers.HomeController.index
 GET         /signup                   controllers.UserController.create
 POST        /signup                   controllers.UserController.postCreate
+GET         /login                    controllers.UserController.login
+POST        /login                    controllers.UserController.postLogin
+GET         /logout                   controllers.UserController.logout
 GET         /profile/:username        controllers.UserController.profile(username)
 
+# noinspection ScalaDeprecation
 GET         /assets/*file             controllers.Assets.at(file)

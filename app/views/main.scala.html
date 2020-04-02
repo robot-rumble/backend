@@ -1,4 +1,4 @@
-@(title: String, assetsFinder: AssetsFinder)(content: Html)
+@(title: String, assetsFinder: AssetsFinder)(content: Html)(implicit request: RequestHeader)
 
 <!DOCTYPE html>
 <html lang="en">
@@ -9,6 +9,17 @@
         <script src="@assetsFinder.path("dist/bundle.js")" type="text/javascript"></script>
     </head>
     <body>
+        @request.session.get("USERNAME") match {
+            case Some(_) => {
+                <a href="@routes.UserController.logout">logout</a>
+            }
+
+            case None => {
+                <a href="@routes.UserController.login">login</a>
+                <a href="@routes.UserController.create">signup</a>
+            }
+        }
+
         @content
     </body>
 </html>
