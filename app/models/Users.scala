@@ -3,15 +3,21 @@ package models
 import javax.inject.Inject
 import services.Db
 
-case class User(username: String, password: String, id: Long)
+object Users {
 
-class Users @Inject()(val db: Db) {
+  case class Data(username: String, password: String, id: Long)
 
-  import db.ctx._
+  class Repo @Inject()(val db: Db) {
 
-  val users: db.ctx.Quoted[db.ctx.EntityQuery[User]] = quote(querySchema[User]("users"))
+    import db.ctx._
 
-  def find(username: String): Option[User] = run(users.filter(c => c.username == lift(username))).headOption
+    val schema: db.ctx.Quoted[db.ctx.EntityQuery[Data]] = quote(querySchema[Data]("users"))
 
-  def create(user: User): User = user.copy(id = run(users.insert(lift(user)).returning(_.id)))
+    def find(username: String): Option[Data] = run(schema.filter(c => c.username == lift(username))).headOption
+
+    def create(data: Data): Data = data.copy(id = run(schema.insert(lift(data)).returning(_.id)))
+  }
+
 }
+
+
