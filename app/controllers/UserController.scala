@@ -19,10 +19,15 @@ class UserController @Inject()(cc: MessagesControllerComponents, repo: Users, as
       },
       data => {
         val user = User(username = data.username, password = data.password, id = 0)
-        repo.create(user)
-        Redirect(routes.UserController.profile(user.username))
-          .flashing("info" -> "Account created!")
-          .withSession("USERNAME" -> user.username)
+        repo.find(user.username) match {
+          case Some(_) => BadRequest(views.html.signup(SignupForm.form.fill(data).withGlobalError("Username taken"), assetsFinder))
+          case None => {
+            repo.create(user)
+            Redirect(routes.UserController.profile(user.username))
+              .flashing("info" -> "Account created!")
+              .withSession("USERNAME" -> user.username)
+          }
+        }
       }
     )
   }
