@@ -1,7 +1,7 @@
-@(user: User, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+@(user: Users.Data, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
-  @main("Profile", assetsFinder) {
-    <h1>@user.username</h1>
+@main("Profile", assetsFinder) {
+  <h1>@user.username</h1>
 
-    <p>@request.flash.get("info")</p>
-  }
+  <p>@request.flash.get("info")</p>
+}

@@ -1,11 +1,11 @@
 package controllers
 
 import javax.inject._
-import models.{User, Users}
+import models.Users
 import play.api.mvc._
 
 @Singleton
-class UserController @Inject()(cc: MessagesControllerComponents, repo: Users, assetsFinder: AssetsFinder)
+class UserController @Inject()(cc: MessagesControllerComponents, repo: Users.Repo, assetsFinder: AssetsFinder)
   extends MessagesAbstractController(cc) {
 
   def create: Action[AnyContent] = Action { implicit request =>
@@ -18,7 +18,7 @@ class UserController @Inject()(cc: MessagesControllerComponents, repo: Users, as
         BadRequest(views.html.signup(formWithErrors, assetsFinder))
       },
       data => {
-        val user = User(username = data.username, password = data.password, id = 0)
+        val user = Users.Data(username = data.username, password = data.password, id = 0)
         repo.find(user.username) match {
           case Some(_) => BadRequest(views.html.signup(SignupForm.form.fill(data).withGlobalError("Username taken"), assetsFinder))
           case None => {
