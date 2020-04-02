@@ -7,7 +7,7 @@ import play.api.mvc._
 class HomeController @Inject()(cc: ControllerComponents, assetsFinder: AssetsFinder)
   extends AbstractController(cc) {
 
-  def index: Action[AnyContent] = Action {
+  def index: Action[AnyContent] = Action { implicit request =>
     Ok(views.html.index(assetsFinder))
   }
 }

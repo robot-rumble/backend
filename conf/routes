@@ -2,8 +2,9 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-GET        /                         controllers.HomeController.index
-GET        /signup                   controllers.UserController.create
-GET        /profile/:username        controllers.UserController.profile(username)
+GET         /                         controllers.HomeController.index
+GET         /signup                   controllers.UserController.create
+POST        /signup                   controllers.UserController.postCreate
+GET         /profile/:username        controllers.UserController.profile(username)
 
-GET        /assets/*file             controllers.Assets.at(file)
+GET         /assets/*file             controllers.Assets.at(file)

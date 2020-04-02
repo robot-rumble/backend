@@ -1,5 +1,5 @@
-@(assetsFinder: AssetsFinder)
+@(assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
-@main("Arena", assetsFinder) {
+  @main("Arena", assetsFinder) {
     <robot-arena></robot-arena>
-}
+  }
