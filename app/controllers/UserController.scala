@@ -8,23 +8,51 @@ import play.api.mvc._
 class UserController @Inject()(cc: MessagesControllerComponents, repo: Users, assetsFinder: AssetsFinder)
   extends MessagesAbstractController(cc) {
 
-  import LoginForm._
-
   def create: Action[AnyContent] = Action { implicit request =>
-    Ok(views.html.signup(form, assetsFinder))
+    Ok(views.html.signup(SignupForm.form, assetsFinder))
   }
 
   def postCreate: Action[AnyContent] = Action { implicit request =>
-    form.bindFromRequest.fold(
+    SignupForm.form.bindFromRequest.fold(
       formWithErrors => {
         BadRequest(views.html.signup(formWithErrors, assetsFinder))
       },
       data => {
         val user = User(username = data.username, password = data.password, id = 0)
         repo.create(user)
-        Redirect(routes.UserController.profile(user.username)).flashing("info" -> "Account created!")
+        Redirect(routes.UserController.profile(user.username))
+          .flashing("info" -> "Account created!")
+          .withSession("USERNAME" -> user.username)
       }
     )
+  }
+
+  def login: Action[AnyContent] = Action { implicit request =>
+    Ok(views.html.login(LoginForm.form, assetsFinder))
+  }
+
+  def postLogin: Action[AnyContent] = Action { implicit request =>
+    LoginForm.form.bindFromRequest.fold(
+      formWithErrors => {
+        Forbidden(views.html.login(formWithErrors, assetsFinder))
+      },
+      data => {
+        repo.find(data.username) match {
+          case Some(user) =>
+            Redirect(routes.UserController.profile(data.username))
+              .flashing("info" -> "Logged in!")
+              .withSession("USERNAME" -> data.username)
+          case None =>
+            Forbidden(views.html.login(LoginForm.form.withGlobalError("Incorrect username or password."), assetsFinder))
+        }
+      }
+    )
+  }
+
+  def logout: Action[AnyContent] = Action { implicit request =>
+    Redirect(routes.HomeController.index())
+      .withNewSession
+      .flashing("info" -> "Logged out!")
   }
 
   def profile(username: String): Action[AnyContent] = Action { implicit request =>
