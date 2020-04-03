@@ -18,11 +18,11 @@ class UserController @Inject()(cc: MessagesControllerComponents, repo: Users.Rep
         BadRequest(views.html.signup(formWithErrors, assetsFinder))
       },
       data => {
-        val user = Users.Data(username = data.username, password = data.password, id = 0)
-        repo.find(user.username) match {
+        val username = data.username.trim()
+        repo.find(username) match {
           case Some(_) => BadRequest(views.html.signup(SignupForm.form.fill(data).withGlobalError("Username taken"), assetsFinder))
           case None => {
-            repo.create(user)
+            val user = repo.create(username, data.password)
             Redirect(routes.UserController.profile(user.username))
               .flashing("info" -> "Account created!")
               .withSession("USERNAME" -> user.username)
@@ -46,7 +46,7 @@ class UserController @Inject()(cc: MessagesControllerComponents, repo: Users.Rep
           case Some(user) =>
             Redirect(routes.UserController.profile(data.username))
               .flashing("info" -> "Logged in!")
-              .withSession("USERNAME" -> data.username)
+              .withSession("USERNAME" -> user.username)
           case None =>
             Forbidden(views.html.login(LoginForm.form.withGlobalError("Incorrect username or password."), assetsFinder))
         }
@@ -62,7 +62,10 @@ class UserController @Inject()(cc: MessagesControllerComponents, repo: Users.Rep
 
   def profile(username: String): Action[AnyContent] = Action { implicit request =>
     repo.find(username) match {
-      case Some(user) => Ok(views.html.profile(user, assetsFinder))
+      case Some(user) => {
+        println(request.session.get("USERNAME"), user.username)
+        Ok(views.html.profile(user, assetsFinder))
+      }
       case None => NotFound("User does not exist!")
     }
   }

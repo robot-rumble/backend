@@ -1,0 +1,11 @@
+@(user: Users.Data, robot: Robots.Data, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+
+@main(s"Robot ${robot.name}", assetsFinder) {
+  <h1>@robot.name</h1>
+
+  <p>@request.flash.get("info")</p>
+
+  @if(request.session.get("USERNAME").forall(_ == user.username)) {
+    <robot-arena></robot-arena>
+  }
+}
