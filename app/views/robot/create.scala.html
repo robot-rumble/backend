@@ -1,0 +1,17 @@
+@(form: Form[CreateRobotForm.Data], assetsFinder: AssetsFinder)(implicit request: MessagesRequestHeader)
+  @main("Create robot", assetsFinder) {
+
+    @helper.form(routes.RobotController.postCreate()) {
+      @helper.inputText(form("name"))
+      @helper.CSRF.formField
+      <button>Create</button>
+    }
+
+    @if(form.hasGlobalErrors) {
+      <ul>
+      @for(error <- form.globalErrors) {
+        <li>@error.format</li>
+      }
+      </ul>
+    }
+  }

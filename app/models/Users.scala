@@ -13,9 +13,12 @@ object Users {
 
     val schema: db.ctx.Quoted[db.ctx.EntityQuery[Data]] = quote(querySchema[Data]("users"))
 
-    def find(username: String): Option[Data] = run(schema.filter(c => c.username == lift(username))).headOption
+    def find(username: String): Option[Data] = run(schema.filter(_.username == lift(username))).headOption
 
-    def create(data: Data): Data = data.copy(id = run(schema.insert(lift(data)).returning(_.id)))
+    def create(username: String, password: String): Data = {
+      val data = Data(username, password, -1)
+      data.copy(id = run(schema.insert(lift(data)).returning(_.id)))
+    }
   }
 
 }
