@@ -17,8 +17,12 @@ object Robots {
 
     def create(user: Users.Data, name: String): Data = {
       val data = Data(name, "", -1, user.id)
-      data.copy(id = run(schema.insert(lift(data)).returning(_.id)))
+      data.copy(id = run(schema.insert(lift(data)).returningGenerated(_.id)))
+    }
+
+    def update(robot: Data, code: String): Result[RunActionResult] = {
+      val newRobot = robot.copy(code = code)
+      run(schema.update(newRobot))
     }
   }
-
 }
