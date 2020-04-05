@@ -38,8 +38,8 @@ import play.api.mvc._
 //}
 
 class AuthAction @Inject()(cc: MessagesControllerComponents, usersRepo: Users.Repo) extends MessagesAbstractController(cc) {
-  def apply(f: Users.Data => MessagesRequest[AnyContent] => Result): Action[AnyContent] =
-    Action { implicit request: MessagesRequest[AnyContent] =>
+  def apply[T](parser: BodyParser[T])(f: Users.Data => MessagesRequest[T] => Result): Action[T] =
+    Action(parser) { implicit request =>
       request.session.get("USERNAME") match {
         case Some(username) =>
           usersRepo.find(username) match {

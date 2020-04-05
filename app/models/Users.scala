@@ -17,7 +17,7 @@ object Users {
 
     def create(username: String, password: String): Data = {
       val data = Data(username, password, -1)
-      data.copy(id = run(schema.insert(lift(data)).returning(_.id)))
+      data.copy(id = run(schema.insert(lift(data)).returningGenerated(_.id)))
     }
   }
 

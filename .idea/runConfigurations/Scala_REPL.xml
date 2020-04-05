@@ -1,6 +1,5 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Scala REPL" type="ScalaScriptConsoleRunConfiguration" factoryName="Scala Console" show_console_on_std_err="false" show_console_on_std_out="false">
-    <module name="play-scala-starter-example" />
     <option name="allowRunningInParallel" value="false" />
     <option name="javaOptions" value="-Djline.terminal=NONE" />
     <option name="myConsoleArgs" value="-usejavacp" />

@@ -4,10 +4,10 @@
 
 CREATE TABLE robots
 (
-    id      SERIAL PRIMARY KEY,
+    Id      SERIAL PRIMARY KEY,
     name    VARCHAR(50) NOT NULL,
     code    TEXT        NOT NULL,
-    user_id SERIAL      NOT NULL REFERENCES users (id)
+    user_id SERIAL      NOT NULL REFERENCES users (Id)
 );
 
 -- !Downs

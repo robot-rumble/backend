@@ -14,5 +14,6 @@ GET         /p/:username           controllers.UserController.profile(username)
 GET         /create-robot          controllers.RobotController.create
 POST        /create-robot          controllers.RobotController.postCreate
 GET         /p/:user/:robot        controllers.RobotController.view(user, robot)
+POST        /update/:robot         controllers.RobotController.update(user, robot)
 
 GET         /assets/*file          controllers.Assets.at(file)
