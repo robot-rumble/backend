@@ -14,7 +14,7 @@ class RobotController @Inject()(cc: MessagesControllerComponents, assetsFinder: 
       Ok(views.html.robot.create(CreateRobotForm.form, assetsFinder))
   }
 
-  def postCreate: Action[CreateRobotForm.Data] = authAction(parse.form(CreateRobotForm.form)) { user =>
+  def postCreate: Action[AnyContent] = authAction(parse.anyContent) { user =>
     implicit request =>
       CreateRobotForm.form.bindFromRequest.fold(
         formWithErrors => {
@@ -60,6 +60,6 @@ class RobotController @Inject()(cc: MessagesControllerComponents, assetsFinder: 
           }
           case None => NotFound("User does not exist")
         }
-      } else Forbidden("")
+      } else Forbidden("Unauthorized")
   }
 }

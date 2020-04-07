@@ -2,18 +2,19 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-GET         /                      controllers.HomeController.index
+GET         /                           controllers.HomeController.index
 
-GET         /signup                controllers.UserController.create
-POST        /signup                controllers.UserController.postCreate
-GET         /login                 controllers.UserController.login
-POST        /login                 controllers.UserController.postLogin
-GET         /logout                controllers.UserController.logout
-GET         /p/:username           controllers.UserController.profile(username)
+GET         /signup                     controllers.UserController.create
+POST        /signup                     controllers.UserController.postCreate
+GET         /login                      controllers.UserController.login
+POST        /login                      controllers.UserController.postLogin
+GET         /logout                     controllers.UserController.logout
+GET         /p/:username                controllers.UserController.profile(username)
 
-GET         /create-robot          controllers.RobotController.create
-POST        /create-robot          controllers.RobotController.postCreate
-GET         /p/:user/:robot        controllers.RobotController.view(user, robot)
-POST        /update/:robot         controllers.RobotController.update(user, robot)
+GET         /create-robot               controllers.RobotController.create
+POST        /create-robot               controllers.RobotController.postCreate
+GET         /p/:user/:robot             controllers.RobotController.view(user, robot)
++ nocsrf
+POST        /update/:user/:robot        controllers.RobotController.update(user, robot)
 
-GET         /assets/*file          controllers.Assets.at(file)
+GET         /assets/*file               controllers.Assets.at(file)
