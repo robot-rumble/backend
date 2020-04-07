@@ -10,12 +10,14 @@
     </head>
     <body>
         @helper.javascriptRouter("jsRoutes")(
-            routes.javascript.RobotController.postCreate,
+            routes.javascript.RobotController.update,
         )
-    <script>window.jsRoutes = jsRoutes</script>
+        <script>window.jsRoutes = jsRoutes</script>
 
         @request.session.get("USERNAME") match {
-            case Some(_) => {
+            case Some(username) => {
+                <p>@username</p>
+                <a href="@routes.UserController.profile(username)">profile</a>
                 <a href="@routes.UserController.logout">logout</a>
             }
 

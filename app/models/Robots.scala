@@ -21,8 +21,7 @@ object Robots {
     }
 
     def update(robot: Data, code: String): Result[RunActionResult] = {
-      val newRobot = robot.copy(code = code)
-      run(schema.update(newRobot))
+      run(schema.filter(_.id == lift(robot.id)).update(_.code -> lift(code)))
     }
   }
 }

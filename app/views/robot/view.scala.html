@@ -6,6 +6,6 @@
   <p>@request.flash.get("info")</p>
 
   @if(request.session.get("USERNAME").forall(_ == user.username)) {
-    <robot-arena></robot-arena>
+    <robot-arena user="@user.username" robot="@robot.name" code="@robot.code"></robot-arena>
   }
 }
