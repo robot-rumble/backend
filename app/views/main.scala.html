@@ -1,0 +1,30 @@
+@(title: String, assetsFinder: AssetsFinder)(content: Html)(implicit request: RequestHeader)
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>@title</title>
+        <link rel="stylesheet" media="screen" href="@assetsFinder.path("dist/app.css")">
+        <link rel="shortcut icon" type="image/png" href="@assetsFinder.path("images/favicon.png")">
+        <script src="@assetsFinder.path("dist/bundle.js")" type="text/javascript"></script>
+    </head>
+    <body>
+        @helper.javascriptRouter("jsRoutes")(
+            routes.javascript.RobotController.postCreate,
+        )
+    <script>window.jsRoutes = jsRoutes</script>
+
+        @request.session.get("USERNAME") match {
+            case Some(_) => {
+                <a href="@routes.UserController.logout">logout</a>
+            }
+
+            case None => {
+                <a href="@routes.UserController.login">login</a>
+                <a href="@routes.UserController.create">signup</a>
+            }
+        }
+
+        @content
+    </body>
+</html>

@@ -1,0 +1,11 @@
+@(user: Users.Data, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+
+@main("Profile", assetsFinder) {
+  <h1>@user.username</h1>
+
+  <p>@request.flash.get("info")</p>
+
+  @if(request.session.get("USERNAME").forall(_ == user.username)) {
+    <a href="@routes.RobotController.create()">Create robot</a>
+  }
+}

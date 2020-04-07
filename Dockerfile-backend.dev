@@ -1,15 +1,9 @@
-FROM elixir:alpine
+FROM hseeberger/scala-sbt:8u222_1.3.4_2.13.1
 WORKDIR /backend
 
-RUN mix local.hex --force && mix local.rebar --force
+COPY . ./
 
-# necessary for bcrypt_elixir
-RUN apk add build-base
+RUN sbt update
 
-COPY backend/mix.exs backend/mix.lock ./
-RUN mix do deps.get, deps.compile
-
-COPY backend ./
-
-EXPOSE 4000
-CMD iex -S mix phx.server
+EXPOSE 9000
+CMD sbt run
