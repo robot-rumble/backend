@@ -1,11 +1,11 @@
 # frontend
-*/elm-stuff
-*/dist/*
-!*/dist/index.html
-
-# backend
-*/_build
+src/frontend/elm-stuff
+src/frontend/node_modules
 
 # logic
-*/_build
-**/.merlin
+src/logic/_build
+src/logic/.merlin
+
+# backend
+target
+

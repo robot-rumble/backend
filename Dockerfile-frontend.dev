@@ -1,14 +1,13 @@
-FROM node:lts
+FROM node:latest
 WORKDIR /frontend
 
-COPY frontend/package.json ./
+COPY src/frontend/package.json ./
 RUN npm install
 
-COPY frontend ./
+COPY src/frontend ./
 
 # needed for elm to install packages
 RUN node_modules/.bin/elm make src/*.elm
 
-EXPOSE 8080
 CMD npm run watch
 

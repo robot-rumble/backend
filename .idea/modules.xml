@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/src/frontend/frontend.iml" filepath="$PROJECT_DIR$/src/frontend/frontend.iml" />
+      <module fileurl="file://$PROJECT_DIR$/src/logic/logic.iml" filepath="$PROJECT_DIR$/src/logic/logic.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/robot-rumble.iml" filepath="$PROJECT_DIR$/.idea/modules/robot-rumble.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/robot-rumble-build.iml" filepath="$PROJECT_DIR$/.idea/modules/robot-rumble-build.iml" />
+    </modules>
+  </component>
+</project>

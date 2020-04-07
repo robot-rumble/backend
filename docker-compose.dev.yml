@@ -9,33 +9,36 @@ services:
       context: .
       dockerfile: Dockerfile-logic.dev
     volumes:
-      - ./logic:/logic
+      - ./src/logic:/logic
       - logic:/logic-output
 
   frontend:
     build:
       context: .
       dockerfile: Dockerfile-frontend.dev
-    ports:
-      - 8080:8080
     depends_on:
       - logic
     volumes:
-      - ./frontend:/frontend
+      - ./src/frontend:/frontend
       - logic:/logic
+      - frontend:/frontend-output
 
   backend:
     build:
       context: .
       dockerfile: Dockerfile-backend.dev
     ports:
-      - 4000:4000
+      - 9000:9000
     depends_on:
       - db
       - logic
     volumes:
-      - ./backend:/backend
+      - .:/backend
       - logic:/logic
+      - frontend:/frontend
+    # https://github.com/docker/compose/issues/596#issuecomment-133004835
+    stdin_open: true
 
 volumes:
   logic:
+  frontend:
