@@ -1,11 +1,1 @@
-# frontend
-src/frontend/elm-stuff
-src/frontend/node_modules
-
-# logic
-src/logic/_build
-src/logic/.merlin
-
-# backend
-target
-
+.gitignore
