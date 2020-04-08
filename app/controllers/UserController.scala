@@ -1,11 +1,11 @@
 package controllers
 
 import javax.inject._
-import models.Users
+import models.{Robots, Users}
 import play.api.mvc._
 
 @Singleton
-class UserController @Inject()(cc: MessagesControllerComponents, repo: Users.Repo, assetsFinder: AssetsFinder)
+class UserController @Inject()(cc: MessagesControllerComponents, repo: Users.Repo, robotRepo: Robots.Repo, assetsFinder: AssetsFinder)
   extends MessagesAbstractController(cc) {
 
   def create: Action[AnyContent] = Action { implicit request =>
@@ -24,7 +24,6 @@ class UserController @Inject()(cc: MessagesControllerComponents, repo: Users.Rep
           case None => {
             val user = repo.create(username, data.password)
             Redirect(routes.UserController.profile(user.username))
-              .flashing("info" -> "Account created!")
               .withSession("USERNAME" -> user.username)
           }
         }
@@ -45,7 +44,6 @@ class UserController @Inject()(cc: MessagesControllerComponents, repo: Users.Rep
         repo.find(data.username) match {
           case Some(user) =>
             Redirect(routes.UserController.profile(data.username))
-              .flashing("info" -> "Logged in!")
               .withSession("USERNAME" -> user.username)
           case None =>
             Forbidden(views.html.login(LoginForm.form.withGlobalError("Incorrect username or password."), assetsFinder))
@@ -57,14 +55,13 @@ class UserController @Inject()(cc: MessagesControllerComponents, repo: Users.Rep
   def logout: Action[AnyContent] = Action { implicit request =>
     Redirect(routes.HomeController.index())
       .withNewSession
-      .flashing("info" -> "Logged out!")
   }
 
   def profile(username: String): Action[AnyContent] = Action { implicit request =>
     repo.find(username) match {
       case Some(user) => {
-        println(request.session.get("USERNAME"), user.username)
-        Ok(views.html.profile(user, assetsFinder))
+        val robots = robotRepo.findAll(user)
+        Ok(views.html.profile(user, robots, assetsFinder))
       }
       case None => NotFound("User does not exist!")
     }

@@ -13,7 +13,9 @@ object Robots {
 
     val schema: db.ctx.Quoted[db.ctx.EntityQuery[Data]] = quote(querySchema[Data]("robots"))
 
-    def find(user: Users.Data, robot: String): Option[Data] = run(schema.filter(_.user_id == lift(user.id))).headOption
+    def find(user: Users.Data, robot: String): Option[Data] = run(schema.filter(r => r.user_id == lift(user.id) && r.name == lift(robot))).headOption
+
+    def findAll(user: Users.Data): List[Data] = run(schema.filter(_.user_id == lift(user.id)))
 
     def create(user: Users.Data, name: String): Data = {
       val data = Data(name, "", -1, user.id)
@@ -25,4 +27,5 @@ object Robots {
       run(schema.update(newRobot))
     }
   }
+
 }

@@ -1,4 +1,4 @@
-@(title: String, assetsFinder: AssetsFinder)(content: Html)(implicit request: RequestHeader)
+@(title: String, className: String, assetsFinder: AssetsFinder, showFooter: Boolean = true)(content: Html)(implicit request: RequestHeader)
 
 <!DOCTYPE html>
 <html lang="en">
@@ -12,19 +12,44 @@
         @helper.javascriptRouter("jsRoutes")(
             routes.javascript.RobotController.postCreate,
         )
-    <script>window.jsRoutes = jsRoutes</script>
+        <script>window.jsRoutes = jsRoutes</script>
 
-        @request.session.get("USERNAME") match {
-            case Some(_) => {
-                <a href="@routes.UserController.logout">logout</a>
-            }
+        <div class="content">
+            <section class="header d-flex justify-content-between">
+                <a class="text-black" href="@routes.HomeController.index">Robot Rumble</a>
+                <div class="d-flex links">
+                    <a href="@routes.HomeController.warehouse">warehouse</a>
+                    <a href="@routes.HomeController.rules">rules</a>
+                    @request.session.get("USERNAME") match {
+                        case Some(username) => {
+                            <a href="@routes.UserController.profile(username)">profile</a>
+                            <a href="@routes.UserController.logout">logout</a>
+                        }
 
-            case None => {
-                <a href="@routes.UserController.login">login</a>
-                <a href="@routes.UserController.create">signup</a>
-            }
+                        case None => {
+                            <div class="d-flex">
+                                <a href="@routes.UserController.login">login</a>
+                                    &nbsp;&#47;&nbsp;
+                                <a href="@routes.UserController.create">signup</a>
+                            </div>
+                        }
+                    }
+                </div>
+            </section>
+
+            <section class="main container @className">
+            @content
+            </section>
+        </div>
+
+        @if(showFooter) {
+            <section class="footer d-flex justify-content-between">
+                <p>Made with Rust, Scala, Elm, and <3 by Chicode NFP</p>
+                <div class="d-flex">
+                    <a href="https://github.com/chicode/robot-rumble">github repo</a>&nbsp;&nbsp;
+                    <a href="https://github.com/chicode/robot-rumble/issues/new">report a bug</a>
+                </div>
+            </section>
         }
-
-        @content
     </body>
 </html>
