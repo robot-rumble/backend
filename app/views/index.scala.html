@@ -1,5 +1,21 @@
 @(assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
-@main("Arena", assetsFinder) {
-  <robot-arena></robot-arena>
+@main("Robot Rumble", "index", assetsFinder) {
+    <h1>Code robots, win matches, rank up.</h1>
+
+    <div class="overview">
+        <p>The rules are simple:</p>
+        <div class="rules">
+            <p>* two players fight in a match</p>
+            <p>* robots spawn every 10 turns</p>
+            <p>* a robot can move or attack</p>
+            <p>* each robot has 5 health</p>
+            <p>* the player with more robots </p>
+            <p>* after 100 turns wins  </p>
+        </div>
+        <p>Read more about the <a href="@routes.HomeController.rules">api</a>.</p>
+    </div>
+    @* <div class="demo">*@
+    @* <robot-arena></robot-arena>*@
+    @* </div>*@
 }

@@ -10,4 +10,8 @@ class HomeController @Inject()(cc: ControllerComponents, assetsFinder: AssetsFin
   def index: Action[AnyContent] = Action { implicit request =>
     Ok(views.html.index(assetsFinder))
   }
+
+  def warehouse: Action[AnyContent] = TODO
+
+  def rules: Action[AnyContent] = TODO
 }

@@ -1,11 +1,23 @@
-@(user: Users.Data, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+@(user: Users.Data, robots: List[Robots.Data], assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
-@main("Profile", assetsFinder) {
-  <h1>@user.username</h1>
+@main("Profile", "profile", assetsFinder) {
+    <h1>@user.username</h1>
 
-  <p>@request.flash.get("info")</p>
+    @if(robots.nonEmpty) {
+        <div class="robots">
+            <h5>robots</h5>
+            <ul>
+            @for(robot <- robots) {
+                <li>
+                        &gt;&nbsp;
+                    <a href="@routes.RobotController.view(user.username, robot.name)">@robot.name</a>
+                </li>
+            }
+            </ul>
+        </div>
+    }
 
-  @if(request.session.get("USERNAME").forall(_ == user.username)) {
-    <a href="@routes.RobotController.create()">Create robot</a>
-  }
+    @if(request.session.get("USERNAME").forall(_ == user.username)) {
+        <a href="@routes.RobotController.create()">create robot</a>
+    }
 }
