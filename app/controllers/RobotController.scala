@@ -61,4 +61,10 @@ class RobotController @Inject()(cc: MessagesControllerComponents, assetsFinder: 
         }
       } else Forbidden("")
   }
+
+  def viewMatch(id: String): Action[AnyContent] = TODO
+
+  def viewCode(user: String, robot: String): Action[AnyContent] = TODO
+
+  def challenge(user: String, robot: String): Action[AnyContent] = TODO
 }

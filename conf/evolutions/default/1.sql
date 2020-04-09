@@ -22,21 +22,25 @@ CREATE TABLE robots
     rating      INT         NOT NULL DEFAULT 1000
 );
 
+CREATE TYPE match_outcome AS ENUM ('r1_won', 'r2_won', 'draw');
+
 CREATE TABLE matches
 (
     id        SERIAL PRIMARY KEY,
-    created   TIMESTAMP NOT NULL DEFAULT NOW(),
-    r1_id     SERIAL    NOT NULL REFERENCES robots (id),
-    r2_id     SERIAL    NOT NULL REFERENCES robots (id),
-    ranked    BOOL      NOT NULL DEFAULT TRUE,
-    r1_won    BOOL      NOT NULL,
-    r1_rating INT       NOT NULL,
-    r2_rating INT       NOT NULL,
-    r1_time   REAL      NOT NULL,
-    r2_time   REAL      NOT NULL,
+    created   TIMESTAMP     NOT NULL DEFAULT NOW(),
+    r1_id     SERIAL        NOT NULL REFERENCES robots (id),
+    r2_id     SERIAL        NOT NULL REFERENCES robots (id),
+    ranked    BOOL          NOT NULL DEFAULT TRUE,
+    outcome   match_outcome NOT NULL,
+--  If `errored` and r1_won/r2_won, then the other robot errored. Otherwise, both errored.
+    errored   BOOL          NOT NULL,
+    r1_rating REAL          NOT NULL,
+    r2_rating REAL          NOT NULL,
+    r1_time   REAL          NOT NULL,
+    r2_time   REAL          NOT NULL,
     r1_logs   TEXT,
     r2_logs   TEXT,
-    data      JSON      NOT NULL
+    data      JSON          NOT NULL
 );
 
 -- !Downs
