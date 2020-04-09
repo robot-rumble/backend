@@ -2,21 +2,25 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-GET         /                           controllers.HomeController.index
-GET         /rules                      controllers.HomeController.rules
-GET         /warehouse                  controllers.HomeController.warehouse
+GET         /                                controllers.HomeController.index
+GET         /rules                           controllers.HomeController.rules
+GET         /warehouse                       controllers.HomeController.warehouse
 
-GET         /signup                     controllers.UserController.create
-POST        /signup                     controllers.UserController.postCreate
-GET         /login                      controllers.UserController.login
-POST        /login                      controllers.UserController.postLogin
-GET         /logout                     controllers.UserController.logout
-GET         /p/:username                controllers.UserController.profile(username)
+GET         /signup                          controllers.UserController.create
+POST        /signup                          controllers.UserController.postCreate
+GET         /login                           controllers.UserController.login
+POST        /login                           controllers.UserController.postLogin
+GET         /logout                          controllers.UserController.logout
+GET         /p/:username                     controllers.UserController.profile(username)
 
-GET         /create-robot               controllers.RobotController.create
-POST        /create-robot               controllers.RobotController.postCreate
-GET         /p/:user/:robot             controllers.RobotController.view(user, robot)
+GET         /create-robot                    controllers.RobotController.create
+POST        /create-robot                    controllers.RobotController.postCreate
+GET         /p/:user/:robot                  controllers.RobotController.view(user, robot)
+GET         /p/:user/:robot/code             controllers.RobotController.viewCode(user, robot)
+GET         /p/:user/:robot/challenge        controllers.RobotController.challenge(user, robot)
 + nocsrf
-POST        /update/:user/:robot        controllers.RobotController.update(user, robot)
+POST        /update/:user/:robot             controllers.RobotController.update(user, robot)
 
-GET         /assets/*file               controllers.Assets.at(file)
+GET         /m/:id                           controllers.RobotController.viewMatch(id)
+
+GET         /assets/*file                    controllers.Assets.at(file)
