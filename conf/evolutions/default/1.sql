@@ -3,16 +3,20 @@
 CREATE TABLE users
 (
     id       SERIAL PRIMARY KEY,
-    username VARCHAR(50) NOT NULL,
+    bio      TEXT,
+    username VARCHAR(15) NOT NULL,
     password VARCHAR(50) NOT NULL
 );
 
 CREATE TABLE robots
 (
-    id      SERIAL PRIMARY KEY,
-    name    VARCHAR(50) NOT NULL,
-    code    TEXT        NOT NULL,
-    user_id SERIAL      NOT NULL REFERENCES users (id)
+    id          SERIAL PRIMARY KEY,
+    user_id     SERIAL      NOT NULL REFERENCES users (id),
+    name        VARCHAR(15) NOT NULL,
+    bio         TEXT,
+    open_source BOOL        NOT NULL,
+    code        TEXT        NOT NULL,
+    rating      INT         NOT NULL
 );
 
 CREATE TABLE robot_matches
@@ -21,7 +25,7 @@ CREATE TABLE robot_matches
     red_robot_id  SERIAL  NOT NULL REFERENCES robots (id),
     blue_robot_id SERIAL  NOT NULL REFERENCES robots (id),
     red_won       BOOLEAN NOT NULL,
-    data          TEXT    NOT NULL
+    data JSON NOT NULL
 );
 
 -- !Downs
