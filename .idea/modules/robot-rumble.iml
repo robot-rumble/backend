@@ -32,10 +32,20 @@
       <sourceFolder url="file://$MODULE_DIR$/../../src/logic/backend/examples" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../../src/logic/backend/tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../../src/logic/backend/benches" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../src/logic/pyrunner/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../src/logic/pyrunner/examples" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../src/logic/pyrunner/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../src/logic/pyrunner/benches" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../src/yente/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../src/yente/examples" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../src/yente/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../src/yente/benches" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/../../src/logic/backend/target" />
       <excludeFolder url="file://$MODULE_DIR$/../../src/logic/frontend/target" />
       <excludeFolder url="file://$MODULE_DIR$/../../src/logic/logic/target" />
+      <excludeFolder url="file://$MODULE_DIR$/../../src/logic/pyrunner/target" />
       <excludeFolder url="file://$MODULE_DIR$/../../src/logic/target" />
+      <excludeFolder url="file://$MODULE_DIR$/../../src/yente/target" />
       <excludeFolder url="file://$MODULE_DIR$/../../target/streams" />
       <excludeFolder url="file://$MODULE_DIR$/../../target/web" />
       <excludePattern pattern="elm-stuff" />
