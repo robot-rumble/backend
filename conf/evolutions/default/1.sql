@@ -3,7 +3,7 @@
 CREATE TABLE users
 (
     id       SERIAL PRIMARY KEY,
-    created  TIMESTAMP   NOT NULL DEFAULT NOW(),
+    created  TIMESTAMP   NOT NULL DEFAULT current_timestamp,
     bio      TEXT,
     username VARCHAR(15) NOT NULL,
     password VARCHAR(50) NOT NULL
@@ -12,7 +12,8 @@ CREATE TABLE users
 CREATE TABLE robots
 (
     id          SERIAL PRIMARY KEY,
-    created     TIMESTAMP   NOT NULL DEFAULT NOW(),
+    created     TIMESTAMP   NOT NULL DEFAULT current_timestamp,
+    modified    TIMESTAMP   NOT NULL DEFAULT current_timestamp,
     user_id     SERIAL      NOT NULL REFERENCES users (id),
     name        VARCHAR(15) NOT NULL,
     bio         TEXT,
@@ -21,6 +22,23 @@ CREATE TABLE robots
     code        TEXT        NOT NULL,
     rating      INT         NOT NULL DEFAULT 1000
 );
+
+CREATE OR REPLACE FUNCTION update_modified_column() RETURNS TRIGGER AS
+$$
+BEGIN
+    IF NEW.code <> OLD.code THEN
+        NEW.modified = now();
+    END IF;
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+CREATE TRIGGER update_modified_column_trigger
+    BEFORE UPDATE
+    ON robots
+    FOR EACH ROW
+EXECUTE PROCEDURE update_modified_column();
+
 
 CREATE TYPE match_outcome AS ENUM ('r1_won', 'r2_won', 'draw');
 
@@ -45,6 +63,7 @@ CREATE TABLE matches
 
 -- !Downs
 
-DROP TABLE matches;
-DROP TABLE robots;
-DROP TABLE users;
+DROP TABLE IF EXISTS matches;
+DROP TYPE IF EXISTS match_outcome;
+DROP TABLE IF EXISTS robots;
+DROP TABLE IF EXISTS users;
