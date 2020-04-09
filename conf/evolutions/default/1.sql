@@ -19,7 +19,7 @@ CREATE TABLE robots
     open_source BOOL        NOT NULL DEFAULT TRUE,
     automatch   BOOL        NOT NULL DEFAULT TRUE,
     code        TEXT        NOT NULL,
-    rating      INT         NOT NULL
+    rating      INT         NOT NULL DEFAULT 1000
 );
 
 CREATE TABLE matches
