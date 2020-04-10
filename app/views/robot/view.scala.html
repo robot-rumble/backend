@@ -1,36 +1,46 @@
-@(user: Users.Data, robot: Robots.Data, matches: List[(Matches.Data, Robots.Data, Robots.Data)], assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+@(user: Users.Data, robot: Robots.Data, battles: List[(Battles.Data, Robots.Data, Robots.Data)], assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
-@main(s"Robot ${robot.name}", "robot", assetsFinder, showFooter = false) {
+@main(s"Robot ${robot.name}", "robot-page", assetsFinder, showFooter = false) {
   <h1>@robot.name</h1>
 
-  @robot.bio match{
+  @robot.bio match {
     case Some(bio) => {
       <p>bio</p>
-    },
+    }
     case None => {
       <p></p>
-    },
+    }
   }
 
-  <div class="d-flex actions">
+  <div class="d-flex actions mb-5">
     @if(robot.openSource) {
-      <a href="@routes.RobotController.viewCode(user.username, robot.name)">
-        <img src="@assetsFinder.path("images/openSource.svg")" alt="">
+      <a href="@routes.RobotController.viewCode(user.username, robot.name)" class="text-green">
+        <img src="@assetsFinder.path("images/open-source.svg")" alt="">
         view source
       </a>
     }
-    <a href="@routes.RobotController.challenge(user.username, robot.name)">
-      <img src="@assetsFinder.path("images/swords.svg")" alt="">
+    <a href="@routes.RobotController.challenge(user.username, robot.name)" class="text-red">
+      <img src="@assetsFinder.path("images/battle.svg")" alt="">
       challenge
     </a>
+    @if(request.session.get("USERNAME").forall(_ == user.username)) {
+      <a href="@routes.RobotController.edit(user.username, robot.name)" class="text-yellow">
+        <img src="@assetsFinder.path("images/edit.svg")" alt="">
+        edit
+      </a>
+    }
   </div>
 
   <div class="matches">
     <h5>Matches</h5>
-    <ul>
-    @for((m, r1, r2) <- matches) {
-      <li>@tags.`match`(m, r1, r2)</li>
+    @if(battles.nonEmpty) {
+      <ul>
+      @for((battle, r1, r2) <- battles) {
+        <li>@tags.battle(battle, r1, r2, assetsFinder, forRobot = true)</li>
+      }
+      </ul>
+    } else {
+      <p>None yet!</p>
     }
-    </ul>
   </div>
 }

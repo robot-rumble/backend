@@ -4,7 +4,6 @@
 <html lang="en">
     <head>
         <title>@title</title>
-        <link rel="stylesheet" media="screen" href="@assetsFinder.path("dist/app.css")">
         <link rel="shortcut icon" type="image/png" href="@assetsFinder.path("images/favicon.png")">
         <script src="@assetsFinder.path("dist/bundle.js")" type="text/javascript"></script>
     </head>
@@ -19,6 +18,7 @@
                 <a class="text-black" href="@routes.HomeController.index">Robot Rumble</a>
                 <div class="d-flex links">
                     <a href="@routes.RobotController.warehouse">warehouse</a>
+                    <a href="@routes.RobotController.battles">battles</a>
                     <a href="@routes.HomeController.rules">rules</a>
                     @request.session.get("USERNAME") match {
                         case Some(username) => {

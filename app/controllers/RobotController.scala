@@ -1,7 +1,7 @@
 package controllers
 
 import javax.inject._
-import models.{Robots, Users, Matches}
+import models.{Battles, Robots, Users}
 import play.api.libs.json.{JsDefined, JsString, JsValue}
 import play.api.mvc._
 
@@ -11,22 +11,28 @@ class RobotController @Inject()(cc: MessagesControllerComponents,
                                 authAction: AuthAction,
                                 repo: Robots.Repo,
                                 usersRepo: Users.Repo,
-                                matchesRepo: Matches.Repo)
+                                matchesRepo: Battles.Repo)
     extends MessagesAbstractController(cc) {
 
   def warehouse: Action[AnyContent] = Action { implicit request =>
     Ok(views.html.robot.warehouse(repo.findAll(), assetsFinder))
   }
 
+  def battles: Action[AnyContent] = Action { implicit request =>
+    Ok(views.html.robot.battles(matchesRepo.findAll(), assetsFinder))
+  }
+
   def create: Action[AnyContent] = authAction(parse.anyContent) {
-    _ => implicit request =>
-      Ok(views.html.robot.create(CreateRobotForm.form, assetsFinder))
+    _ =>
+      implicit request =>
+        Ok(views.html.robot.create(CreateRobotForm.form, assetsFinder))
   }
 
   def postCreate: Action[AnyContent] = authAction(parse.anyContent) {
-    user => implicit request =>
-      CreateRobotForm.form.bindFromRequest.fold(
-        formWithErrors => {
+    user =>
+      implicit request =>
+        CreateRobotForm.form.bindFromRequest.fold(
+          formWithErrors => {
           BadRequest(views.html.robot.create(formWithErrors, assetsFinder))
         },
         data => {
@@ -92,7 +98,15 @@ class RobotController @Inject()(cc: MessagesControllerComponents,
 
   def viewMatch(id: String): Action[AnyContent] = TODO
 
-  def viewCode(user: String, robot: String): Action[AnyContent] = TODO
+  def viewCode(user: String, robot: String): Action[AnyContent] = Action { implicit request =>
+    (for {
+      user <- usersRepo.find(user)
+      robot <- repo.find(user, robot) if robot.openSource
+    } yield robot) match {
+      case Some(robot) => Ok(views.html.robot.viewCode(robot, assetsFinder))
+      case None => NotFound("")
+    }
+  }
 
   def challenge(user: String, robot: String): Action[AnyContent] = TODO
 }

@@ -1,0 +1,11 @@
+@(battles: List[(Battles.Data, Robots.Data, Robots.Data)], assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+
+@main("Warehouse", "warehouse", assetsFinder) {
+    <h1>Battles</h1>
+
+    <ul>
+    @for((battle, r1, r2) <- battles) {
+        <li>@tags.battle(battle, r1, r2, assetsFinder, forRobot = false)</li>
+    }
+    </ul>
+}
