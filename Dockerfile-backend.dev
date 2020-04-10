@@ -1,9 +1,0 @@
-FROM hseeberger/scala-sbt:8u222_1.3.4_2.13.1
-WORKDIR /backend
-
-COPY . ./
-
-RUN sbt update
-
-EXPOSE 9000
-CMD sbt run
