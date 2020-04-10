@@ -1,0 +1,9 @@
+@(user: Users.Data, robot: Robots.Data, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+
+@main(s"Robot ${robot.name}", "robot", assetsFinder, showFooter = false) {
+  <h1>@robot.name</h1>
+
+  @if(request.session.get("USERNAME").forall(_ == user.username)) {
+    <robot-arena user="@user.username" robot="@robot.name" code="@robot.code"></robot-arena>
+  }
+}

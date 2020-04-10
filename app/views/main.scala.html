@@ -18,7 +18,7 @@
             <section class="header d-flex justify-content-between">
                 <a class="text-black" href="@routes.HomeController.index">Robot Rumble</a>
                 <div class="d-flex links">
-                    <a href="@routes.HomeController.warehouse">warehouse</a>
+                    <a href="@routes.RobotController.warehouse">warehouse</a>
                     <a href="@routes.HomeController.rules">rules</a>
                     @request.session.get("USERNAME") match {
                         case Some(username) => {

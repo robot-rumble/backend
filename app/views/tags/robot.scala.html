@@ -1,0 +1,16 @@
+@(user: Users.Data, robot: Robots.Data, assetsFinder: AssetsFinder, showUser: Boolean)
+
+<ul class="robot">
+    <li><a href="@routes.RobotController.view(user.username, robot.name)">@robot.name</a></li>
+    <li class="separator"></li>
+    @if(showUser) {
+        <li>by <a href="@routes.UserController.profile(user.username)">@user.username</a></li>
+        <li class="separator"></li>
+    }
+    <li class="d-flex">
+        <p class="mr-2">@robot.rating</p>
+        @if(robot.openSource) {
+            <img src="@assetsFinder.path("images/openSource.svg")" alt="foss">
+        }
+    </li>
+</ul>

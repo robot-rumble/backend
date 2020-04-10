@@ -60,7 +60,7 @@ class UserController @Inject()(cc: MessagesControllerComponents, repo: Users.Rep
   def profile(username: String): Action[AnyContent] = Action { implicit request =>
     repo.find(username) match {
       case Some(user) => {
-        val robots = robotRepo.findAll(user)
+        val robots = robotRepo.findAllForUser(user)
         Ok(views.html.profile(user, robots, assetsFinder))
       }
       case None => NotFound("User does not exist!")

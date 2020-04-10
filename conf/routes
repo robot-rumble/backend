@@ -4,7 +4,7 @@
 
 GET         /                                controllers.HomeController.index
 GET         /rules                           controllers.HomeController.rules
-GET         /warehouse                       controllers.HomeController.warehouse
+GET         /warehouse                       controllers.RobotController.warehouse
 
 GET         /signup                          controllers.UserController.create
 POST        /signup                          controllers.UserController.postCreate
@@ -16,6 +16,7 @@ GET         /p/:username                     controllers.UserController.profile(
 GET         /create-robot                    controllers.RobotController.create
 POST        /create-robot                    controllers.RobotController.postCreate
 GET         /p/:user/:robot                  controllers.RobotController.view(user, robot)
+GET         /p/:user/:robot/edit             controllers.RobotController.edit(user, robot)
 GET         /p/:user/:robot/code             controllers.RobotController.viewCode(user, robot)
 GET         /p/:user/:robot/challenge        controllers.RobotController.challenge(user, robot)
 + nocsrf

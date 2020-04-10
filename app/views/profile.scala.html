@@ -7,11 +7,9 @@
         <div class="robots">
             <h5>robots</h5>
             <ul>
+
             @for(robot <- robots) {
-                <li>
-                        &gt;&nbsp;
-                    <a href="@routes.RobotController.view(user.username, robot.name)">@robot.name</a>
-                </li>
+                <li>@tags.panel(user, robot, assetsFinder, showUser = false)</li>
             }
             </ul>
         </div>
