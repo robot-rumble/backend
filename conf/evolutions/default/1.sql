@@ -4,7 +4,6 @@ CREATE TABLE users
 (
     id       SERIAL PRIMARY KEY,
     created  TIMESTAMP   NOT NULL DEFAULT current_timestamp,
-    bio      TEXT,
     username VARCHAR(15) NOT NULL,
     password VARCHAR(50) NOT NULL
 );
@@ -52,8 +51,8 @@ CREATE TABLE matches
     outcome   match_outcome NOT NULL,
 --  If `errored` and r1_won/r2_won, then the other robot errored. Otherwise, both errored.
     errored   BOOL          NOT NULL,
-    r1_rating REAL          NOT NULL,
-    r2_rating REAL          NOT NULL,
+    r1_rating INT           NOT NULL,
+    r2_rating INT           NOT NULL,
     r1_time   REAL          NOT NULL,
     r2_time   REAL          NOT NULL,
     r1_logs   TEXT,

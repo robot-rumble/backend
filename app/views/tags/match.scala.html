@@ -1,0 +1,19 @@
+@(`match`: Matches.Data, r1: Robots.Data, r2: Robots.Data, assetsFinder: AssetsFinder, forRobot: Boolean)
+
+<ul class="robot">
+    @if(forRobot) {
+        <li><img src="@{
+            val imgPath = Matches.didR1Win(`match`, r1, r2) match {
+                case Some(won) => if (won) "images/won.svg" else "images/lost.svg"
+                case None => "images/draw.svg"
+            }
+            assetsFinder.path(imgPath)
+        }"></li>
+        <li class="separator"></li>
+        <li><a href="@routes.RobotController.viewMatch(`match`.id.toString)">vs @r2.name</a></li>
+        <li class="separator"></li>
+    } else {
+        <li><a href="@routes.RobotController.viewMatch(`match`.id.toString)">@r1.name vs @r2.name</a></li>
+        <li class="separator"></li>
+    }
+</ul>

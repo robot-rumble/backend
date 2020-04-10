@@ -11,7 +11,5 @@ class HomeController @Inject()(cc: ControllerComponents, assetsFinder: AssetsFin
     Ok(views.html.index(assetsFinder))
   }
 
-  def warehouse: Action[AnyContent] = TODO
-
   def rules: Action[AnyContent] = TODO
 }

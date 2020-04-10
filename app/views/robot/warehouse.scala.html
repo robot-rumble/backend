@@ -1,0 +1,11 @@
+@(robots: List[(Robots.Data, Users.Data)], assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+
+@main("Warehouse", "warehouse", assetsFinder) {
+    <h1>Warehouse</h1>
+
+    <ul>
+    @for((robot, user) <- robots) {
+        <li>@tags.panel(user, robot, assetsFinder, showUser = true)</li>
+    }
+    </ul>
+}

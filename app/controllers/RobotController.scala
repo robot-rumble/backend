@@ -1,21 +1,30 @@
 package controllers
 
 import javax.inject._
-import models.{Robots, Users}
+import models.{Robots, Users, Matches}
 import play.api.libs.json.{JsDefined, JsString, JsValue}
 import play.api.mvc._
 
 @Singleton
-class RobotController @Inject()(cc: MessagesControllerComponents, assetsFinder: AssetsFinder, authAction: AuthAction, repo: Robots.Repo, usersRepo: Users.Repo)
-  extends MessagesAbstractController(cc) {
+class RobotController @Inject()(cc: MessagesControllerComponents,
+                                assetsFinder: AssetsFinder,
+                                authAction: AuthAction,
+                                repo: Robots.Repo,
+                                usersRepo: Users.Repo,
+                                matchesRepo: Matches.Repo)
+    extends MessagesAbstractController(cc) {
 
-  def create: Action[AnyContent] = authAction(parse.anyContent) { _ =>
-    implicit request =>
+  def warehouse: Action[AnyContent] = Action { implicit request =>
+    Ok(views.html.robot.warehouse(repo.findAll(), assetsFinder))
+  }
+
+  def create: Action[AnyContent] = authAction(parse.anyContent) {
+    _ => implicit request =>
       Ok(views.html.robot.create(CreateRobotForm.form, assetsFinder))
   }
 
-  def postCreate: Action[AnyContent] = authAction(parse.anyContent) { user =>
-    implicit request =>
+  def postCreate: Action[AnyContent] = authAction(parse.anyContent) {
+    user => implicit request =>
       CreateRobotForm.form.bindFromRequest.fold(
         formWithErrors => {
           BadRequest(views.html.robot.create(formWithErrors, assetsFinder))
@@ -24,7 +33,12 @@ class RobotController @Inject()(cc: MessagesControllerComponents, assetsFinder: 
           val name = data.name.trim()
           repo.find(user, name) match {
             case Some(_) =>
-              BadRequest(views.html.robot.create(CreateRobotForm.form.fill(data).withGlobalError("Robot with this name already exists"), assetsFinder))
+              BadRequest(
+                views.html.robot.create(
+                  CreateRobotForm.form
+                    .fill(data)
+                    .withGlobalError("Robot with this name already exists"),
+                  assetsFinder))
             case None => {
               val robot = repo.create(user, name)
               Redirect(routes.RobotController.view(user.username, robot.name))
@@ -34,18 +48,32 @@ class RobotController @Inject()(cc: MessagesControllerComponents, assetsFinder: 
       )
   }
 
-  def view(user: String, robot: String): Action[AnyContent] = Action { implicit request =>
-    (for {
-      user <- usersRepo.find(user)
-      robot <- repo.find(user, robot)
-    } yield (user, robot)) match {
-      case Some((user, robot)) => Ok(views.html.robot.view(user, robot, assetsFinder))
-      case None => NotFound("Robot not found")
-    }
+  def view(user: String, robot: String): Action[AnyContent] = Action {
+    implicit request =>
+      (for {
+        user <- usersRepo.find(user)
+        robot <- repo.find(user, robot)
+      } yield (user, robot)) match {
+        case Some((user, robot)) =>
+          Ok(views.html.robot.view(user, robot, matchesRepo.findForRobot(robot), assetsFinder))
+        case None => NotFound("Robot not found")
+      }
   }
 
-  def update(user: String, robot: String): Action[JsValue] = authAction(parse.json) { authUser =>
+  def edit(user: String, robot: String): Action[AnyContent] = Action {
     implicit request =>
+      (for {
+        user <- usersRepo.find(user)
+        robot <- repo.find(user, robot)
+      } yield (user, robot)) match {
+        case Some((user, robot)) =>
+          Ok(views.html.robot.edit(user, robot, assetsFinder))
+        case None => NotFound("Robot not found")
+      }
+  }
+
+  def update(user: String, robot: String): Action[JsValue] =
+    authAction(parse.json) { authUser => implicit request =>
       if (user == authUser.username) {
         repo.find(authUser, robot) match {
           case Some(robot) => {
@@ -60,7 +88,7 @@ class RobotController @Inject()(cc: MessagesControllerComponents, assetsFinder: 
           case None => NotFound("User does not exist")
         }
       } else Forbidden("")
-  }
+    }
 
   def viewMatch(id: String): Action[AnyContent] = TODO
 
