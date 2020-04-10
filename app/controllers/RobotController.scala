@@ -2,7 +2,7 @@ package controllers
 
 import javax.inject._
 import models.{Robots, Users}
-import play.api.libs.json.{JsDefined, JsUndefined, JsValue}
+import play.api.libs.json.{JsDefined, JsString, JsValue}
 import play.api.mvc._
 
 @Singleton
@@ -50,11 +50,11 @@ class RobotController @Inject()(cc: MessagesControllerComponents, assetsFinder: 
         repo.find(authUser, robot) match {
           case Some(robot) => {
             request.body \ "code" match {
-              case JsDefined(code) => {
-                repo.update(robot, code.toString())
+              case JsDefined(code: JsString) => {
+                repo.update(robot, code.value)
                 Ok("Code updated")
               }
-              case _: JsUndefined => BadRequest("Missing 'code' field")
+              case _ => BadRequest("Invalid 'code' field")
             }
           }
           case None => NotFound("User does not exist")
