@@ -39,30 +39,30 @@ CREATE TRIGGER update_modified_column_trigger
 EXECUTE PROCEDURE update_modified_column();
 
 
-CREATE TYPE match_outcome AS ENUM ('r1_won', 'r2_won', 'draw');
+CREATE TYPE battle_outcome AS ENUM ('r1_won', 'r2_won', 'draw');
 
-CREATE TABLE matches
+CREATE TABLE battles
 (
     id        SERIAL PRIMARY KEY,
-    created   TIMESTAMP     NOT NULL DEFAULT NOW(),
-    r1_id     SERIAL        NOT NULL REFERENCES robots (id),
-    r2_id     SERIAL        NOT NULL REFERENCES robots (id),
-    ranked    BOOL          NOT NULL DEFAULT TRUE,
-    outcome   match_outcome NOT NULL,
+    created   TIMESTAMP      NOT NULL DEFAULT NOW(),
+    r1_id     SERIAL         NOT NULL REFERENCES robots (id),
+    r2_id     SERIAL         NOT NULL REFERENCES robots (id),
+    ranked    BOOL           NOT NULL DEFAULT TRUE,
+    outcome   battle_outcome NOT NULL,
 --  If `errored` and r1_won/r2_won, then the other robot errored. Otherwise, both errored.
-    errored   BOOL          NOT NULL,
-    r1_rating INT           NOT NULL,
-    r2_rating INT           NOT NULL,
-    r1_time   REAL          NOT NULL,
-    r2_time   REAL          NOT NULL,
+    errored   BOOL           NOT NULL,
+    r1_rating INT            NOT NULL,
+    r2_rating INT            NOT NULL,
+    r1_time   REAL           NOT NULL,
+    r2_time   REAL           NOT NULL,
     r1_logs   TEXT,
     r2_logs   TEXT,
-    data      JSON          NOT NULL
+    data      JSON           NOT NULL
 );
 
 -- !Downs
 
-DROP TABLE IF EXISTS matches;
-DROP TYPE IF EXISTS match_outcome;
+DROP TABLE IF EXISTS battles;
+DROP TYPE IF EXISTS battle_outcome;
 DROP TABLE IF EXISTS robots;
 DROP TABLE IF EXISTS users;

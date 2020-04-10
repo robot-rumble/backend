@@ -1,0 +1,17 @@
+@(battle: Battles.Data, r1: Robots.Data, r2: Robots.Data, assetsFinder: AssetsFinder, forRobot: Boolean)
+
+<ul class="battle panel">
+    @if(forRobot) {
+        <li><img src="@{
+            val imgPath = Battles.didR1Win(battle, r1, r2) match {
+                case Some(won) => if (won) "images/win.svg" else "images/loss.svg"
+                case None => "images/draw.svg"
+            }
+            assetsFinder.path(imgPath)
+        }"></li>
+        <li class="separator"></li>
+        <li><a href="@routes.RobotController.viewMatch(battle.id.toString)">vs @r2.name</a></li>
+    } else {
+        <li><a href="@routes.RobotController.viewMatch(battle.id.toString)">@r1.name vs @r2.name</a></li>
+    }
+</ul>

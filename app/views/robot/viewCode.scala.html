@@ -1,0 +1,7 @@
+@(robot: Robots.Data, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+
+@main(s"Robot ${robot.name}'s code", "view-code", assetsFinder, showFooter = false) {
+  <h1>@robot.name's Code</h1>
+
+  <textarea readonly>@robot.code</textarea>
+}
