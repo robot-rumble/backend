@@ -10,6 +10,7 @@
     <body>
         @helper.javascriptRouter("jsRoutes")(
             routes.javascript.RobotController.update,
+            routes.javascript.Assets.at
         )
         <script>window.jsRoutes = jsRoutes</script>
 
