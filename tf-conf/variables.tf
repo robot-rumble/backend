@@ -6,17 +6,12 @@ variable "aws_region" {
 //variable "aws_secret_key" {}
 
 variable "app_image" {
-  default = "adongy/hostname-docker:latest"
+  default = "docker.pkg.github.com/phanatic/repo/app:1.0"
 }
 
 variable "app_port" {
   default = 9000
 }
-
-variable "az_count" {
-  default = 1
-}
-
 
 variable "app_count" {
   default = 1
