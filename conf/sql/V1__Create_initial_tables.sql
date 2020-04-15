@@ -1,5 +1,3 @@
--- !Ups
-
 CREATE TABLE users
 (
     id       SERIAL PRIMARY KEY,
@@ -59,10 +57,3 @@ CREATE TABLE battles
     r2_logs   TEXT,
     data      JSON           NOT NULL
 );
-
--- !Downs
-
-DROP TABLE IF EXISTS battles;
-DROP TYPE IF EXISTS battle_outcome;
-DROP TABLE IF EXISTS robots;
-DROP TABLE IF EXISTS users;

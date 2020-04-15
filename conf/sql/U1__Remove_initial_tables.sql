@@ -1,0 +1,4 @@
+DROP TABLE IF EXISTS battles;
+DROP TYPE IF EXISTS battle_outcome;
+DROP TABLE IF EXISTS robots;
+DROP TABLE IF EXISTS users;

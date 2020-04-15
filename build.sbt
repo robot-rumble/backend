@@ -22,8 +22,6 @@ libraryDependencies ++= Seq(
 
 libraryDependencies += javaJdbc
 
-libraryDependencies ++= Seq(evolutions, jdbc)
-
 scalacOptions ++= Seq(
   "-feature",
   "-deprecation",
