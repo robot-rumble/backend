@@ -1,0 +1,13 @@
+@(title: String, assetsFinder: AssetsFinder)(header: Html)(content: Html)(implicit request: RequestHeader)
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>@title</title>
+        <link rel="shortcut icon" type="image/png" href="@assetsFinder.path("images/favicon.png")">
+        @header
+    </head>
+    <body>
+        @content
+    </body>
+</html>
