@@ -1,9 +1,20 @@
 @(user: Users.Data, robot: Robots.Data, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
-@main(s"Robot ${robot.name}", "garage", assetsFinder, showFooter = false) {
-  <h1>@robot.name</h1>
+@basic(s"The Garage -- editing ${robot.name}", assetsFinder) {
+  <link rel="stylesheet" type="text/css" href="@assetsFinder.path("dist/main.css")">
+  <script src="@assetsFinder.path("dist/app.js")" type="text/javascript"></script>
+} {
+  @helper.javascriptRouter("jsRoutes")(
+    routes.javascript.RobotController.update,
+    routes.javascript.Assets.at
+  )
+  <script>window.jsRoutes = jsRoutes</script>
 
-  @if(request.session.get("USERNAME").forall(_ == user.username)) {
-    <robot-arena user="@user.username" robot="@robot.name" code="@robot.code"></robot-arena>
-  }
+  <div class="garage">
+    <h1>@robot.name</h1>
+
+    @if(request.session.get("USERNAME").forall(_ == user.username)) {
+      <robot-arena user="@user.username" robot="@robot.name" code="@robot.code"></robot-arena>
+    }
+  </div>
 }
