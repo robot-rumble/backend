@@ -11,10 +11,6 @@
   <script>window.jsRoutes = jsRoutes</script>
 
   <div class="garage">
-    <h1>@robot.name</h1>
-
-    @if(request.session.get("USERNAME").forall(_ == user.username)) {
-      <robot-arena user="@user.username" robot="@robot.name" code="@robot.code"></robot-arena>
-    }
+    <robot-arena user="@user.username" robot="@robot.name" code="@robot.code"></robot-arena>
   </div>
 }
