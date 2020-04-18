@@ -109,4 +109,6 @@ class RobotController @Inject()(cc: MessagesControllerComponents,
   }
 
   def challenge(user: String, robot: String): Action[AnyContent] = TODO
+
+  def publish(user: String, robot: String): Action[AnyContent] = TODO
 }

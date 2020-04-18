@@ -20,6 +20,7 @@ GET         /p/:user/:robot                  controllers.RobotController.view(us
 GET         /p/:user/:robot/edit             controllers.RobotController.edit(user, robot)
 GET         /p/:user/:robot/code             controllers.RobotController.viewCode(user, robot)
 GET         /p/:user/:robot/challenge        controllers.RobotController.challenge(user, robot)
+GET         /p/:user/:robot/publish          controllers.RobotController.publish(user, robot)
 + nocsrf
 POST        /update/:user/:robot             controllers.RobotController.update(user, robot)
 
