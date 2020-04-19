@@ -66,10 +66,10 @@ class RobotController @Inject()(cc: MessagesControllerComponents,
       }
   }
 
-  def edit(user: String, robot: String): Action[AnyContent] = Action {
+  def edit(user: String, robot: String): Action[AnyContent] = authAction(parse.anyContent) { authUser =>
     implicit request =>
       (for {
-        user <- usersRepo.find(user)
+        user <- usersRepo.find(user) if user == authUser
         robot <- repo.find(user, robot)
       } yield (user, robot)) match {
         case Some((user, robot)) =>
@@ -109,4 +109,6 @@ class RobotController @Inject()(cc: MessagesControllerComponents,
   }
 
   def challenge(user: String, robot: String): Action[AnyContent] = TODO
+
+  def publish(user: String, robot: String): Action[AnyContent] = TODO
 }
