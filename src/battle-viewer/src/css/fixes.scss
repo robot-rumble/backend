@@ -12,7 +12,7 @@ textarea {
   outline: 0 !important;
 }
 
-*::-moz-focus-inner {
+*::-moz-focus-inner, *::-moz-focus-outer {
   outline: 0 !important;
   border: 0 !important;
 }
@@ -42,4 +42,13 @@ p {
 
 a img {
   display: inline-block;
+}
+
+// fix Bootstrap Reboot breaking CodeMirror CSS with margin
+pre {
+  margin-bottom: 0;
+}
+
+body, html {
+  height: 100%;
 }

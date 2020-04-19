@@ -1,55 +1,43 @@
-@(title: String, className: String, assetsFinder: AssetsFinder, showFooter: Boolean = true)(content: Html)(implicit request: RequestHeader)
+@(title: String, className: String, assetsFinder: AssetsFinder)(content: Html)(implicit request: RequestHeader)
 
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <title>@title</title>
-        <link rel="shortcut icon" type="image/png" href="@assetsFinder.path("images/favicon.png")">
-        <script src="@assetsFinder.path("dist/bundle.js")" type="text/javascript"></script>
-    </head>
-    <body>
-        @helper.javascriptRouter("jsRoutes")(
-            routes.javascript.RobotController.update,
-        )
-        <script>window.jsRoutes = jsRoutes</script>
-
-        <div class="content">
-            <section class="header d-flex justify-content-between">
-                <a class="text-black" href="@routes.HomeController.index">Robot Rumble</a>
-                <div class="d-flex links">
-                    <a href="@routes.RobotController.warehouse">warehouse</a>
-                    <a href="@routes.RobotController.battles">battles</a>
-                    <a href="@routes.HomeController.rules">rules</a>
-                    @request.session.get("USERNAME") match {
-                        case Some(username) => {
-                            <a href="@routes.UserController.profile(username)">profile</a>
-                            <a href="@routes.UserController.logout">logout</a>
-                        }
-
-                        case None => {
-                            <div class="d-flex">
-                                <a href="@routes.UserController.login">login</a>
-                                    &nbsp;&#47;&nbsp;
-                                <a href="@routes.UserController.create">signup</a>
-                            </div>
-                        }
+@basic(title, assetsFinder) {
+    <link rel="stylesheet" type="text/css" href="@assetsFinder.path("dist/site_css.css")">
+} {
+    <div class="content">
+        <section class="header d-flex justify-content-between">
+            <a class="text-black" href="@routes.HomeController.index">Robot Rumble</a>
+            <div class="d-flex links">
+                <a href="@routes.RobotController.warehouse">warehouse</a>
+                <a href="@routes.RobotController.battles">battles</a>
+                <a href="@routes.HomeController.rules">rules</a>
+                @request.session.get("USERNAME") match {
+                    case Some(username) => {
+                        <a href="@routes.UserController.profile(username)">profile</a>
+                        <a href="@routes.UserController.logout">logout</a>
                     }
-                </div>
-            </section>
 
-            <section class="main container @className">
-            @content
-            </section>
+                    case None => {
+                        <div class="d-flex">
+                            <a href="@routes.UserController.login">login</a>
+                                &nbsp;&#47;&nbsp;
+                            <a href="@routes.UserController.create">signup</a>
+                        </div>
+                    }
+                }
+            </div>
+        </section>
+
+        <section class="main container @className">
+        @content
+        </section>
+    </div>
+
+    <section class="footer d-flex justify-content-between">
+        <p>Made with Rust, Scala, Elm, and <3 by Chicode NFP</p>
+        <div class="d-flex">
+            <a href="https://github.com/chicode/robot-rumble">github repo</a>&nbsp;&nbsp;
+            <a href="https://github.com/chicode/robot-rumble/issues/new">report a bug</a>
         </div>
+    </section>
 
-        @if(showFooter) {
-            <section class="footer d-flex justify-content-between">
-                <p>Made with Rust, Scala, Elm, and <3 by Chicode NFP</p>
-                <div class="d-flex">
-                    <a href="https://github.com/chicode/robot-rumble">github repo</a>&nbsp;&nbsp;
-                    <a href="https://github.com/chicode/robot-rumble/issues/new">report a bug</a>
-                </div>
-            </section>
-        }
-    </body>
-</html>
+}

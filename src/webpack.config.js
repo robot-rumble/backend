@@ -9,11 +9,12 @@ const browserConfig = {
   mode: process.env.NODE_ENV || 'development',
   stats: 'minimal',
   entry: {
-    app: ['@babel/polyfill', './src/app.js'],
+    webapp_js: ['@babel/polyfill', './src/app.js'],
+    webapp_css: './src/css/webapp.scss',
+    site_css: './src/css/site.scss',
   },
   output: {
     path: dist,
-    filename: 'bundle.js',
   },
   module: {
     rules: [
@@ -25,7 +26,7 @@ const browserConfig = {
       {
         test: /\.(sa|sc|c)ss$/,
         use: [
-          process.env.NODE_ENV === 'production' ? MiniCssExtractPlugin.loader : 'style-loader',
+          MiniCssExtractPlugin.loader,
           'css-loader',
           'sass-loader',
         ],
