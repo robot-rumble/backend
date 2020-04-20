@@ -3,7 +3,7 @@ CREATE TABLE users
     id       SERIAL PRIMARY KEY,
     created  TIMESTAMP   NOT NULL DEFAULT current_timestamp,
     username VARCHAR(15) NOT NULL,
-    password VARCHAR(50) NOT NULL
+    password VARCHAR(60) NOT NULL
 );
 
 CREATE TABLE robots
