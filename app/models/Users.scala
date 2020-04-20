@@ -2,10 +2,11 @@ package models
 
 import javax.inject.Inject
 import services.Db
+import com.github.t3hnar.bcrypt._
 
 object Users {
   private def createData(username: String, password: String): Data = {
-    Data(username, password)
+    Data(username, password.bcrypt)
   }
 
   case class Data(username: String, password: String, id: Long = -1)
@@ -16,7 +17,8 @@ object Users {
 
     val schema: Quoted[EntityQuery[Data]] = quote(querySchema[Data]("users"))
 
-    def find(username: String): Option[Data] = run(schema.filter(_.username == lift(username))).headOption
+    def find(username: String): Option[Data] =
+      run(schema.filter(_.username == lift(username))).headOption
 
     def create(username: String, password: String): Data = {
       val data = createData(username, password)
@@ -25,5 +27,3 @@ object Users {
   }
 
 }
-
-

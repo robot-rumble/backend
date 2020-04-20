@@ -3,10 +3,14 @@ package controllers
 import javax.inject._
 import models.{Robots, Users}
 import play.api.mvc._
+import com.github.t3hnar.bcrypt._
 
 @Singleton
-class UserController @Inject()(cc: MessagesControllerComponents, repo: Users.Repo, robotRepo: Robots.Repo, assetsFinder: AssetsFinder)
-  extends MessagesAbstractController(cc) {
+class UserController @Inject()(cc: MessagesControllerComponents,
+                               repo: Users.Repo,
+                               robotRepo: Robots.Repo,
+                               assetsFinder: AssetsFinder)
+    extends MessagesAbstractController(cc) {
 
   def create: Action[AnyContent] = Action { implicit request =>
     Ok(views.html.signup(SignupForm.form, assetsFinder))
@@ -20,7 +24,11 @@ class UserController @Inject()(cc: MessagesControllerComponents, repo: Users.Rep
       data => {
         val username = data.username.trim()
         repo.find(username) match {
-          case Some(_) => BadRequest(views.html.signup(SignupForm.form.fill(data).withGlobalError("Username taken"), assetsFinder))
+          case Some(_) =>
+            BadRequest(
+              views.html.signup(
+                SignupForm.form.fill(data).withGlobalError("Username taken"),
+                assetsFinder))
           case None => {
             val user = repo.create(username, data.password)
             Redirect(routes.UserController.profile(user.username))
@@ -42,28 +50,31 @@ class UserController @Inject()(cc: MessagesControllerComponents, repo: Users.Rep
       },
       data => {
         repo.find(data.username) match {
-          case Some(user) =>
+          case Some(user) if data.password.isBcrypted(user.password) =>
             Redirect(routes.UserController.profile(data.username))
               .withSession("USERNAME" -> user.username)
-          case None =>
-            Forbidden(views.html.login(LoginForm.form.withGlobalError("Incorrect username or password."), assetsFinder))
+          case _ =>
+            Forbidden(
+              views.html.login(LoginForm.form.withGlobalError(
+                                 "Incorrect username or password."),
+                               assetsFinder))
         }
       }
     )
   }
 
   def logout: Action[AnyContent] = Action { implicit request =>
-    Redirect(routes.HomeController.index())
-      .withNewSession
+    Redirect(routes.HomeController.index()).withNewSession
   }
 
-  def profile(username: String): Action[AnyContent] = Action { implicit request =>
-    repo.find(username) match {
-      case Some(user) => {
-        val robots = robotRepo.findAllForUser(user)
-        Ok(views.html.profile(user, robots, assetsFinder))
+  def profile(username: String): Action[AnyContent] = Action {
+    implicit request =>
+      repo.find(username) match {
+        case Some(user) => {
+          val robots = robotRepo.findAllForUser(user)
+          Ok(views.html.profile(user, robots, assetsFinder))
+        }
+        case None => NotFound("User does not exist!")
       }
-      case None => NotFound("User does not exist!")
-    }
   }
 }

@@ -22,6 +22,8 @@ libraryDependencies ++= Seq(
 
 libraryDependencies += javaJdbc
 
+libraryDependencies += "com.github.t3hnar" %% "scala-bcrypt" % "4.1"
+
 scalacOptions ++= Seq(
   "-feature",
   "-deprecation",

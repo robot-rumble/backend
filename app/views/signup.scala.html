@@ -3,7 +3,7 @@
 
     @helper.form(routes.UserController.postCreate()) {
       @helper.inputText(form("username"), Symbol("_showConstraints") -> false)
-      @helper.inputText(form("password"), Symbol("_showConstraints") -> false)
+      @helper.inputPassword(form("password"), Symbol("_showConstraints") -> false)
       @helper.CSRF.formField
       <button>Signup</button>
     }
