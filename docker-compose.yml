@@ -1,0 +1,28 @@
+version: '3.3'
+
+services:
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: robot
+      POSTGRES_USER: robot
+      POSTGRES_PASSWORD: robot
+
+  sqs:
+    image: roribio16/alpine-sqs:latest
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - 9000:9000
+    depends_on:
+      - db
+      - sqs
+    volumes:
+      - .:/backend
+    environment:
+      DATABASE_URL: jdbc:postgresql://db:5432/robot
+    # https://github.com/docker/compose/issues/596#issuecomment-133004835
+    stdin_open: true

@@ -22,6 +22,10 @@ libraryDependencies ++= Seq(
 
 libraryDependencies += javaJdbc
 
+libraryDependencies ++= Seq(
+  "org.flywaydb" %% "flyway-play" % "6.0.0"
+)
+
 libraryDependencies += "com.github.t3hnar" %% "scala-bcrypt" % "4.1"
 
 scalacOptions ++= Seq(
