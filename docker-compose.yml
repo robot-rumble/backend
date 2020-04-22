@@ -8,9 +8,6 @@ services:
       POSTGRES_USER: robot
       POSTGRES_PASSWORD: robot
 
-  sqs:
-    image: roribio16/alpine-sqs:latest
-
   backend:
     build:
       context: .
@@ -19,7 +16,6 @@ services:
       - 9000:9000
     depends_on:
       - db
-      - sqs
     volumes:
       - .:/backend
     environment:
