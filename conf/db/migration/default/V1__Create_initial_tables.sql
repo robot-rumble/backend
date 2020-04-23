@@ -8,44 +8,32 @@ CREATE TABLE users
 
 CREATE TABLE robots
 (
-    id          SERIAL PRIMARY KEY,
-    created     TIMESTAMP   NOT NULL DEFAULT current_timestamp,
-    modified    TIMESTAMP   NOT NULL DEFAULT current_timestamp,
-    user_id     SERIAL      NOT NULL REFERENCES users (id),
-    name        VARCHAR(15) NOT NULL,
-    bio         TEXT,
-    open_source BOOL        NOT NULL DEFAULT TRUE,
-    automatch   BOOL        NOT NULL DEFAULT TRUE,
-    code        TEXT        NOT NULL,
-    rating      INT         NOT NULL DEFAULT 1000
+    id        SERIAL PRIMARY KEY,
+    created   TIMESTAMP   NOT NULL DEFAULT current_timestamp,
+    user_id   SERIAL      NOT NULL REFERENCES users (id),
+    name      VARCHAR(15) NOT NULL,
+    dev_code  TEXT        NOT NULL,
+    automatch BOOL        NOT NULL,
+    rating    INT         NOT NULL
 );
 
-CREATE OR REPLACE FUNCTION update_modified_column() RETURNS TRIGGER AS
-$$
-BEGIN
-    IF NEW.code <> OLD.code THEN
-        NEW.modified = now();
-    END IF;
-    RETURN NEW;
-END;
-$$ language 'plpgsql';
-
-CREATE TRIGGER update_modified_column_trigger
-    BEFORE UPDATE
-    ON robots
-    FOR EACH ROW
-EXECUTE PROCEDURE update_modified_column();
-
+CREATE TABLE published_robots
+(
+    id       SERIAL PRIMARY KEY,
+    robot_id SERIAL    NOT NULL REFERENCES robots (id),
+    created  TIMESTAMP NOT NULL DEFAULT current_timestamp,
+    code     TEXT      NOT NULL
+);
 
 CREATE TYPE battle_outcome AS ENUM ('r1_won', 'r2_won', 'draw');
 
 CREATE TABLE battles
 (
     id        SERIAL PRIMARY KEY,
-    created   TIMESTAMP      NOT NULL DEFAULT NOW(),
+    created   TIMESTAMP      NOT NULL DEFAULT current_timestamp,
     r1_id     SERIAL         NOT NULL REFERENCES robots (id),
     r2_id     SERIAL         NOT NULL REFERENCES robots (id),
-    ranked    BOOL           NOT NULL DEFAULT TRUE,
+    ranked    BOOL           NOT NULL,
     outcome   battle_outcome NOT NULL,
 --  If `errored` and r1_won/r2_won, then the other robot errored. Otherwise, both errored.
     errored   BOOL           NOT NULL,
@@ -53,7 +41,5 @@ CREATE TABLE battles
     r2_rating INT            NOT NULL,
     r1_time   REAL           NOT NULL,
     r2_time   REAL           NOT NULL,
-    r1_logs   TEXT,
-    r2_logs   TEXT,
     data      JSON           NOT NULL
 );

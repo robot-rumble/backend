@@ -1,28 +1,19 @@
-@(user: Users.Data, robot: Robots.Data, battles: List[(Battles.Data, Robots.Data, Robots.Data)], assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+@(user: Users.Data, robot: Robots.Data, publishedRobotOption: Option[PublishedRobots.Data], battles: List[(Battles.Data, Robots.Data, Robots.Data)], assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
 @main(s"Robot ${robot.name}", "robot-page", assetsFinder) {
   <h1>@robot.name</h1>
 
-  @robot.bio match {
-    case Some(bio) => {
-      <p>bio</p>
-    }
-    case None => {
-      <p></p>
-    }
-  }
-
   <div class="d-flex actions mb-5">
-    @if(robot.openSource) {
+    @if(publishedRobotOption.isDefined) {
       <a href="@routes.RobotController.viewCode(user.username, robot.name)" class="text-green">
         <img src="@assetsFinder.path("images/open-source.svg")" alt="">
         view source
       </a>
+      <a href="@routes.RobotController.challenge(user.username, robot.name)" class="text-red">
+        <img src="@assetsFinder.path("images/battle.svg")" alt="">
+        challenge
+      </a>
     }
-    <a href="@routes.RobotController.challenge(user.username, robot.name)" class="text-red">
-      <img src="@assetsFinder.path("images/battle.svg")" alt="">
-      challenge
-    </a>
     @if(request.session.get("USERNAME").forall(_ == user.username)) {
       <a href="@routes.RobotController.edit(user.username, robot.name)" class="text-yellow">
         <img src="@assetsFinder.path("images/edit.svg")" alt="">
