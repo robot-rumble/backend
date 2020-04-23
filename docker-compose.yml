@@ -1,15 +1,26 @@
 version: '3.3'
 
 services:
+  localstack:
+    image: localstack/localstack
+    ports:
+      - '4566-4599:4566-4599'
+      - '8080:8080'
+    environment:
+      - SERVICES=lambda,sqs,iam,s3
+      - LAMBDA_EXECUTOR=docker-reuse
+      - DATA_DIR=/tmp/localstack/data
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - DEBUG=1
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "../logic/target/debug:/tmp/localstack/data"
   db:
     image: postgres:latest
     environment:
       POSTGRES_DB: robot
       POSTGRES_USER: robot
       POSTGRES_PASSWORD: robot
-
-  sqs:
-    image: roribio16/alpine-sqs:latest
 
   backend:
     build:
@@ -19,10 +30,12 @@ services:
       - 9000:9000
     depends_on:
       - db
-      - sqs
+      - localstack
     volumes:
       - .:/backend
     environment:
       DATABASE_URL: jdbc:postgresql://db:5432/robot
+      MATCH_QUEUE_IN_URL: asfdasd
+      MATCH_QUEUE_OUT_URL: asdf
     # https://github.com/docker/compose/issues/596#issuecomment-133004835
     stdin_open: true
