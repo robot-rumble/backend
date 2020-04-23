@@ -6,14 +6,14 @@ import services.Db
 object Robots {
 
   private def createData(user: Users.Data, name: String): Data = {
-    Data(name = name, user_id = user.id)
+    Data(name = name, userId = user.id)
   }
 
   case class Data(
       id: Long = -1,
-      user_id: Long,
+      userId: Long,
       name: String,
-      dev_code: String = "",
+      devCode: String = "",
       automatch: Boolean = true,
       rating: Int = 1000,
   )
@@ -24,21 +24,23 @@ object Robots {
 
     val schema = quote(querySchema[Data]("robots"))
 
-    def find(user: Users.Data, robot: String): Option[Data] =
+    def find(user: Users.Data, robotName: String): Option[Data] =
       run(
-        schema.filter(r => r.user_id == lift(user.id) && r.name == lift(robot))
+        schema.filter(
+          r => r.userId == lift(user.id) && r.name == lift(robotName)
+        )
       ).headOption
 
-    def find_by_id(id: Long): Option[Data] =
+    def findById(id: Long): Option[Data] =
       run(schema.filter(_.id == lift(id))).headOption
 
     def findAllForUser(user: Users.Data): List[Data] =
-      run(schema.filter(_.user_id == lift(user.id)))
+      run(schema.filter(_.userId == lift(user.id)))
 
     def findAll(): List[(Data, Users.Data)] = {
       val userSchema =
         usersRepo.schema.asInstanceOf[Quoted[EntityQuery[Users.Data]]]
-      run(schema.join(userSchema).on(_.user_id == _.id))
+      run(schema.join(userSchema).on(_.userId == _.id))
     }
 
     def create(user: Users.Data, name: String): Data = {
@@ -48,7 +50,7 @@ object Robots {
 
     def update(robot: Data, code: String): Result[RunActionResult] = {
       run(
-        schema.filter(_.id == lift(robot.id)).update(_.dev_code -> lift(code))
+        schema.filter(_.id == lift(robot.id)).update(_.devCode -> lift(code))
       )
     }
   }

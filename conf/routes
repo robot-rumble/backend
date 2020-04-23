@@ -21,7 +21,7 @@ GET         /p/:user/:robot/edit             controllers.RobotController.edit(us
 GET         /p/:user/:robot/code             controllers.RobotController.viewCode(user, robot)
 GET         /p/:user/:robot/challenge        controllers.RobotController.challenge(user, robot)
 GET         /p/:user/:robot/publish          controllers.RobotController.publish(user, robot)
-POST        /publish/:robot_id               controllers.RobotController.postPublish(robot_id: Long)
+POST        /publish/:robotId                controllers.RobotController.postPublish(robotId: Long)
 + nocsrf
 POST        /update/:user/:robot             controllers.RobotController.update(user, robot)
 
