@@ -1,16 +1,17 @@
 package controllers
 
+import com.github.t3hnar.bcrypt._
 import javax.inject._
 import models.{Robots, Users}
 import play.api.mvc._
-import com.github.t3hnar.bcrypt._
 
 @Singleton
-class UserController @Inject()(cc: MessagesControllerComponents,
-                               repo: Users.Repo,
-                               robotRepo: Robots.Repo,
-                               assetsFinder: AssetsFinder)
-    extends MessagesAbstractController(cc) {
+class UserController @Inject()(
+    cc: MessagesControllerComponents,
+    repo: Users.Repo,
+    robotRepo: Robots.Repo,
+    assetsFinder: AssetsFinder
+) extends MessagesAbstractController(cc) {
 
   def create: Action[AnyContent] = Action { implicit request =>
     Ok(views.html.signup(SignupForm.form, assetsFinder))
@@ -28,7 +29,9 @@ class UserController @Inject()(cc: MessagesControllerComponents,
             BadRequest(
               views.html.signup(
                 SignupForm.form.fill(data).withGlobalError("Username taken"),
-                assetsFinder))
+                assetsFinder
+              )
+            )
           case None => {
             val user = repo.create(username, data.password)
             Redirect(routes.UserController.profile(user.username))
@@ -55,9 +58,12 @@ class UserController @Inject()(cc: MessagesControllerComponents,
               .withSession("USERNAME" -> user.username)
           case _ =>
             Forbidden(
-              views.html.login(LoginForm.form.withGlobalError(
-                                 "Incorrect username or password."),
-                               assetsFinder))
+              views.html.login(
+                LoginForm.form
+                  .withGlobalError("Incorrect username or password."),
+                assetsFinder
+              )
+            )
         }
       }
     )
