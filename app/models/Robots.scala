@@ -1,6 +1,7 @@
 package models
 
 import javax.inject.Inject
+import models.Users.Data
 import services.Db
 
 object Robots {
@@ -9,25 +10,30 @@ object Robots {
     Data(name = name, user_id = user.id)
   }
 
-  case class Data(name: String,
-                  code: String = "",
-                  id: Long = -1,
-                  user_id: Long,
-                  bio: Option[String] = None,
-                  rating: Int = 1000,
-                  openSource: Boolean = true,
-                  automatch: Boolean = false)
+  case class Data(
+      id: Long = -1,
+      user_id: Long,
+      name: String,
+      dev_code: String = "",
+      automatch: Boolean = true,
+      rating: Int = 1000,
+  )
 
   class Repo @Inject()(val db: Db, val usersRepo: Users.Repo) {
 
     import db.ctx._
 
     val schema: db.ctx.Quoted[db.ctx.EntityQuery[Data]] = quote(
-      querySchema[Data]("robots"))
+      querySchema[Data]("robots")
+    )
 
     def find(user: Users.Data, robot: String): Option[Data] =
-      run(schema.filter(r =>
-        r.user_id == lift(user.id) && r.name == lift(robot))).headOption
+      run(
+        schema.filter(r => r.user_id == lift(user.id) && r.name == lift(robot))
+      ).headOption
+
+    def find_by_id(id: Long): Option[Data] =
+      run(schema.filter(_.id == lift(id))).headOption
 
     def findAllForUser(user: Users.Data): List[Data] =
       run(schema.filter(_.user_id == lift(user.id)))
@@ -43,7 +49,9 @@ object Robots {
     }
 
     def update(robot: Data, code: String): Result[RunActionResult] = {
-      run(schema.filter(_.id == lift(robot.id)).update(_.code -> lift(code)))
+      run(
+        schema.filter(_.id == lift(robot.id)).update(_.dev_code -> lift(code))
+      )
     }
   }
 }
