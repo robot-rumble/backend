@@ -4,7 +4,7 @@
     @if(forRobot) {
         <li><img src="@{
             val imgPath = Battles.didR1Win(battle, r1, r2) match {
-                case Some(won) => if (won) "images/win.svg" else "images/loss.svg"
+                case Some(won) => if(won) "images/win.svg" else "images/loss.svg"
                 case None => "images/draw.svg"
             }
             assetsFinder.path(imgPath)

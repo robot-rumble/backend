@@ -1,17 +1,17 @@
 @(form: Form[CreateRobotForm.Data], assetsFinder: AssetsFinder)(implicit request: MessagesRequestHeader)
-  @main("Create robot", "create-robot", assetsFinder) {
 
+@main("Create robot", "create-robot", assetsFinder) {
     @helper.form(routes.RobotController.postCreate()) {
-      @helper.inputText(form("name"), Symbol("_showConstraints") -> false)
-      @helper.CSRF.formField
-      <button>Create</button>
+        @helper.inputText(form("name"), Symbol("_showConstraints") -> false)
+        @helper.CSRF.formField
+        <button>Create</button>
     }
 
     @if(form.hasGlobalErrors) {
-      <ul>
-      @for(error <- form.globalErrors) {
-        <li>@error.format</li>
-      }
-      </ul>
+        <ul>
+        @for(error <- form.globalErrors) {
+            <li>@error.format</li>
+        }
+        </ul>
     }
-  }
+}

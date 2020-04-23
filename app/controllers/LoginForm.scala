@@ -1,6 +1,7 @@
 package controllers
 
 object LoginForm {
+
   import play.api.data.Form
   import play.api.data.Forms._
 
@@ -12,4 +13,5 @@ object LoginForm {
   )
 
   case class Data(username: String, password: String)
+
 }

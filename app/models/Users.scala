@@ -1,8 +1,8 @@
 package models
 
+import com.github.t3hnar.bcrypt._
 import javax.inject.Inject
 import services.Db
-import com.github.t3hnar.bcrypt._
 
 object Users {
   private def createData(username: String, password: String): Data = {
