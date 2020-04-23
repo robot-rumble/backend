@@ -5,19 +5,19 @@ import services.Db
 
 object Battles {
 
-  case class Data(id: Long,
-                  r1_id: Long,
-                  r2_id: Long,
-                  ranked: Boolean,
-                  outcome: Outcome.Value,
-                  errored: Boolean,
-                  r1_rating: Int,
-                  r2_rating: Int,
-                  r1_time: Float,
-                  r2_time: Float,
-                  r1_logs: String,
-                  r2_logs: String,
-                  data: String)
+  case class Data(
+      id: Long,
+      r1_id: Long,
+      r2_id: Long,
+      ranked: Boolean,
+      outcome: Outcome.Value,
+      errored: Boolean,
+      r1_rating: Int,
+      r2_rating: Int,
+      r1_time: Float,
+      r2_time: Float,
+      data: String
+  )
 
 
   def didR1Win(battle: Data, r1: Robots.Data, r2: Robots.Data): Option[Boolean] = {
