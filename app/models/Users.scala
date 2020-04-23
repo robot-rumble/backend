@@ -20,7 +20,7 @@ object Users {
     def find(username: String): Option[Data] =
       run(schema.filter(_.username == lift(username))).headOption
 
-    def find_by_id(id: Long): Option[Data] =
+    def findById(id: Long): Option[Data] =
       run(schema.filter(_.id == lift(id))).headOption
 
     def create(username: String, password: String): Data = {

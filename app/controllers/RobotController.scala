@@ -134,11 +134,11 @@ class RobotController @Inject()(
       }
     }
 
-  def postPublish(robot_id: Long): Action[AnyContent] =
+  def postPublish(robotId: Long): Action[AnyContent] =
     authAction(parse.anyContent) { authUser => implicit request =>
       (for {
-        robot <- robotsRepo.find_by_id(robot_id)
-        user <- usersRepo.find_by_id(robot.id) if user == authUser
+        robot <- robotsRepo.findById(robotId)
+        user <- usersRepo.findById(robot.id) if user == authUser
       } yield (user, robot)) match {
         case Some((user, robot)) =>
           publishedRobotRepo.create(robot)
