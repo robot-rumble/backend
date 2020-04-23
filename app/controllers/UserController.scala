@@ -8,7 +8,7 @@ import play.api.mvc._
 @Singleton
 class UserController @Inject()(
     cc: MessagesControllerComponents,
-    repo: Users.Repo,
+    usersRepo: Users.Repo,
     robotRepo: Robots.Repo,
     assetsFinder: AssetsFinder
 ) extends MessagesAbstractController(cc) {
@@ -24,7 +24,7 @@ class UserController @Inject()(
       },
       data => {
         val username = data.username.trim()
-        repo.find(username) match {
+        usersRepo.find(username) match {
           case Some(_) =>
             BadRequest(
               views.html.signup(
@@ -32,11 +32,10 @@ class UserController @Inject()(
                 assetsFinder
               )
             )
-          case None => {
-            val user = repo.create(username, data.password)
+          case None =>
+            val user = usersRepo.create(username, data.password)
             Redirect(routes.UserController.profile(user.username))
               .withSession("USERNAME" -> user.username)
-          }
         }
       }
     )
@@ -52,7 +51,7 @@ class UserController @Inject()(
         Forbidden(views.html.login(formWithErrors, assetsFinder))
       },
       data => {
-        repo.find(data.username) match {
+        usersRepo.find(data.username) match {
           case Some(user) if data.password.isBcrypted(user.password) =>
             Redirect(routes.UserController.profile(data.username))
               .withSession("USERNAME" -> user.username)
@@ -75,12 +74,11 @@ class UserController @Inject()(
 
   def profile(username: String): Action[AnyContent] = Action {
     implicit request =>
-      repo.find(username) match {
-        case Some(user) => {
+      usersRepo.find(username) match {
+        case Some(user) =>
           val robots = robotRepo.findAllForUser(user)
           Ok(views.html.profile(user, robots, assetsFinder))
-        }
-        case None => NotFound("User does not exist!")
+        case None => NotFound("404")
       }
   }
 }
