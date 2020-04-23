@@ -1,7 +1,6 @@
 package models
 
 import javax.inject.Inject
-import models.Users.Data
 import services.Db
 
 object Robots {
@@ -39,7 +38,8 @@ object Robots {
       run(schema.filter(_.user_id == lift(user.id)))
 
     def findAll(): List[(Data, Users.Data)] = {
-      val userSchema = usersRepo.schema.asInstanceOf[Quoted[EntityQuery[Users.Data]]]
+      val userSchema =
+        usersRepo.schema.asInstanceOf[Quoted[EntityQuery[Users.Data]]]
       run(schema.join(userSchema).on(_.user_id == _.id))
     }
 

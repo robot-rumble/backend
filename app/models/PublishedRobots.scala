@@ -1,6 +1,6 @@
 package models
 
-import java.time.{LocalDate}
+import java.time.LocalDate
 
 import javax.inject.Inject
 import services.Db
@@ -38,6 +38,7 @@ object PublishedRobots {
     }
 
     def find(robot: Robots.Data): Option[Data] = {
+
       run(
         schema
           .filter(_.robot_id == lift(robot.id))
