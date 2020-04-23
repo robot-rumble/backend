@@ -8,7 +8,7 @@ import services.Db
 object PublishedRobots {
 
   private def createData(robot: Robots.Data): Data = {
-    Data(robot_id = robot.id, code = robot.dev_code)
+    Data(robot_id = robot.id, code = robot.devCode)
   }
 
   case class Data(
@@ -36,7 +36,6 @@ object PublishedRobots {
     }
 
     def find(robot: Robots.Data): Option[Data] = {
-
       run(
         schema
           .filter(_.robot_id == lift(robot.id))
