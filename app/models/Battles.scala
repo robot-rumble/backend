@@ -40,9 +40,6 @@ object Battles {
 
     import db.ctx._
 
-    val robotSchema: Quoted[EntityQuery[Robots.Data]] =
-      robotsRepo.schema.asInstanceOf[Quoted[EntityQuery[Robots.Data]]]
-
     implicit val decoderSource: Decoder[Outcome.Value] = decoder(
       (index, row) => Outcome.serialize(row.getObject(index).toString)
     )
@@ -53,9 +50,9 @@ object Battles {
         (index, value, row) => row.setString(index, value.toString)
       )
 
-    val schema: db.ctx.Quoted[db.ctx.EntityQuery[Data]] = quote(
-      querySchema[Data]("battles")
-    )
+    val robotSchema =
+      robotsRepo.schema.asInstanceOf[Quoted[EntityQuery[Robots.Data]]]
+    val schema = quote(querySchema[Data]("battles"))
 
     def find(id: Long): Option[Data] =
       run(schema.filter(_.id == lift(id))).headOption

@@ -22,9 +22,7 @@ object Robots {
 
     import db.ctx._
 
-    val schema: db.ctx.Quoted[db.ctx.EntityQuery[Data]] = quote(
-      querySchema[Data]("robots")
-    )
+    val schema = quote(querySchema[Data]("robots"))
 
     def find(user: Users.Data, robot: String): Option[Data] =
       run(
