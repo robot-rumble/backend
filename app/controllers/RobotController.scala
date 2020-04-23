@@ -10,14 +10,14 @@ class RobotController @Inject()(
     cc: MessagesControllerComponents,
     assetsFinder: AssetsFinder,
     authAction: AuthAction,
-    repo: Robots.Repo,
+    robotsRepo: Robots.Repo,
     usersRepo: Users.Repo,
     publishedRobotRepo: PublishedRobots.Repo,
     matchesRepo: Battles.Repo
 ) extends MessagesAbstractController(cc) {
 
   def warehouse: Action[AnyContent] = Action { implicit request =>
-    Ok(views.html.robot.warehouse(repo.findAll(), assetsFinder))
+    Ok(views.html.robot.warehouse(robotsRepo.findAll(), assetsFinder))
   }
 
   def battles: Action[AnyContent] = Action { implicit request =>
@@ -37,7 +37,7 @@ class RobotController @Inject()(
         },
         data => {
           val name = data.name.trim()
-          repo.find(user, name) match {
+          robotsRepo.find(user, name) match {
             case Some(_) =>
               BadRequest(
                 views.html.robot.create(
@@ -47,10 +47,9 @@ class RobotController @Inject()(
                   assetsFinder
                 )
               )
-            case None => {
-              val robot = repo.create(user, name)
+            case None =>
+              val robot = robotsRepo.create(user, name)
               Redirect(routes.RobotController.view(user.username, robot.name))
-            }
           }
         }
       )
@@ -60,21 +59,20 @@ class RobotController @Inject()(
     implicit request =>
       (for {
         user <- usersRepo.find(user)
-        robot <- repo.find(user, robot)
+        robot <- robotsRepo.find(user, robot)
       } yield (user, robot)) match {
         case Some((user, robot)) =>
           val publishedRobot = publishedRobotRepo.find(robot)
           Ok(
-            views.html.robot
-              .view(
-                user,
-                robot,
-                publishedRobot,
-                matchesRepo.findForRobot(robot),
-                assetsFinder
-              )
+            views.html.robot.view(
+              user,
+              robot,
+              publishedRobot,
+              matchesRepo.findForRobot(robot),
+              assetsFinder
+            )
           )
-        case None => NotFound("Robot not found")
+        case None => NotFound("404")
       }
   }
 
@@ -82,30 +80,29 @@ class RobotController @Inject()(
     authAction(parse.anyContent) { authUser => implicit request =>
       (for {
         user <- usersRepo.find(user) if user == authUser
-        robot <- repo.find(user, robot)
+        robot <- robotsRepo.find(user, robot)
       } yield (user, robot)) match {
         case Some((user, robot)) =>
           Ok(views.html.robot.edit(user, robot, assetsFinder))
-        case None => NotFound("Robot not found")
+        case None => NotFound("404")
       }
     }
 
   def update(user: String, robot: String): Action[JsValue] =
     authAction(parse.json) { authUser => implicit request =>
-      if (user == authUser.username) {
-        repo.find(authUser, robot) match {
-          case Some(robot) => {
-            request.body \ "code" match {
-              case JsDefined(code: JsString) => {
-                repo.update(robot, code.value)
-                Ok("Code updated")
-              }
-              case _ => BadRequest("Invalid 'code' field")
-            }
+      (for {
+        user <- usersRepo.find(user) if user == authUser
+        robot <- robotsRepo.find(user, robot)
+      } yield robot) match {
+        case Some(robot) =>
+          request.body \ "code" match {
+            case JsDefined(code: JsString) =>
+              robotsRepo.update(robot, code.value)
+              Ok("Code updated")
+            case _ => BadRequest("Invalid 'code' field")
           }
-          case None => NotFound("User does not exist")
-        }
-      } else Forbidden("")
+        case None => NotFound("404")
+      }
     }
 
   def viewMatch(id: String): Action[AnyContent] = TODO
@@ -114,12 +111,12 @@ class RobotController @Inject()(
     implicit request =>
       (for {
         user <- usersRepo.find(user)
-        robot <- repo.find(user, robot)
+        robot <- robotsRepo.find(user, robot)
         publishedRobot <- publishedRobotRepo.find(robot)
       } yield (robot, publishedRobot)) match {
         case Some((robot, publishedRobot)) =>
           Ok(views.html.robot.viewCode(robot, publishedRobot, assetsFinder))
-        case None => NotFound("No published code found.")
+        case None => NotFound("404")
       }
   }
 
@@ -129,18 +126,18 @@ class RobotController @Inject()(
     authAction(parse.anyContent) { authUser => implicit request =>
       (for {
         user <- usersRepo.find(user) if user == authUser
-        robot <- repo.find(user, robot)
+        robot <- robotsRepo.find(user, robot)
       } yield robot) match {
         case Some(robot) =>
           Ok(views.html.robot.publish(robot, assetsFinder))
-        case None => NotFound("No published code found.")
+        case None => NotFound("404")
       }
     }
 
   def postPublish(robot_id: Long): Action[AnyContent] =
     authAction(parse.anyContent) { authUser => implicit request =>
       (for {
-        robot <- repo.find_by_id(robot_id)
+        robot <- robotsRepo.find_by_id(robot_id)
         user <- usersRepo.find_by_id(robot.id) if user == authUser
       } yield (user, robot)) match {
         case Some((user, robot)) =>
