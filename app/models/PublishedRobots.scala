@@ -23,9 +23,7 @@ object PublishedRobots {
 
     import db.ctx._
 
-    val schema: db.ctx.Quoted[db.ctx.EntityQuery[Data]] = quote(
-      querySchema[Data]("published_robots")
-    )
+    val schema = quote(querySchema[Data]("published_robots"))
 
     def create(robot: Robots.Data): Data = {
       val data = createData(robot)

@@ -15,7 +15,7 @@ object Users {
 
     import db.ctx._
 
-    val schema: Quoted[EntityQuery[Data]] = quote(querySchema[Data]("users"))
+    val schema = quote(querySchema[Data]("users"))
 
     def find(username: String): Option[Data] =
       run(schema.filter(_.username == lift(username))).headOption
