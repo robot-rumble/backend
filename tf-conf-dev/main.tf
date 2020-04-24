@@ -1,75 +1,67 @@
 provider "aws" {
-  access_key                  = "mock_access_key"
-  secret_key                  = "mock_secret_key"
-  region                      = "us-east-1"
-  skip_credentials_validation = true
-  skip_metadata_api_check     = true
-  skip_requesting_account_id  = true
-  s3_force_path_style = true
-
-  endpoints {
-    apigateway     = "http://localhost:4566"
-    cloudformation = "http://localhost:4566"
-    cloudwatch     = "http://localhost:4566"
-    dynamodb       = "http://localhost:4566"
-    es             = "http://localhost:4566"
-    firehose       = "http://localhost:4566"
-    iam            = "http://localhost:4566"
-    kinesis        = "http://localhost:4566"
-    lambda         = "http://localhost:4566"
-    route53        = "http://localhost:4566"
-    redshift       = "http://localhost:4566"
-    s3             = "http://localhost:4566"
-    secretsmanager = "http://localhost:4566"
-    ses            = "http://localhost:4566"
-    sns            = "http://localhost:4566"
-    sqs            = "http://localhost:4566"
-    ssm            = "http://localhost:4566"
-    stepfunctions  = "http://localhost:4566"
-    sts            = "http://localhost:4566"
-  }
+  region = var.aws_region
 }
 
+
 resource "aws_sqs_queue" "battle_queue_in" {
-  name = "battle_input_queue"
+  name = "dev-battle-input-queue"
 }
 
 resource "aws_sqs_queue" "battle_queue_out" {
-  name = "battle_output_queue"
+  name = "dev-battle-output-queue"
 }
 
-resource "aws_s3_bucket" "lambda_files" {
-  bucket = "robot-runner-lambda"
+//resource "aws_sqs_queue" "battle_queue_error" {
+//  name = "dev-battle-output-queue"
+//}
+
+resource "aws_s3_bucket" "lambda" {
+  bucket = "dev-battle-runner"
   acl = "public-read"
 }
 
-resource "aws_s3_bucket_object" "object" {
-  bucket = aws_s3_bucket.lambda_files.bucket
+resource "aws_s3_bucket_object" "lambda" {
+  bucket = aws_s3_bucket.lambda.bucket
   key    = "lambda.zip"
   source = "../../logic/target/debug/lambda.zip"
 }
 
 resource "aws_lambda_function" "battle_runner" {
-  depends_on = [aws_s3_bucket.lambda_files, aws_s3_bucket_object.object]
-  s3_bucket = aws_s3_bucket.lambda_files.id
-  s3_key = aws_s3_bucket_object.object.key
-  function_name = "battle-runner"
+  depends_on = [aws_s3_bucket_object.lambda]
+  s3_bucket = aws_s3_bucket.lambda.id
+  s3_key = aws_s3_bucket_object.lambda.key
+  function_name = "dev-battle-runner"
   runtime = "provided"
   timeout = var.lambda_timeout
   memory_size = var.lambda_memory_size
   handler = "doesnt.matter"
-  role = aws_iam_role.iam_for_lambda.arn
+  role = aws_iam_role.lambda.arn
   environment {
     variables = {
-      BATTLE_QUEUE_OUT_URL = aws_sqs_queue.battle_queue_out.id
+      RUST_BACKTRACE = 1
     }
   }
 }
 
+resource "aws_lambda_event_source_mapping" "battle_queue_in" {
+  event_source_arn = aws_sqs_queue.battle_queue_in.arn
+  function_name = aws_lambda_function.battle_runner.arn
+}
+
+resource "aws_lambda_function_event_invoke_config" "battle_queue_out" {
+  function_name = aws_lambda_function.battle_runner.function_name
+
+  destination_config {
+    on_success {
+      destination = aws_sqs_queue.battle_queue_out.arn
+    }
+  }
+}
+
+
 resource "aws_iam_policy" "lambda" {
-  name = "lambda_logging"
+  name = "dev-lambda-policy"
   path = "/"
-  description = "IAM policy for logging from a lambda"
 
   policy = <<EOF
 {
@@ -80,6 +72,7 @@ resource "aws_iam_policy" "lambda" {
             "Action": [
                 "sqs:ReceiveMessage",
                 "sqs:DeleteMessage",
+                "sqs:SendMessage",
                 "sqs:GetQueueAttributes",
                 "logs:CreateLogGroup",
                 "logs:CreateLogStream",
@@ -93,12 +86,12 @@ EOF
 }
 
 resource "aws_iam_role_policy_attachment" "lambda" {
-  role = aws_iam_role.iam_for_lambda.name
+  role = aws_iam_role.lambda.name
   policy_arn = aws_iam_policy.lambda.arn
 }
 
-resource "aws_iam_role" "iam_for_lambda" {
-  name = "iam_for_lambda"
+resource "aws_iam_role" "lambda" {
+  name = "dev-lambda-iam"
 
   assume_role_policy = <<EOF
 {
@@ -115,10 +108,5 @@ resource "aws_iam_role" "iam_for_lambda" {
   ]
 }
 EOF
-}
-
-resource "aws_lambda_event_source_mapping" "input_queue_mapping" {
-  event_source_arn = aws_sqs_queue.battle_queue_in.arn
-  function_name = aws_lambda_function.battle_runner.arn
 }
 
