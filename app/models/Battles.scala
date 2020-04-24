@@ -1,6 +1,7 @@
 package models
 
 import javax.inject.Inject
+import play.api.libs.json.{Reads, Writes}
 import services.Db
 
 object Battles {
@@ -10,11 +11,10 @@ object Battles {
       r1: Robots.Data,
       r2: Robots.Data
   ): Option[Boolean] = {
-    battle.outcome match {
-      case Outcome.R1Won | Outcome.R2Won => {
-        Some(battle.outcome == Outcome.R1Won && battle.r1_id == r1.id)
-      }
-      case Outcome.Draw => None
+    battle.winner match {
+      case Winner.R1 | Winner.R2 =>
+        Some(battle.winner == Winner.R1 && battle.r1_id == r1.id)
+      case Winner.Draw => None
     }
   }
 
@@ -23,7 +23,7 @@ object Battles {
       r1_id: Long,
       r2_id: Long,
       ranked: Boolean,
-      outcome: Outcome.Value,
+      winner: Winner.Value,
       errored: Boolean,
       r1_rating: Int,
       r2_rating: Int,
@@ -40,11 +40,11 @@ object Battles {
 
     import db.ctx._
 
-    implicit val decoderSource: Decoder[Outcome.Value] = decoder(
-      (index, row) => Outcome.serialize(row.getObject(index).toString)
+    implicit val decoderSource: Decoder[Winner.Value] = decoder(
+      (index, row) => Winner.serialize(row.getObject(index).toString)
     )
 
-    implicit val encoderSource: Encoder[Outcome.Value] =
+    implicit val encoderSource: Encoder[Winner.Value] =
       encoder(
         java.sql.Types.VARCHAR,
         (index, value, row) => row.setString(index, value.toString)
@@ -84,12 +84,14 @@ object Battles {
   }
 
   //noinspection TypeAnnotation
-  object Outcome extends Enumeration {
-    val R1Won = Value("r1_won")
-    val R2Won = Value("r2_won")
-    val Draw = Value("draw")
+  object Winner extends Enumeration {
+    val R1 = Value("R1")
+    val R2 = Value("R2")
+    val Draw = Value("Draw")
 
     def serialize(s: String): Value = values.find(_.toString == s).get
-  }
 
+    implicit val winnerReads = Reads.enumNameReads(Winner)
+    implicit val winnerWrites = Writes.enumNameWrites
+  }
 }
