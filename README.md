@@ -6,7 +6,7 @@
 ```
 mkdir rr & cd rr
 git clone https://github.com/robot-rumble/backend --recursive
-git clone https://github.com/robot-rumble/logic
+git clone https://github.com/robot-rumble/logic --recursive
 ```
 
 3. Build the web battle-runner:
