@@ -43,15 +43,27 @@ resource "aws_s3_bucket" "lambda_files" {
   acl = "public-read"
 }
 
+resource "aws_s3_bucket_object" "object" {
+  bucket = aws_s3_bucket.lambda_files.bucket
+  key    = "lambda.zip"
+  source = "../../logic/target/debug/lambda.zip"
+}
+
 resource "aws_lambda_function" "battle_runner" {
+  depends_on = [aws_s3_bucket.lambda_files, aws_s3_bucket_object.object]
   s3_bucket = aws_s3_bucket.lambda_files.id
-  s3_key = "lambda.zip"
+  s3_key = aws_s3_bucket_object.object.key
   function_name = "battle-runner"
   runtime = "provided"
   timeout = var.lambda_timeout
   memory_size = var.lambda_memory_size
   handler = "doesnt.matter"
   role = aws_iam_role.iam_for_lambda.arn
+  environment {
+    variables = {
+      BATTLE_QUEUE_OUT_URL = aws_sqs_queue.battle_queue_out.id
+    }
+  }
 }
 
 resource "aws_iam_policy" "lambda" {
@@ -110,7 +122,3 @@ resource "aws_lambda_event_source_mapping" "input_queue_mapping" {
   function_name = aws_lambda_function.battle_runner.arn
 }
 
-resource "aws_lambda_event_source_mapping" "output_queue_mapping" {
-  event_source_arn = aws_sqs_queue.battle_queue_out.arn
-  function_name = aws_lambda_function.battle_runner.arn
-}
