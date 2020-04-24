@@ -53,5 +53,9 @@ object Robots {
         schema.filter(_.id == lift(robot.id)).update(_.devCode -> lift(code))
       )
     }
+
+    def random(): Option[Data] = {
+      run(schema.sortBy(_ => infix"RANDOM()".as[Int])(Ord.desc)).headOption
+    }
   }
 }
