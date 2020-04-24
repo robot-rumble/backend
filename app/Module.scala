@@ -16,5 +16,6 @@ class Module(environment: Environment, configuration: Configuration)
     extends AbstractModule {
   override def configure(): Unit = {
     bind(classOf[Db]).to(classOf[Postgres])
+    bind(classOf[MatchMaker]).asEagerSingleton()
   }
 }
