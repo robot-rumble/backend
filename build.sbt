@@ -4,7 +4,13 @@ name := """robot-rumble"""
 
 version := "1.0-SNAPSHOT"
 
-lazy val root = (project in file(".")).enablePlugins(PlayScala)
+lazy val root = (project in file("."))
+  .enablePlugins(PlayScala)
+  .dependsOn(scalaElo)
+lazy val scalaElo = ProjectRef(
+  uri("git://github.com/robot-rumble/scala-elo.git#v1.0.2"),
+  "scala-elo"
+)
 
 resolvers += Resolver.sonatypeRepo("snapshots")
 
@@ -41,4 +47,3 @@ scalacOptions ++= Seq(
   "-deprecation",
   "-Xfatal-warnings"
 )
-

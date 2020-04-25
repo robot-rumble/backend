@@ -15,7 +15,7 @@ object Robots {
       name: String,
       devCode: String = "",
       automatch: Boolean = true,
-      rating: Int = 1000,
+      rating: Int = 1400,
   )
 
   class Repo @Inject()(val db: Db, val usersRepo: Users.Repo) {
@@ -51,6 +51,12 @@ object Robots {
     def update(robot: Data, code: String): Result[RunActionResult] = {
       run(
         schema.filter(_.id == lift(robot.id)).update(_.devCode -> lift(code))
+      )
+    }
+
+    def updateRating(robot: Data, rating: Int) = {
+      run(
+        schema.filter(_.id == lift(robot.id)).update(_.rating -> lift(rating))
       )
     }
 
