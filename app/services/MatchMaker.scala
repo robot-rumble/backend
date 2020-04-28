@@ -1,82 +1,29 @@
 package services
 
-import akka.NotUsed
 import akka.actor._
 import akka.stream.Materializer
-import akka.stream.scaladsl.{Flow, Keep, Sink, Source}
+import akka.stream.scaladsl.{Sink, Source}
 import com.github.esap120.scala_elo._
 import javax.inject._
 import models.Battles.Winner
 import models.{Battles, PublishedRobots, Robots}
-import play.api.Configuration
-import play.api.libs.functional.syntax._
-import play.api.libs.json.Reads._
 import play.api.mvc._
-import services.MatchMaker.{MatchInput, MatchOutput}
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
-import services.AwsQueue
-import software.amazon.awssdk.services.sqs.model.SendMessageRequest
 
-trait BattleQueue {
-  def createStreams(): (Sink[MatchInput, NotUsed], Source[MatchOutput, NotUsed])
-}
-
-object MatchMaker {
-  import play.api.libs.json._
-
-  implicit val matchInputWrites = new Writes[MatchInput] {
-    def writes(matchInput: MatchInput) = Json.obj(
-      "r1_id" -> matchInput.r1Id,
-      "r1_code" -> matchInput.r1Code,
-      "r2_id" -> matchInput.r2Id,
-      "r2_code" -> matchInput.r2Code,
-    )
-  }
-
-  implicit val matchOutputReads: Reads[MatchOutput] = (
-    (JsPath \ "r1_id").read[Long] and
-      (JsPath \ "r1_time").read[Float] and
-      (JsPath \ "r2_id").read[Long] and
-      (JsPath \ "r2_time").read[Float] and
-      (JsPath \ "winner").read[Winner.Value] and
-      (JsPath \ "errored").read[Boolean] and
-      (JsPath \ "data").read[String]
-  )(MatchOutput.apply _)
-
-  def inputToOutput(matchInput: MatchInput): MatchOutput = {
-    MatchOutput(0, 0, 0, 0, Winner.Draw, false, "")
-  }
-
-  case class MatchInput(r1Id: Long, r1Code: String, r2Id: Long, r2Code: String)
-
-  case class MatchOutput(
-      r1Id: Long,
-      r1Time: Float,
-      r2Id: Long,
-      r2Time: Float,
-      winner: Winner.Value,
-      errored: Boolean,
-      data: String
-  )
-}
 @Singleton
 class MatchMaker @Inject()(
     implicit system: ActorSystem,
     ec: ExecutionContext,
     mat: Materializer,
     cc: ControllerComponents,
-    config: Configuration,
     robotsRepo: Robots.Repo,
     battlesRepo: Battles.Repo,
     publishedRobotsRepo: PublishedRobots.Repo,
-) extends AbstractController(cc) {
-  import MatchMaker._
-
-  val (sink, source) =
-    if (true) new MockQueue().createStreams()
-    else new AwsQueue().createStreams()
+    battleQueue: BattleQueue
+) {
+  import BattleQueue._
 
   def prepareMatches(): Future[List[MatchInput]] = {
     val matchInputs = List.range(0, 5).flatMap { _ =>
@@ -94,18 +41,21 @@ class MatchMaker @Inject()(
           )
       }
     }
+    println("Sending", matchInputs)
     Future.sequence(matchInputs)
   }
 
   Source
-    .tick(0.seconds, 5.second, "tick")
+    .tick(0.seconds, 5.seconds, "tick")
     .mapAsync(1) { _ =>
       prepareMatches()
     }
     .mapConcat(identity)
-    .runWith(sink)
+    .runWith(battleQueue.sink)
 
   def processMatches(matchOutput: MatchOutput): Future[Unit] = {
+    println("Received", matchOutput)
+
     val getRobotInfo = (id: Long) => {
       val r = robotsRepo.findById(id).get
       val rGames = battlesRepo.findForRobot(r)
@@ -130,5 +80,5 @@ class MatchMaker @Inject()(
     Future.successful(())
   }
 
-  source.runWith(Sink.foreachAsync(1)(processMatches))
+  battleQueue.source.runWith(Sink.foreachAsync(1)(processMatches))
 }
