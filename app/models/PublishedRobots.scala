@@ -7,15 +7,14 @@ import services.Db
 
 object PublishedRobots {
 
-  private def createData(robot: Robots.Data): Data = {
-    Data(robot_id = robot.id, code = robot.devCode)
+  private def createData(robotId: Long, code: String): Data = {
+    Data(robotId = robotId, code = code)
   }
 
   case class Data(
       id: Long = -1,
-      // TODO: make sure postgres sets this
-      created: LocalDate = LocalDate.MIN,
-      robot_id: Long,
+      created: LocalDate = LocalDate.now(),
+      robotId: Long,
       code: String,
   )
 
@@ -25,22 +24,16 @@ object PublishedRobots {
 
     val schema = quote(querySchema[Data]("published_robots"))
 
-    def create(robot: Robots.Data): Data = {
-      val data = createData(robot)
-      val (id, created) = run(
-        schema
-          .insert(lift(data))
-          .returningGenerated(row => (row.id, row.created))
-      )
-      data.copy(id = id, created = created)
-    }
-
-    def find(robot: Robots.Data): Option[Data] = {
+    def find(robotId: Long): Option[Data] =
       run(
         schema
-          .filter(_.robot_id == lift(robot.id))
+          .filter(_.robotId == lift(robotId))
           .sortBy(_.created)(Ord.desc)
       ).headOption
+
+    def create(robotId: Long, code: String) = {
+      val data = createData(robotId, code)
+      run(schema.insert(lift(data)).returningGenerated(_.id))
     }
   }
 

@@ -8,13 +8,14 @@ CREATE TABLE users
 
 CREATE TABLE robots
 (
-    id        SERIAL PRIMARY KEY,
-    created   TIMESTAMP   NOT NULL DEFAULT current_timestamp,
-    user_id   SERIAL      NOT NULL REFERENCES users (id),
-    name      VARCHAR(15) NOT NULL,
-    dev_code  TEXT        NOT NULL,
-    automatch BOOL        NOT NULL,
-    rating    INT         NOT NULL
+    id           SERIAL PRIMARY KEY,
+    created      TIMESTAMP   NOT NULL DEFAULT current_timestamp,
+    user_id      SERIAL      NOT NULL REFERENCES users (id),
+    name         VARCHAR(15) NOT NULL,
+    dev_code     TEXT        NOT NULL,
+    automatch    BOOL        NOT NULL,
+    is_published BOOL        NOT NULL,
+    rating       INT         NOT NULL
 );
 
 CREATE TABLE published_robots
