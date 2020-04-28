@@ -81,7 +81,12 @@ class UserController @Inject()(
           val robots = robotRepo.findAllForUser(user)
           Ok(
             views.html
-              .profile(user, authUser.forall(_ == user), robots, assetsFinder)
+              .profile(
+                user,
+                authUser.forall(_.id == user.id),
+                robots,
+                assetsFinder
+              )
           )
         case None => NotFound("404")
       }
