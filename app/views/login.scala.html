@@ -1,18 +1,18 @@
 @(form: Form[LoginForm.Data], assetsFinder: AssetsFinder)(implicit request: MessagesRequestHeader)
-  @main("Login", "login", assetsFinder) {
 
+@main("Login", "login", assetsFinder) {
     @helper.form(routes.UserController.postLogin()) {
-      @helper.inputText(form("username"), Symbol("_showConstraints") -> false)
-      @helper.inputPassword(form("password"), Symbol("_showConstraints") -> false)
-      @helper.CSRF.formField
-      <button>Login</button>
+        @helper.inputText(form("username"), Symbol("_showConstraints") -> false)
+        @helper.inputPassword(form("password"), Symbol("_showConstraints") -> false)
+        @helper.CSRF.formField
+        <button>Login</button>
     }
 
     @if(form.hasGlobalErrors) {
-      <ul>
-      @for(error <- form.globalErrors) {
-        <li>@error.format</li>
-      }
-      </ul>
-  }
+        <ul>
+        @for(error <- form.globalErrors) {
+            <li>@error.format</li>
+        }
+        </ul>
+    }
 }
