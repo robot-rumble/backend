@@ -61,11 +61,11 @@ class RobotController @Inject()(
         robot <- robotsRepo.find(user, robot)
       } yield (user, robot)) match {
         case Some((user, robot))
-            if robot.isPublished || authUser.forall(_ == user) =>
+            if robot.isPublished || authUser.forall(_.id == user.id) =>
           Ok(
             views.html.robot.view(
               user,
-              authUser.forall(_ == user),
+              authUser.forall(_.id == user.id),
               robot,
               matchesRepo.findForRobot(robot.id),
               assetsFinder
@@ -78,7 +78,7 @@ class RobotController @Inject()(
   def edit(user: String, robot: String): Action[AnyContent] =
     authAction.force(parse.anyContent) { authUser => implicit request =>
       (for {
-        user <- usersRepo.find(user) if user == authUser
+        user <- usersRepo.find(user) if user.id == authUser.id
         robot <- robotsRepo.find(user, robot)
         code <- robotsRepo.getDevCode(robot.id)
       } yield (user, robot, code)) match {
@@ -91,7 +91,7 @@ class RobotController @Inject()(
   def update(user: String, robot: String): Action[JsValue] =
     authAction.force(parse.json) { authUser => implicit request =>
       (for {
-        user <- usersRepo.find(user) if user == authUser
+        user <- usersRepo.find(user) if user.id == authUser.id
         robot <- robotsRepo.find(user, robot)
       } yield robot) match {
         case Some(robot) =>
@@ -121,7 +121,7 @@ class RobotController @Inject()(
   def publish(user: String, robot: String): Action[AnyContent] =
     authAction.force(parse.anyContent) { authUser => implicit request =>
       (for {
-        user <- usersRepo.find(user) if user == authUser
+        user <- usersRepo.find(user) if user.id == authUser.id
         robot <- robotsRepo.find(user, robot)
       } yield robot) match {
         case Some(robot) =>
@@ -134,7 +134,7 @@ class RobotController @Inject()(
     authAction.force(parse.anyContent) { authUser => implicit request =>
       (for {
         robot <- robotsRepo.findById(robotId)
-        user <- usersRepo.findById(robot.userId) if user == authUser
+        user <- usersRepo.findById(robot.userId) if user.id == authUser.id
       } yield (user, robot)) match {
         case Some((user, robot)) =>
           robotsRepo.publish(robot.id)
@@ -150,8 +150,8 @@ class RobotController @Inject()(
         user <- usersRepo.findById(robot.userId)
       } yield (user, robot)) match {
         case Some((user, robot))
-            if robot.isPublished || authUser.forall(_ == user) =>
-          val code = if (authUser.forall(_ == user)) {
+            if robot.isPublished || authUser.forall(_.id == user.id) =>
+          val code = if (authUser.forall(_.id == user.id)) {
             robotsRepo.getDevCode(robotId)
           } else robotsRepo.getPublishedCode(robotId)
           Ok(Json.toJson(code.get))
@@ -165,7 +165,9 @@ class RobotController @Inject()(
         case Some(user) =>
           val robots = robotsRepo
             .findAllForUser(user)
-            .filter(robot => robot.isPublished || authUser.forall(_ == user))
+            .filter(
+              robot => robot.isPublished || authUser.forall(_.id == user.id)
+            )
           Ok(Json.obj("robots" -> robots))
         case None => NotFound("404")
       }
