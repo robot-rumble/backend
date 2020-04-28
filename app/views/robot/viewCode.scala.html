@@ -1,7 +1,7 @@
-@(robot: Robots.Data, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+@(robot: Robots.Data, publishedRobot: PublishedRobots.Data, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
 @main(s"Robot ${robot.name}'s code", "view-code", assetsFinder) {
-  <h1>@robot.name's Code</h1>
+    <h1>@robot.name's Code</h1>
 
-  <textarea readonly>@robot.code</textarea>
+    <textarea readonly>@publishedRobot.code</textarea>
 }

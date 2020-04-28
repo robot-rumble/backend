@@ -1,8 +1,8 @@
 package models
 
+import com.github.t3hnar.bcrypt._
 import javax.inject.Inject
 import services.Db
-import com.github.t3hnar.bcrypt._
 
 object Users {
   private def createData(username: String, password: String): Data = {
@@ -15,10 +15,13 @@ object Users {
 
     import db.ctx._
 
-    val schema: Quoted[EntityQuery[Data]] = quote(querySchema[Data]("users"))
+    val schema = quote(querySchema[Data]("users"))
 
     def find(username: String): Option[Data] =
       run(schema.filter(_.username == lift(username))).headOption
+
+    def findById(id: Long): Option[Data] =
+      run(schema.filter(_.id == lift(id))).headOption
 
     def create(username: String, password: String): Data = {
       val data = createData(username, password)

@@ -19,9 +19,18 @@ wasm-pack build
 4. Start the battle-viewer webpack process:
 ```
 # /rr
-cd backend/src
+cd backend/src/battle-viewer
 yarn # or npm i
-yarn watch # or npm run watch
+cd ..
+yarn # or npm i
+yarn dev # or npm run dev
+```
+
+4. Start docker:
+```
+# If installing on linux, follow these steps to execute docker without root access:
+# https://docs.docker.com/engine/install/linux-postinstall/
+sudo systemctl start docker
 ```
 
 5. Start the backend:
