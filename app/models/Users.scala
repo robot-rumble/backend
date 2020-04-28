@@ -23,9 +23,9 @@ object Users {
     def findById(id: Long): Option[Data] =
       run(schema.filter(_.id == lift(id))).headOption
 
-    def create(username: String, password: String): Data = {
+    def create(username: String, password: String) = {
       val data = createData(username, password)
-      data.copy(id = run(schema.insert(lift(data)).returningGenerated(_.id)))
+      run(schema.insert(lift(data)).returningGenerated(_.id))
     }
   }
 

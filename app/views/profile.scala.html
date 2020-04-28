@@ -1,4 +1,4 @@
-@(user: Users.Data, robots: List[Robots.Data], assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+@(user: Users.Data, isAuthenticated: Boolean, robots: List[Robots.BasicData], assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
 @main("Profile", "profile", assetsFinder) {
     <h1>@user.username</h1>
@@ -15,7 +15,7 @@
         </div>
     }
 
-    @if(request.session.get("USERNAME").forall(_ == user.username)) {
+    @if(isAuthenticated) {
         <a href="@routes.RobotController.create()">create robot</a>
     }
 }

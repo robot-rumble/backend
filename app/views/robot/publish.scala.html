@@ -1,4 +1,4 @@
-@(robot: Robots.Data, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+@(robot: Robots.BasicData, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
 @main(s"Publish ${robot.name}", "publish", assetsFinder) {
     <h1>Publish @robot.name</h1>

@@ -1,19 +1,21 @@
 package models
 
+import scala.languageFeature.implicitConversions
+
 import javax.inject.Inject
 import play.api.libs.json.{Reads, Writes}
 import services.Db
 
-object Battles {
+import Robots.dataToBasic
 
+object Battles {
   def didR1Win(
       battle: Data,
-      r1: Robots.Data,
-      r2: Robots.Data
+      r1Id: Long,
   ): Option[Boolean] = {
     battle.winner match {
       case Winner.R1 | Winner.R2 =>
-        Some(battle.winner == Winner.R1 && battle.r1_id == r1.id)
+        Some(battle.winner == Winner.R1 && battle.r1_id == r1Id)
       case Winner.Draw => None
     }
   }
@@ -57,29 +59,27 @@ object Battles {
     def find(id: Long): Option[Data] =
       run(schema.filter(_.id == lift(id))).headOption
 
-    def findForRobot(
-        robot: Robots.Data
-    ): List[(Data, Robots.Data, Robots.Data)] = {
+    def findForRobot(robotId: Long): List[(Data, Robots.BasicData)] = {
       run(
         for {
           m <- schema
           other_r <- robotSchema
           if (
-            (m.r1_id == lift(robot.id) && m.r2_id == other_r.id)
-              || (m.r2_id == lift(robot.id) && m.r1_id == other_r.id)
+            (m.r1_id == lift(robotId) && m.r2_id == other_r.id)
+              || (m.r2_id == lift(robotId) && m.r1_id == other_r.id)
           )
         } yield (m, other_r)
-      ).map({ case (m, other_r) => (m, robot, other_r) })
+      ).map(tuple => (tuple._1, dataToBasic(tuple._2)))
     }
 
-    def findAll(): List[(Data, Robots.Data, Robots.Data)] = {
+    def findAll(): List[(Data, Robots.BasicData, Robots.BasicData)] = {
       run(
         for {
           battle <- schema
           r1 <- robotSchema if battle.r1_id == r1.id
           r2 <- robotSchema if battle.r2_id == r1.id
         } yield (battle, r1, r2)
-      )
+      ).map(tuple => (tuple._1, dataToBasic(tuple._2), dataToBasic(tuple._3)))
     }
   }
 
