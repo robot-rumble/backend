@@ -1,4 +1,4 @@
-@(battles: List[(Battles.Data, Robots.Data, Robots.Data)], assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+@(battles: List[(Battles.Data, Robots.BasicData, Robots.BasicData)], assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
 @main("Warehouse", "warehouse", assetsFinder) {
     <h1>Battles</h1>

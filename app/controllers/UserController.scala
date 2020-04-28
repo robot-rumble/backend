@@ -3,6 +3,7 @@ package controllers
 import com.github.t3hnar.bcrypt._
 import javax.inject._
 import models.{Robots, Users}
+import play.api.libs.json.Json
 import play.api.mvc._
 
 @Singleton
@@ -10,7 +11,8 @@ class UserController @Inject()(
     cc: MessagesControllerComponents,
     usersRepo: Users.Repo,
     robotRepo: Robots.Repo,
-    assetsFinder: AssetsFinder
+    assetsFinder: AssetsFinder,
+    authAction: AuthAction,
 ) extends MessagesAbstractController(cc) {
 
   def create: Action[AnyContent] = Action { implicit request =>
@@ -33,9 +35,9 @@ class UserController @Inject()(
               )
             )
           case None =>
-            val user = usersRepo.create(username, data.password)
-            Redirect(routes.UserController.profile(user.username))
-              .withSession("USERNAME" -> user.username)
+            usersRepo.create(username, data.password)
+            Redirect(routes.UserController.profile(username))
+              .withSession("USERNAME" -> username)
         }
       }
     )
@@ -72,13 +74,16 @@ class UserController @Inject()(
     Redirect(routes.HomeController.index()).withNewSession
   }
 
-  def profile(username: String): Action[AnyContent] = Action {
-    implicit request =>
+  def profile(username: String): Action[AnyContent] =
+    authAction(parse.anyContent) { authUser => implicit request =>
       usersRepo.find(username) match {
         case Some(user) =>
           val robots = robotRepo.findAllForUser(user)
-          Ok(views.html.profile(user, robots, assetsFinder))
+          Ok(
+            views.html
+              .profile(user, authUser.forall(_ == user), robots, assetsFinder)
+          )
         case None => NotFound("404")
       }
-  }
+    }
 }
