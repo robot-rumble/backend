@@ -32,10 +32,6 @@ object BattleQueue {
       (JsPath \ "data").read[String]
   )(MatchOutput.apply _)
 
-  def inputToOutput(matchInput: MatchInput): MatchOutput = {
-    MatchOutput(0, 0, 0, 0, Winner.Draw, false, "")
-  }
-
   case class MatchInput(r1Id: Long, r1Code: String, r2Id: Long, r2Code: String)
 
   case class MatchOutput(
