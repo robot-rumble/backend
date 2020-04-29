@@ -13,22 +13,22 @@ object Battles {
   ): Option[Boolean] = {
     battle.winner match {
       case Winner.R1 | Winner.R2 =>
-        Some(battle.winner == Winner.R1 && battle.r1_id == r1.id)
+        Some(battle.winner == Winner.R1 && battle.r1Id == r1.id)
       case Winner.Draw => None
     }
   }
 
   case class Data(
       id: Long,
-      r1_id: Long,
-      r2_id: Long,
+      r1Id: Long,
+      r2Id: Long,
       ranked: Boolean,
       winner: Winner.Value,
       errored: Boolean,
-      r1_rating: Int,
-      r2_rating: Int,
-      r1_time: Float,
-      r2_time: Float,
+      r1Rating: Int,
+      r2Rating: Int,
+      r1Time: Float,
+      r2Time: Float,
       data: String
   )
 
@@ -63,12 +63,12 @@ object Battles {
       run(
         for {
           m <- schema
-          other_r <- robotSchema
+          otherR <- robotSchema
           if (
-            (m.r1_id == lift(robot.id) && m.r2_id == other_r.id)
-              || (m.r2_id == lift(robot.id) && m.r1_id == other_r.id)
+            (m.r1Id == lift(robot.id) && m.r2Id == otherR.id)
+              || (m.r2Id == lift(robot.id) && m.r1Id == otherR.id)
           )
-        } yield (m, other_r)
+        } yield (m, otherR)
       ).map({ case (m, other_r) => (m, robot, other_r) })
     }
 
@@ -76,8 +76,8 @@ object Battles {
       run(
         for {
           battle <- schema
-          r1 <- robotSchema if battle.r1_id == r1.id
-          r2 <- robotSchema if battle.r2_id == r1.id
+          r1 <- robotSchema if battle.r1Id == r1.id
+          r2 <- robotSchema if battle.r2Id == r1.id
         } yield (battle, r1, r2)
       )
     }
