@@ -1,7 +1,11 @@
 package models
 
+import java.time.LocalDate
+
 import javax.inject.Inject
+import org.postgresql.util.PGobject
 import play.api.libs.json.{Reads, Writes}
+import services.BattleQueue.MatchOutput
 import services.Db
 
 object Battles {
@@ -18,8 +22,28 @@ object Battles {
     }
   }
 
+  private def createData(
+      matchOutput: MatchOutput,
+      r1Rating: Int,
+      r2Rating: Int
+  ): Data = {
+    Data(
+      r1Id = matchOutput.r1Id,
+      r2Id = matchOutput.r2Id,
+      winner = matchOutput.winner,
+      errored = matchOutput.errored,
+      r1Time = matchOutput.r1Time,
+      r2Time = matchOutput.r2Time,
+      data = matchOutput.data,
+      ranked = true,
+      r1Rating = r1Rating,
+      r2Rating = r2Rating,
+      created = LocalDate.now()
+    )
+  }
+
   case class Data(
-      id: Long,
+      id: Long = -1,
       r1Id: Long,
       r2Id: Long,
       ranked: Boolean,
@@ -29,7 +53,8 @@ object Battles {
       r2Rating: Int,
       r1Time: Float,
       r2Time: Float,
-      data: String
+      data: String,
+      created: LocalDate,
   )
 
   class Repo @Inject()(
@@ -40,14 +65,21 @@ object Battles {
 
     import db.ctx._
 
+    // https://github.com/getquill/quill/issues/1129
+
     implicit val decoderSource: Decoder[Winner.Value] = decoder(
       (index, row) => Winner.serialize(row.getObject(index).toString)
     )
 
     implicit val encoderSource: Encoder[Winner.Value] =
       encoder(
-        java.sql.Types.VARCHAR,
-        (index, value, row) => row.setString(index, value.toString)
+        java.sql.Types.OTHER,
+        (index, value, row) => {
+          val pgObj = new PGobject()
+          pgObj.setType("battle_outcome")
+          pgObj.setValue(value.toString)
+          row.setObject(index, pgObj, java.sql.Types.OTHER)
+        }
       )
 
     val robotSchema =
@@ -80,6 +112,11 @@ object Battles {
           r2 <- robotSchema if battle.r2Id == r1.id
         } yield (battle, r1, r2)
       )
+    }
+
+    def create(matchOutput: MatchOutput, r1Rating: Int, r2Rating: Int) = {
+      val data = createData(matchOutput, r1Rating, r2Rating)
+      run(schema.insert(lift(data)).returningGenerated(_.id))
     }
   }
 

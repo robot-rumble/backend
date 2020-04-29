@@ -25,7 +25,7 @@ CREATE TABLE published_robots
     code     TEXT      NOT NULL
 );
 
-CREATE TYPE battle_outcome AS ENUM ('r1_won', 'r2_won', 'draw');
+CREATE TYPE battle_outcome AS ENUM ('R1', 'R2', 'DRAW');
 
 CREATE TABLE battles
 (
@@ -41,5 +41,5 @@ CREATE TABLE battles
     r2_rating INT            NOT NULL,
     r1_time   REAL           NOT NULL,
     r2_time   REAL           NOT NULL,
-    data      JSON           NOT NULL
+    data      TEXT           NOT NULL
 );

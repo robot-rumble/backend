@@ -53,26 +53,28 @@ class MatchMaker @Inject()(
   def processMatches(matchOutput: MatchOutput) = {
     println("Received", matchOutput)
 
-//    val getRobotInfo = (id: Long) => {
-//      val r = robotsRepo.findById(id).get
-//      val rGames = battlesRepo.findForRobot(r)
-//      val rPlayer =
-//        new Player(rating = r.rating, startingGameCount = rGames.length)
-//      (r, rPlayer)
-//    }
-//    val ((r1, r1Player), (r2, r2Player)) =
-//      (getRobotInfo(matchOutput.r1Id), getRobotInfo(matchOutput.r2Id))
-//
-//    matchOutput.winner match {
-//      case Winner.R1   => r1Player wins r2Player
-//      case Winner.R2   => r2Player wins r1Player
-//      case Winner.Draw => r1Player draws r2Player
-//    }
-//
-//    r1Player.updateRating()
-//    robotsRepo.updateRating(r1, r1Player.rating)
-//    r2Player.updateRating()
-//    robotsRepo.updateRating(r2, r2Player.rating)
+    val getRobotInfo = (id: Long) => {
+      val r = robotsRepo.findById(id).get
+      val rGames = battlesRepo.findForRobot(r)
+      val rPlayer =
+        new Player(rating = r.rating, startingGameCount = rGames.length)
+      (r, rPlayer)
+    }
+    val ((r1, r1Player), (r2, r2Player)) =
+      (getRobotInfo(matchOutput.r1Id), getRobotInfo(matchOutput.r2Id))
+
+    matchOutput.winner match {
+      case Winner.R1   => r1Player wins r2Player
+      case Winner.R2   => r2Player wins r1Player
+      case Winner.Draw => r1Player draws r2Player
+    }
+
+    r1Player.updateRating(KFactor.USCF)
+    robotsRepo.updateRating(r1, r1Player.rating)
+    r2Player.updateRating(KFactor.USCF)
+    robotsRepo.updateRating(r2, r2Player.rating)
+
+    battlesRepo.create(matchOutput, r1Player.rating, r2Player.rating)
   }
 
   battleQueue.source.runForeach(processMatches)
