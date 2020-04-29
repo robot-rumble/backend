@@ -12,6 +12,7 @@ import play.api.mvc._
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 @Singleton
 class MatchMaker @Inject()(
@@ -77,5 +78,8 @@ class MatchMaker @Inject()(
     battlesRepo.create(matchOutput, r1Player.rating, r2Player.rating)
   }
 
-  battleQueue.source.runForeach(processMatches)
+  battleQueue.source.runForeach(processMatches) onComplete {
+    case Success(_) => println("BattleQueue exited.")
+    case Failure(t) => println("BattleQueue error: " + t.getMessage)
+  }
 }
