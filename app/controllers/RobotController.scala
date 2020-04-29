@@ -168,7 +168,7 @@ class RobotController @Inject()(
             .filter(
               robot => robot.isPublished || authUser.forall(_.id == user.id)
             )
-          Ok(Json.obj("robots" -> robots))
+          Ok(Json.toJson(robots))
         case None => NotFound("404")
       }
     }
