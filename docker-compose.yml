@@ -20,8 +20,6 @@ services:
       - .:/backend
     environment:
       DATABASE_URL: jdbc:postgresql://db:5432/robot
-      MATCH_QUEUE_IN_URL: http://localstack:443/queue/battle_input_queue
-      MATCH_QUEUE_OUT_URL: http://localstack:443/queue/battle_output_queue
 
     # https://github.com/docker/compose/issues/596#issuecomment-133004835
     stdin_open: true
