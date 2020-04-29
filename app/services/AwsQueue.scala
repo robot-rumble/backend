@@ -20,7 +20,6 @@ import scala.concurrent.Future
 class AwsQueue @Inject()(
     implicit system: ActorSystem,
     config: Configuration,
-    lifecycle: ApplicationLifecycle
 ) extends BattleQueue {
   val inputQueueUrl = config.get[String]("aws.matchQueueInUrl")
   val outputQueueUrl = config.get[String]("aws.matchQueueOutUrl")
@@ -31,10 +30,7 @@ class AwsQueue @Inject()(
     .region(Region.US_EAST_1)
     .httpClient(AkkaHttpClient.builder().withActorSystem(system).build())
     .build()
-  lifecycle.addStopHook { () =>
-    awsSqsClient.close()
-    Future.successful(())
-  }
+  system.registerOnTermination(awsSqsClient.close())
 
   val sink = Flow[MatchInput]
     .map(matchInput => {
