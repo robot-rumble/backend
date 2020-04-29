@@ -24,6 +24,8 @@
     <appender-ref ref="STDOUT" />
   </appender>
 
+  <logger name="akka.actor" level="INFO" />
+
   <logger name="play" level="INFO" />
   <logger name="application" level="DEBUG" />
 
