@@ -2,32 +2,32 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-GET         /                                controllers.HomeController.index
-GET         /rules                           controllers.HomeController.rules
-GET         /warehouse                       controllers.RobotController.warehouse
-GET         /battles                         controllers.RobotController.battles
+GET         /                                 controllers.HomeController.index
+GET         /rules                            controllers.HomeController.rules
+GET         /warehouse                        controllers.RobotController.warehouse
+GET         /battles                          controllers.RobotController.battles
 
-GET         /signup                          controllers.UserController.create
-POST        /signup                          controllers.UserController.postCreate
-GET         /login                           controllers.UserController.login
-POST        /login                           controllers.UserController.postLogin
-GET         /logout                          controllers.UserController.logout
-GET         /p/:username                     controllers.UserController.profile(username)
+GET         /signup                           controllers.UserController.create
+POST        /signup                           controllers.UserController.postCreate
+GET         /login                            controllers.UserController.login
+POST        /login                            controllers.UserController.postLogin
+GET         /logout                           controllers.UserController.logout
+GET         /p/:username                      controllers.UserController.profile(username)
 
-GET         /create-robot                    controllers.RobotController.create
-POST        /create-robot                    controllers.RobotController.postCreate
-GET         /p/:user/:robot                  controllers.RobotController.view(user, robot)
-GET         /p/:user/:robot/edit             controllers.RobotController.edit(user, robot)
-GET         /viewCode/:robotId               controllers.RobotController.viewPublishedCode(robotId: Long)
-GET         /p/:user/:robot/challenge        controllers.RobotController.challenge(user, robot)
-GET         /p/:user/:robot/publish          controllers.RobotController.publish(user, robot)
-POST        /publish/:robotId                controllers.RobotController.postPublish(robotId: Long)
+GET         /create-robot                     controllers.RobotController.create
+POST        /create-robot                     controllers.RobotController.postCreate
+GET         /p/:user/:robot                   controllers.RobotController.view(user, robot)
+GET         /p/:user/:robot/edit              controllers.RobotController.edit(user, robot)
+GET         /viewCode/:robotId                controllers.RobotController.viewPublishedCode(robotId: Long)
+GET         /p/:user/:robot/challenge         controllers.RobotController.challenge(user, robot)
+GET         /p/:user/:robot/publish           controllers.RobotController.publish(user, robot)
+POST        /publish/:robotId                 controllers.RobotController.postPublish(robotId: Long)
 + nocsrf
-POST        /update/:user/:robot             controllers.RobotController.update(user, robot)
+POST        /update/:user/:robot              controllers.RobotController.update(user, robot)
 
-GET         /api/:user/robots                controllers.RobotController.getUserRobots(user)
-GET         /api/robot/:robotId              controllers.RobotController.getRobotCode(robotId: Long)
+GET         /api/getUserRobots/:user          controllers.RobotController.getUserRobots(user)
+GET         /api/getRobotCode/:robotId        controllers.RobotController.getRobotCode(robotId: Long)
 
-GET         /m/:id                           controllers.RobotController.viewMatch(id)
+GET         /m/:id                            controllers.RobotController.viewMatch(id)
 
-GET         /assets/*file                    controllers.Assets.at(file)
+GET         /assets/*file                     controllers.Assets.at(file)
