@@ -8,9 +8,10 @@ object CreateRobotForm {
   val form: Form[Data] = Form(
     mapping(
       "name" -> nonEmptyText,
+      "lang" -> nonEmptyText
     )(Data.apply)(Data.unapply)
   )
 
-  case class Data(name: String)
+  case class Data(name: String, lang: String)
 
 }

@@ -3,6 +3,11 @@
 @main("Create robot", "create-robot", assetsFinder) {
     @helper.form(routes.RobotController.postCreate()) {
         @helper.inputText(form("name"), Symbol("_showConstraints") -> false)
+        @helper.select(
+            form("lang"),
+            Seq("PYTHON" -> "Python", "JAVASCRIPT" -> "Javascript"),
+            Symbol("_showConstraints") -> false
+        )
         @helper.CSRF.formField
         <button>Create</button>
     }

@@ -6,6 +6,8 @@ CREATE TABLE users
     password VARCHAR(60) NOT NULL
 );
 
+CREATE TYPE lang AS ENUM ('PYTHON', 'JAVASCRIPT');
+
 CREATE TABLE robots
 (
     id           SERIAL PRIMARY KEY,
@@ -15,7 +17,8 @@ CREATE TABLE robots
     dev_code     TEXT        NOT NULL,
     automatch    BOOL        NOT NULL,
     is_published BOOL        NOT NULL,
-    rating       INT         NOT NULL
+    rating       INT         NOT NULL,
+    lang         lang        NOT NULL
 );
 
 CREATE TABLE published_robots
