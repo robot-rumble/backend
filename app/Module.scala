@@ -16,5 +16,12 @@ class Module(environment: Environment, configuration: Configuration)
     extends AbstractModule {
   override def configure(): Unit = {
     bind(classOf[Db]).to(classOf[Postgres])
+    if (configuration.get[Boolean]("aws.runQueue")) {
+      if (configuration.get[Boolean]("aws.useMockQueue"))
+        bind(classOf[BattleQueue]).to(classOf[MockQueue])
+      else
+        bind(classOf[BattleQueue]).to(classOf[AwsQueue]).asEagerSingleton()
+      bind(classOf[MatchMaker]).asEagerSingleton()
+    }
   }
 }

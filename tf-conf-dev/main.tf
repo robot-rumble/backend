@@ -27,7 +27,7 @@ resource "aws_s3_bucket_object" "lambda" {
 }
 
 resource "aws_lambda_function" "battle_runner" {
-  depends_on = [aws_s3_bucket_object.lambda]
+  depends_on = [aws_s3_bucket_object.lambda, aws_sqs_queue.battle_queue_out]
   s3_bucket = aws_s3_bucket.lambda.id
   s3_key = aws_s3_bucket_object.lambda.key
   function_name = "dev-battle-runner"
@@ -39,6 +39,7 @@ resource "aws_lambda_function" "battle_runner" {
   environment {
     variables = {
       RUST_BACKTRACE = 1
+      BATTLE_QUEUE_OUT_URL = aws_sqs_queue.battle_queue_out.id
     }
   }
 }
@@ -46,16 +47,7 @@ resource "aws_lambda_function" "battle_runner" {
 resource "aws_lambda_event_source_mapping" "battle_queue_in" {
   event_source_arn = aws_sqs_queue.battle_queue_in.arn
   function_name = aws_lambda_function.battle_runner.arn
-}
-
-resource "aws_lambda_function_event_invoke_config" "battle_queue_out" {
-  function_name = aws_lambda_function.battle_runner.function_name
-
-  destination_config {
-    on_success {
-      destination = aws_sqs_queue.battle_queue_out.arn
-    }
-  }
+  batch_size = 1
 }
 
 
