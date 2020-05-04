@@ -112,8 +112,10 @@ object Robots {
 
     def publish(id: Long) = {
       run(schema.filter(_.id == lift(id))).headOption.map(robot => {
-        publishedRobotsRepo.create(id, robot.devCode)
-        run(schema.filter(_.id == lift(id)).update(_.isPublished -> true))
+        if (!robot.devCode.isBlank) {
+          publishedRobotsRepo.create(id, robot.devCode)
+          run(schema.filter(_.id == lift(id)).update(_.isPublished -> true))
+        }
       })
     }
 
