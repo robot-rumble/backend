@@ -65,22 +65,10 @@ object Battles {
 
     import db.ctx._
 
-    // https://github.com/getquill/quill/issues/1129
-
-    implicit val decoderSource: Decoder[Winner.Value] = decoder(
-      (index, row) => Winner.serialize(row.getObject(index).toString)
-    )
-
+    implicit val decoderSource: Decoder[Winner.Value] =
+      QuillUtils.generateEnumDecoder(db.ctx, Winner)
     implicit val encoderSource: Encoder[Winner.Value] =
-      encoder(
-        java.sql.Types.OTHER,
-        (index, value, row) => {
-          val pgObj = new PGobject()
-          pgObj.setType("battle_outcome")
-          pgObj.setValue(value.toString)
-          row.setObject(index, pgObj, java.sql.Types.OTHER)
-        }
-      )
+      QuillUtils.generateEnumEncoder(db.ctx, Winner, "battle_outcome")
 
     val robotSchema =
       robotsRepo.schema.asInstanceOf[Quoted[EntityQuery[Robots.Data]]]
@@ -123,8 +111,6 @@ object Battles {
     val R1 = Value("R1")
     val R2 = Value("R2")
     val Draw = Value("Draw")
-
-    def serialize(s: String): Value = values.find(_.toString == s).get
 
     implicit val winnerReads = Reads.enumNameReads(Winner)
     implicit val winnerWrites = Writes.enumNameWrites
