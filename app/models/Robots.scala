@@ -103,5 +103,15 @@ object Robots {
         run(schema.filter(_.id == lift(id)).update(_.isPublished -> true))
       })
     }
+
+    def updateRating(id: Long, rating: Int) = {
+      run(
+        schema.filter(_.id == lift(id)).update(_.rating -> lift(rating))
+      )
+    }
+
+    def random(): Option[Data] = {
+      run(schema.sortBy(_ => infix"RANDOM()".as[Int])(Ord.desc)).headOption
+    }
   }
 }

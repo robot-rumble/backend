@@ -4,7 +4,13 @@ name := """robot-rumble"""
 
 version := "1.0-SNAPSHOT"
 
-lazy val root = (project in file(".")).enablePlugins(PlayScala)
+lazy val root = (project in file("."))
+  .enablePlugins(PlayScala)
+  .dependsOn(scalaElo)
+lazy val scalaElo = ProjectRef(
+  uri("git://github.com/robot-rumble/scala-elo.git#v1.0.2"),
+  "scala-elo"
+)
 
 resolvers += Resolver.sonatypeRepo("snapshots")
 
@@ -28,9 +34,16 @@ libraryDependencies ++= Seq(
 
 libraryDependencies += "com.github.t3hnar" %% "scala-bcrypt" % "4.1"
 
+val AkkaVersion = "2.5.31"
+val AkkaHttpVersion = "10.1.11"
+libraryDependencies ++= Seq(
+  "com.lightbend.akka" %% "akka-stream-alpakka-sqs" % "2.0.0-RC2",
+  "com.typesafe.akka" %% "akka-stream" % AkkaVersion,
+  "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion
+)
+
 scalacOptions ++= Seq(
   "-feature",
   "-deprecation",
   "-Xfatal-warnings"
 )
-
