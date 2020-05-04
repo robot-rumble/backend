@@ -1,13 +1,14 @@
 package models
 
 import javax.inject.Inject
-import play.api.libs.json.{Json, Writes}
+import org.postgresql.util.PGobject
+import play.api.libs.json.{Json, Reads, Writes}
 import services.Db
 
 object Robots {
 
-  private def createData(userId: Long, name: String): Data = {
-    Data(name = name, userId = userId)
+  private def createData(userId: Long, name: String, lang: Lang.Value): Data = {
+    Data(name = name, userId = userId, lang = lang)
   }
 
   case class Data(
@@ -18,6 +19,7 @@ object Robots {
       automatch: Boolean = true,
       isPublished: Boolean = false,
       rating: Int = 1000,
+      lang: Lang.Value
   )
 
   def dataToBasic(data: Data): BasicData =
@@ -26,7 +28,8 @@ object Robots {
       userId = data.userId,
       name = data.name,
       rating = data.rating,
-      isPublished = data.isPublished
+      isPublished = data.isPublished,
+      lang = data.lang
     )
 
   case class BasicData(
@@ -34,7 +37,8 @@ object Robots {
       userId: Long,
       name: String,
       rating: Int,
-      isPublished: Boolean
+      isPublished: Boolean,
+      lang: Lang.Value
   )
 
   implicit val basicDataWrites = new Writes[BasicData] {
@@ -53,6 +57,15 @@ object Robots {
   ) {
 
     import db.ctx._
+
+    implicit val decoderSource =
+      QuillUtils
+        .generateEnumDecoder(db.ctx, Lang)
+        .asInstanceOf[Decoder[Lang.Value]]
+    implicit val encoderSource =
+      QuillUtils
+        .generateEnumEncoder(db.ctx, Lang, "lang")
+        .asInstanceOf[Encoder[Lang.Value]]
 
     val schema = quote(querySchema[Data]("robots"))
 
@@ -86,8 +99,8 @@ object Robots {
         .map(tuple => (dataToBasic(tuple._1), tuple._2))
     }
 
-    def create(userId: Long, name: String) = {
-      val data = createData(userId, name)
+    def create(userId: Long, name: String, lang: Lang.Value) = {
+      val data = createData(userId, name, lang)
       run(schema.insert(lift(data)).returningGenerated(_.id))
     }
 
@@ -113,5 +126,14 @@ object Robots {
     def random(): Option[Data] = {
       run(schema.sortBy(_ => infix"RANDOM()".as[Int])(Ord.desc)).headOption
     }
+  }
+
+  //noinspection TypeAnnotation
+  object Lang extends Enumeration {
+    val PYTHON = Value("PYTHON")
+    val JAVASCRIPT = Value("JAVASCRIPT")
+
+    implicit val winnerReads = Reads.enumNameReads(Lang)
+    implicit val winnerWrites = Writes.enumNameWrites
   }
 }

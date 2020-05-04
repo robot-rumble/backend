@@ -1,7 +1,7 @@
 package controllers
 
 import javax.inject._
-import models.{Battles, Robots, Users}
+import models.{Battles, QuillUtils, Robots, Users}
 import play.api.libs.json.{JsDefined, JsString, JsValue, Json}
 import play.api.mvc._
 
@@ -47,8 +47,13 @@ class RobotController @Inject()(
                 )
               )
             case None =>
-              robotsRepo.create(user.id, name)
-              Redirect(routes.RobotController.view(user.username, name))
+              QuillUtils.serialize(Robots.Lang, data.lang) match {
+                case Some(lang) =>
+                  robotsRepo.create(user.id, name, lang)
+                  Redirect(routes.RobotController.view(user.username, name))
+                case None =>
+                  BadRequest("Invalid lang field value.")
+              }
           }
         }
       )

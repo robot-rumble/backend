@@ -1,7 +1,7 @@
 @(user: Users.Data, isOwner: Boolean, robot: Robots.BasicData, battles: List[(Battles.Data, Robots.BasicData)], assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
 @main(s"Robot ${robot.name}", "robot-page", assetsFinder) {
-    <h1>@robot.name</h1>
+    <h1>@robot.name <span>(@robot.lang.toString)</span></h1>
 
     <div class="d-flex actions mb-5">
         @if(robot.isPublished) {

@@ -3,7 +3,6 @@ package models
 import java.time.LocalDate
 
 import javax.inject.Inject
-import org.postgresql.util.PGobject
 import services.BattleQueue.MatchOutput
 import play.api.libs.json.{Reads, Writes}
 import services.Db
@@ -65,10 +64,17 @@ object Battles {
 
     import db.ctx._
 
-    implicit val decoderSource: Decoder[Winner.Value] =
-      QuillUtils.generateEnumDecoder(db.ctx, Winner)
-    implicit val encoderSource: Encoder[Winner.Value] =
-      QuillUtils.generateEnumEncoder(db.ctx, Winner, "battle_outcome")
+    implicit val robotDecoderSource =
+      robotsRepo.decoderSource.asInstanceOf[Decoder[Robots.Lang.Value]]
+
+    implicit val decoderSource =
+      QuillUtils
+        .generateEnumDecoder(db.ctx, Winner)
+        .asInstanceOf[Decoder[Winner.Value]]
+    implicit val encoderSource =
+      QuillUtils
+        .generateEnumEncoder(db.ctx, Winner, "battle_outcome")
+        .asInstanceOf[Encoder[Winner.Value]]
 
     val robotSchema =
       robotsRepo.schema.asInstanceOf[Quoted[EntityQuery[Robots.Data]]]

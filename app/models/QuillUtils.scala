@@ -9,13 +9,19 @@ object QuillUtils {
 
   type ctx = JdbcContext[PostgresDialect, SnakeCase]
 
+  def serialize[E <: Enumeration](
+      enum: E,
+      value: String
+  ): Option[enum.Value] = {
+    enum.values.find(_.toString == value)
+  }
+
   def generateEnumDecoder[E <: Enumeration](
       quillCtx: ctx,
       enum: E
   ): quillCtx.Decoder[enum.Value] = {
     quillCtx.decoder(
-      (index, row) =>
-        enum.values.find(_.toString == row.getObject(index).toString).get
+      (index, row) => serialize(enum, row.getObject(index).toString).get
     )
   }
 
