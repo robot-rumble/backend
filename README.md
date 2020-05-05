@@ -12,8 +12,7 @@ git clone https://github.com/robot-rumble/logic --recursive
 3. Build the web battle-runner:
 ```
 # /rr
-cd logic/runners/webapp
-wasm-pack build
+logic/build-for-web.sh
 ```
 
 4. Start the battle-viewer webpack process:
