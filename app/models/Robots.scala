@@ -46,7 +46,8 @@ object Robots {
       "id" -> basicData.id,
       "userId" -> basicData.userId,
       "name" -> basicData.name,
-      "rating" -> basicData.rating
+      "rating" -> basicData.rating,
+      "lang" -> basicData.lang
     )
   }
 
