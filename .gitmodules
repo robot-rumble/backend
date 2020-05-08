@@ -1,4 +1,0 @@
-[submodule "src/battle-viewer"]
-	path = src/battle-viewer
-	url = https://github.com/robot-rumble/battle-viewer
-	branch = master
