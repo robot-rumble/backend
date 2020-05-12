@@ -5,17 +5,17 @@
         <script src="@assetsFinder.path("dist/webapp_js.js")" type="text/javascript"></script>
     } {
         @helper.javascriptRouter("jsRoutes")(
-            routes.javascript.RobotController.update,
             routes.javascript.RobotController.view,
             routes.javascript.RobotController.publish,
             routes.javascript.Assets.at,
 
-            routes.javascript.RobotController.getRobotCode,
-            routes.javascript.RobotController.getUserRobots
+            routes.javascript.RobotController.apiUpdate,
+            routes.javascript.RobotController.apiGetRobotCode,
+            routes.javascript.RobotController.apiGetUserRobots
         )
         <script>window.jsRoutes = jsRoutes</script>
 
         <div class="garage">
-            <robot-arena user="@user.username" robot="@robot.name" code="@code" lang="@robot.lang"></robot-arena>
+            <robot-arena user="@user.username" robot="@robot.name" robotId="@robot.id" code="@code" lang="@robot.lang"></robot-arena>
         </div>
     }
