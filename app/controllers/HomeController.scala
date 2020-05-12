@@ -9,9 +9,9 @@ class HomeController @Inject()(
     assetsFinder: AssetsFinder
 ) extends AbstractController(cc) {
 
-  def index: Action[AnyContent] = Action { implicit request =>
+  def index = Action { implicit request =>
     Ok(views.html.index(assetsFinder))
   }
 
-  def rules: Action[AnyContent] = TODO
+  def rules = TODO
 }

@@ -14,11 +14,11 @@ class UserController @Inject()(
     assetsFinder: AssetsFinder,
     auth: Auth,
 ) extends MessagesAbstractController(cc) {
-  def create: Action[AnyContent] = Action { implicit request =>
+  def create = Action { implicit request =>
     Ok(views.html.signup(SignupForm.form, assetsFinder))
   }
 
-  def postCreate: Action[AnyContent] = Action { implicit request =>
+  def postCreate = Action { implicit request =>
     SignupForm.form.bindFromRequest.fold(
       formWithErrors => {
         BadRequest(views.html.signup(formWithErrors, assetsFinder))
@@ -53,11 +53,11 @@ class UserController @Inject()(
     }
   }
 
-  def login: Action[AnyContent] = Action { implicit request =>
+  def login = Action { implicit request =>
     Ok(views.html.login(LoginForm.form, assetsFinder))
   }
 
-  def postLogin: Action[AnyContent] = Action { implicit request =>
+  def postLogin = Action { implicit request =>
     LoginForm.form.bindFromRequest.fold(
       formWithErrors => {
         Forbidden(views.html.login(formWithErrors, assetsFinder))
@@ -81,7 +81,7 @@ class UserController @Inject()(
     )
   }
 
-  def apiLogin: Action[AnyContent] = Action { implicit request =>
+  def apiLogin = Action { implicit request =>
     LoginForm.form.bindFromRequest.fold(
       formWithErrors => {
         BadRequest(formWithErrors.errorsAsJson)
@@ -101,15 +101,15 @@ class UserController @Inject()(
     )
   }
 
-  def logout: Action[AnyContent] = Action { implicit request =>
+  def logout = Action { implicit request =>
     Auth.logout(Redirect(routes.HomeController.index()))
   }
 
-  def apiLogout: Action[AnyContent] = Action { implicit request =>
+  def apiLogout = Action { implicit request =>
     Auth.logout(Ok(""))
   }
 
-  def profile(username: String): Action[AnyContent] =
+  def profile(username: String) =
     auth.action(parse.anyContent) { authUser => implicit request =>
       usersRepo.find(username) match {
         case Some(user) =>

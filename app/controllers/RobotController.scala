@@ -15,20 +15,19 @@ class RobotController @Inject()(
     matchesRepo: Battles.Repo
 ) extends MessagesAbstractController(cc) {
 
-  def warehouse: Action[AnyContent] = Action { implicit request =>
+  def warehouse = Action { implicit request =>
     Ok(views.html.robot.warehouse(robotsRepo.findAll(), assetsFinder))
   }
 
-  def battles: Action[AnyContent] = Action { implicit request =>
+  def battles = Action { implicit request =>
     Ok(views.html.robot.battles(matchesRepo.findAll(), assetsFinder))
   }
 
-  def create: Action[AnyContent] = auth.actionForce(parse.anyContent) {
-    _ => implicit request =>
-      Ok(views.html.robot.create(CreateRobotForm.form, assetsFinder))
+  def create = auth.actionForce(parse.anyContent) { _ => implicit request =>
+    Ok(views.html.robot.create(CreateRobotForm.form, assetsFinder))
   }
 
-  def postCreate: Action[AnyContent] =
+  def postCreate =
     auth.actionForce(parse.anyContent) { user => implicit request =>
       CreateRobotForm.form.bindFromRequest.fold(
         formWithErrors => {
@@ -59,7 +58,7 @@ class RobotController @Inject()(
       )
     }
 
-  def view(user: String, robot: String): Action[AnyContent] =
+  def view(user: String, robot: String) =
     auth.action(parse.anyContent) { authUser => implicit request =>
       (for {
         user <- usersRepo.find(user)
@@ -80,7 +79,7 @@ class RobotController @Inject()(
       }
     }
 
-  def edit(user: String, robot: String): Action[AnyContent] =
+  def edit(user: String, robot: String) =
     auth.actionForce(parse.anyContent) { authUser => implicit request =>
       (for {
         user <- usersRepo.find(user) if user.id == authUser.id
@@ -93,7 +92,7 @@ class RobotController @Inject()(
       }
     }
 
-  def update(user: String, robot: String): Action[JsValue] =
+  def update(user: String, robot: String) =
     auth.actionForce(parse.json) { authUser => implicit request =>
       (for {
         user <- usersRepo.find(user) if user.id == authUser.id
@@ -110,20 +109,19 @@ class RobotController @Inject()(
       }
     }
 
-  def viewMatch(id: String): Action[AnyContent] = TODO
+  def viewMatch(id: String) = TODO
 
-  def viewPublishedCode(robotId: Long): Action[AnyContent] = Action {
-    implicit request =>
-      robotsRepo.getPublishedCode(robotId) match {
-        case Some(publishedCode) =>
-          Ok(views.html.robot.viewCode(publishedCode, assetsFinder))
-        case None => NotFound("404")
-      }
+  def viewPublishedCode(robotId: Long) = Action { implicit request =>
+    robotsRepo.getPublishedCode(robotId) match {
+      case Some(publishedCode) =>
+        Ok(views.html.robot.viewCode(publishedCode, assetsFinder))
+      case None => NotFound("404")
+    }
   }
 
-  def challenge(user: String, robot: String): Action[AnyContent] = TODO
+  def challenge(user: String, robot: String) = TODO
 
-  def publish(user: String, robot: String): Action[AnyContent] =
+  def publish(user: String, robot: String) =
     auth.actionForce(parse.anyContent) { authUser => implicit request =>
       (for {
         user <- usersRepo.find(user) if user.id == authUser.id
@@ -135,7 +133,7 @@ class RobotController @Inject()(
       }
     }
 
-  def postPublish(robotId: Long): Action[AnyContent] =
+  def postPublish(robotId: Long) =
     auth.actionForce(parse.anyContent) { authUser => implicit request =>
       (for {
         robot <- robotsRepo.findById(robotId)
@@ -148,7 +146,7 @@ class RobotController @Inject()(
       }
     }
 
-  def getRobotCode(robotId: Long): Action[AnyContent] =
+  def getRobotCode(robotId: Long) =
     auth.action(parse.anyContent) { authUser => implicit request =>
       (for {
         robot <- robotsRepo.findById(robotId)
@@ -164,7 +162,7 @@ class RobotController @Inject()(
       }
     }
 
-  def getUserRobots(user: String): Action[AnyContent] =
+  def getUserRobots(user: String) =
     auth.action(parse.anyContent) { authUser => implicit request =>
       usersRepo.find(user) match {
         case Some(user) =>
