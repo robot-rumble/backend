@@ -25,6 +25,8 @@ POST        /publish/:robotId                 controllers.RobotController.postPu
 + nocsrf
 POST        /update/:user/:robot              controllers.RobotController.update(user, robot)
 
+POST        /api/login                        controllers.UserController.apiLogin
+POST        /api/logout                       controllers.UserController.apiLogout
 GET         /api/getUserRobots/:user          controllers.RobotController.getUserRobots(user)
 GET         /api/getRobotCode/:robotId        controllers.RobotController.getRobotCode(robotId: Long)
 

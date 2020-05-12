@@ -3,7 +3,7 @@ package controllers
 import com.github.t3hnar.bcrypt._
 import javax.inject._
 import models.{Robots, Users}
-import play.api.libs.json.Json
+import play.api.libs.json.{JsObject, Json}
 import play.api.mvc._
 
 @Singleton
@@ -12,9 +12,8 @@ class UserController @Inject()(
     usersRepo: Users.Repo,
     robotRepo: Robots.Repo,
     assetsFinder: AssetsFinder,
-    authAction: AuthAction,
+    auth: Auth,
 ) extends MessagesAbstractController(cc) {
-
   def create: Action[AnyContent] = Action { implicit request =>
     Ok(views.html.signup(SignupForm.form, assetsFinder))
   }
@@ -43,6 +42,17 @@ class UserController @Inject()(
     )
   }
 
+  private def loginOnSuccess(
+      data: LoginForm.Data
+  ): Either[Users.Data, String] = {
+    usersRepo.find(data.username) match {
+      case Some(user) if data.password.isBcrypted(user.password) =>
+        Left(user)
+      case _ =>
+        Right("Incorrect username or password.")
+    }
+  }
+
   def login: Action[AnyContent] = Action { implicit request =>
     Ok(views.html.login(LoginForm.form, assetsFinder))
   }
@@ -53,15 +63,16 @@ class UserController @Inject()(
         Forbidden(views.html.login(formWithErrors, assetsFinder))
       },
       data => {
-        usersRepo.find(data.username) match {
-          case Some(user) if data.password.isBcrypted(user.password) =>
-            Redirect(routes.UserController.profile(data.username))
-              .withSession("USERNAME" -> user.username)
-          case _ =>
+        loginOnSuccess(data) match {
+          case Left(user) =>
+            Auth.login(user.username)(
+              Redirect(routes.UserController.profile(user.username))
+            )
+          case Right(error) =>
             Forbidden(
               views.html.login(
                 LoginForm.form
-                  .withGlobalError("Incorrect username or password."),
+                  .withGlobalError(error),
                 assetsFinder
               )
             )
@@ -70,12 +81,36 @@ class UserController @Inject()(
     )
   }
 
+  def apiLogin: Action[AnyContent] = Action { implicit request =>
+    LoginForm.form.bindFromRequest.fold(
+      formWithErrors => {
+        BadRequest(formWithErrors.errorsAsJson)
+      },
+      data => {
+        loginOnSuccess(data) match {
+          case Left(user) =>
+            Auth.login(user.username)(Ok(""))
+          case Right(error) =>
+            Forbidden(
+              LoginForm.form
+                .withGlobalError(error)
+                .errorsAsJson
+            )
+        }
+      }
+    )
+  }
+
   def logout: Action[AnyContent] = Action { implicit request =>
-    Redirect(routes.HomeController.index()).withNewSession
+    Auth.logout(Redirect(routes.HomeController.index()))
+  }
+
+  def apiLogout: Action[AnyContent] = Action { implicit request =>
+    Auth.logout(Ok(""))
   }
 
   def profile(username: String): Action[AnyContent] =
-    authAction(parse.anyContent) { authUser => implicit request =>
+    auth.action(parse.anyContent) { authUser => implicit request =>
       usersRepo.find(username) match {
         case Some(user) =>
           val robots = robotRepo.findAllForUser(user)
