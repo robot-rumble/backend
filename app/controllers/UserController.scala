@@ -3,7 +3,6 @@ package controllers
 import com.github.t3hnar.bcrypt._
 import javax.inject._
 import models.{Robots, Users}
-import play.api.libs.json.{JsObject, Json}
 import play.api.mvc._
 
 @Singleton
@@ -110,7 +109,7 @@ class UserController @Inject()(
   }
 
   def profile(username: String) =
-    auth.action(parse.anyContent) { authUser => implicit request =>
+    auth.action { authUser => implicit request =>
       usersRepo.find(username) match {
         case Some(user) =>
           val robots = robotRepo.findAllForUser(user)

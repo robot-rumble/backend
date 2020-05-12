@@ -20,10 +20,23 @@ class Auth @Inject()(
     cc: MessagesControllerComponents,
     usersRepo: Users.Repo
 ) extends MessagesAbstractController(cc) {
-  def action[T](
-      parser: BodyParser[T]
-  )(f: Option[Users.Data] => MessagesRequest[T] => Result): Action[T] =
-    Action(parser) { implicit request =>
+  def actionForce(
+      f: Users.Data => MessagesRequest[AnyContent] => Result
+  ): Action[AnyContent] =
+    action(
+      authUser =>
+        implicit request => {
+          authUser match {
+            case Some(user) => f(user)(request)
+            case None       => Forbidden("Not logged in")
+          }
+      }
+    )
+
+  def action(
+      f: Option[Users.Data] => MessagesRequest[AnyContent] => Result
+  ): Action[AnyContent] =
+    Action { implicit request =>
       request.session.get(Auth.KEY) match {
         case Some(username) =>
           usersRepo.find(username) match {
@@ -34,17 +47,4 @@ class Auth @Inject()(
           f(None)(request)
       }
     }
-
-  def actionForce[T](
-      parser: BodyParser[T]
-  )(f: Users.Data => MessagesRequest[T] => Result): Action[T] =
-    action(parser)(
-      authUser =>
-        implicit request => {
-          authUser match {
-            case Some(user) => f(user)(request)
-            case None       => Forbidden("Not logged in")
-          }
-      }
-    )
 }
