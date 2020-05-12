@@ -31,6 +31,7 @@ POST        /api/logout                       controllers.UserController.apiLogo
 POST        /api/updateRobotCode/:robotId     controllers.RobotController.apiUpdate(robotId: Long)
 
 GET         /api/getUserRobots/:user          controllers.RobotController.apiGetUserRobots(user)
+GET         /api/getRobotSlug/:user/:robot    controllers.RobotController.apiGetRobotSlug(user, robot)
 GET         /api/getRobotCode/:robotId        controllers.RobotController.apiGetRobotCode(robotId: Long)
 
 GET         /m/:id                            controllers.RobotController.viewMatch(id)
