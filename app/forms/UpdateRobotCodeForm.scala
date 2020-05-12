@@ -1,6 +1,7 @@
-package controllers
+package forms
 
 object UpdateRobotCodeForm {
+
   import play.api.data.Form
   import play.api.data.Forms._
 
@@ -11,4 +12,5 @@ object UpdateRobotCodeForm {
   )
 
   case class Data(code: String)
+
 }
