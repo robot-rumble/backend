@@ -15,20 +15,20 @@ class UserController @Inject()(
     auth: Auth,
 ) extends MessagesAbstractController(cc) {
   def create = Action { implicit request =>
-    Ok(views.html.signup(SignupForm.form, assetsFinder))
+    Ok(views.html.user.signup(SignupForm.form, assetsFinder))
   }
 
   def postCreate = Action { implicit request =>
     SignupForm.form.bindFromRequest.fold(
       formWithErrors => {
-        BadRequest(views.html.signup(formWithErrors, assetsFinder))
+        BadRequest(views.html.user.signup(formWithErrors, assetsFinder))
       },
       data => {
         val username = data.username.trim()
         usersRepo.find(username) match {
           case Some(_) =>
             BadRequest(
-              views.html.signup(
+              views.html.user.signup(
                 SignupForm.form.fill(data).withGlobalError("Username taken"),
                 assetsFinder
               )
@@ -54,13 +54,13 @@ class UserController @Inject()(
   }
 
   def login = Action { implicit request =>
-    Ok(views.html.login(LoginForm.form, assetsFinder))
+    Ok(views.html.user.login(LoginForm.form, assetsFinder))
   }
 
   def postLogin = Action { implicit request =>
     LoginForm.form.bindFromRequest.fold(
       formWithErrors => {
-        Forbidden(views.html.login(formWithErrors, assetsFinder))
+        Forbidden(views.html.user.login(formWithErrors, assetsFinder))
       },
       data => {
         loginOnSuccess(data) match {
@@ -70,7 +70,7 @@ class UserController @Inject()(
             )
           case Right(error) =>
             Forbidden(
-              views.html.login(
+              views.html.user.login(
                 LoginForm.form
                   .withGlobalError(error),
                 assetsFinder
@@ -115,13 +115,12 @@ class UserController @Inject()(
         case Some(user) =>
           val robots = robotRepo.findAllForUser(user)
           Ok(
-            views.html
-              .profile(
-                user,
-                authUser.forall(_.id == user.id),
-                robots,
-                assetsFinder
-              )
+            views.html.user.profile(
+              user,
+              authUser.forall(_.id == user.id),
+              robots,
+              assetsFinder
+            )
           )
         case None => NotFound("404")
       }
