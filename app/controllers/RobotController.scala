@@ -1,5 +1,6 @@
 package controllers
 
+import forms.{CreateRobotForm, UpdateRobotCodeForm}
 import javax.inject._
 import models.{Battles, QuillUtils, Robots, Users}
 import play.api.libs.json.Json

@@ -1,6 +1,7 @@
 package controllers
 
 import com.github.t3hnar.bcrypt._
+import forms.{LoginForm, SignupForm}
 import javax.inject._
 import models.{Robots, Users}
 import play.api.mvc._
