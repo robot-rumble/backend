@@ -2,7 +2,7 @@ package controllers
 
 import javax.inject._
 import models.{Battles, QuillUtils, Robots, Users}
-import play.api.libs.json.{JsDefined, JsString, JsValue, Json}
+import play.api.libs.json.Json
 import play.api.mvc._
 
 @Singleton
@@ -23,12 +23,13 @@ class RobotController @Inject()(
     Ok(views.html.robot.battles(matchesRepo.findAll(), assetsFinder))
   }
 
-  def create = auth.actionForce(parse.anyContent) { _ => implicit request =>
-    Ok(views.html.robot.create(CreateRobotForm.form, assetsFinder))
-  }
+  def create =
+    auth.actionForce { _ => implicit request =>
+      Ok(views.html.robot.create(CreateRobotForm.form, assetsFinder))
+    }
 
   def postCreate =
-    auth.actionForce(parse.anyContent) { user => implicit request =>
+    auth.actionForce { user => implicit request =>
       CreateRobotForm.form.bindFromRequest.fold(
         formWithErrors => {
           BadRequest(views.html.robot.create(formWithErrors, assetsFinder))
@@ -59,7 +60,7 @@ class RobotController @Inject()(
     }
 
   def view(user: String, robot: String) =
-    auth.action(parse.anyContent) { authUser => implicit request =>
+    auth.action { authUser => implicit request =>
       (for {
         user <- usersRepo.find(user)
         robot <- robotsRepo.find(user, robot)
@@ -80,7 +81,7 @@ class RobotController @Inject()(
     }
 
   def edit(user: String, robot: String) =
-    auth.actionForce(parse.anyContent) { authUser => implicit request =>
+    auth.actionForce { authUser => implicit request =>
       (for {
         user <- usersRepo.find(user) if user.id == authUser.id
         robot <- robotsRepo.find(user, robot)
@@ -93,7 +94,7 @@ class RobotController @Inject()(
     }
 
   def apiUpdate(robotId: Long) =
-    auth.actionForce(parse.anyContent) { authUser => implicit request =>
+    auth.actionForce { authUser => implicit request =>
       (for {
         robot <- robotsRepo.findById(robotId)
       } yield robot) match {
@@ -124,7 +125,7 @@ class RobotController @Inject()(
   def challenge(user: String, robot: String) = TODO
 
   def publish(user: String, robot: String) =
-    auth.actionForce(parse.anyContent) { authUser => implicit request =>
+    auth.actionForce { authUser => implicit request =>
       (for {
         user <- usersRepo.find(user) if user.id == authUser.id
         robot <- robotsRepo.find(user, robot)
@@ -136,7 +137,7 @@ class RobotController @Inject()(
     }
 
   def postPublish(robotId: Long) =
-    auth.actionForce(parse.anyContent) { authUser => implicit request =>
+    auth.actionForce { authUser => implicit request =>
       (for {
         robot <- robotsRepo.findById(robotId)
         user <- usersRepo.findById(robot.userId) if user.id == authUser.id
@@ -149,7 +150,7 @@ class RobotController @Inject()(
     }
 
   def apiGetRobotCode(robotId: Long) =
-    auth.action(parse.anyContent) { authUser => implicit request =>
+    auth.action { authUser => implicit request =>
       (for {
         robot <- robotsRepo.findById(robotId)
         user <- usersRepo.findById(robot.userId)
@@ -165,7 +166,7 @@ class RobotController @Inject()(
     }
 
   def apiGetUserRobots(user: String) =
-    auth.action(parse.anyContent) { authUser => implicit request =>
+    auth.action { authUser => implicit request =>
       usersRepo.find(user) match {
         case Some(user) =>
           val robots = robotsRepo
