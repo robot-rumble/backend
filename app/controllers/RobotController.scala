@@ -92,19 +92,21 @@ class RobotController @Inject()(
       }
     }
 
-  def update(user: String, robot: String) =
-    auth.actionForce(parse.json) { authUser => implicit request =>
+  def apiUpdate(robotId: Long) =
+    auth.actionForce(parse.anyContent) { authUser => implicit request =>
       (for {
-        user <- usersRepo.find(user) if user.id == authUser.id
-        robot <- robotsRepo.find(user, robot)
+        robot <- robotsRepo.findById(robotId)
       } yield robot) match {
-        case Some(robot) =>
-          request.body \ "code" match {
-            case JsDefined(code: JsString) =>
-              robotsRepo.update(robot.id, code.value)
-              Ok("Code updated")
-            case _ => BadRequest("Missing 'code' field")
-          }
+        case Some(robot) if robot.userId == authUser.id =>
+          UpdateRobotCodeForm.form.bindFromRequest.fold(
+            formWithErrors => {
+              BadRequest(formWithErrors.errorsAsJson)
+            },
+            data => {
+              robotsRepo.update(robot.id, data.code)
+              Ok("")
+            }
+          )
         case None => NotFound("404")
       }
     }
@@ -146,7 +148,7 @@ class RobotController @Inject()(
       }
     }
 
-  def getRobotCode(robotId: Long) =
+  def apiGetRobotCode(robotId: Long) =
     auth.action(parse.anyContent) { authUser => implicit request =>
       (for {
         robot <- robotsRepo.findById(robotId)
@@ -162,7 +164,7 @@ class RobotController @Inject()(
       }
     }
 
-  def getUserRobots(user: String) =
+  def apiGetUserRobots(user: String) =
     auth.action(parse.anyContent) { authUser => implicit request =>
       usersRepo.find(user) match {
         case Some(user) =>
