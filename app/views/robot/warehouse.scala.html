@@ -3,9 +3,15 @@
 @main("Warehouse", "warehouse", assetsFinder) {
     <h1>Warehouse</h1>
 
-    <ul>
+    <table>
     @for((robot, user) <- robots) {
-        <li>@tags.robot(user, robot, assetsFinder, showUser = true)</li>
+        <tr>
+            <td><a href="@routes.RobotController.view(user.username, robot.name)">@robot.name</a></td>
+            <td>by <a href="@routes.UserController.profile(user.username)">@user.username</a></td>
+            <td class="d-flex">
+                <p class="mr-2">@robot.rating</p>
+            </td>
+        </tr>
     }
-    </ul>
+    </table>
 }

@@ -144,7 +144,7 @@ class RobotController @Inject()(
       }
     }
 
-  def viewMatch(id: String) = TODO
+  def viewBattle(battleId: Long) = TODO
 
   def viewPublishedCode(robotId: Long) = Action { implicit request =>
     robotsRepo.getPublishedCode(robotId) match {

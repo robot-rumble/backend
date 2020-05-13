@@ -4,15 +4,16 @@
     <h1>@user.username</h1>
 
     @if(robots.nonEmpty) {
-        <div class="robots">
-            <h5>robots</h5>
-            <ul>
-
-            @for(robot <- robots) {
-                <li>@tags.robot(user, robot, assetsFinder, showUser = false)</li>
-            }
-            </ul>
-        </div>
+        <table>
+        @for(robot <- robots) {
+            <tr>
+                <td><a href="@routes.RobotController.view(user.username, robot.name)">@robot.name</a></td>
+                <td class="d-flex">
+                    <p class="mr-2">@robot.rating</p>
+                </td>
+            </tr>
+        }
+        </table>
     }
 
     @if(isAuthenticated) {
