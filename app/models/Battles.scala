@@ -108,7 +108,8 @@ object Battles {
 
     def create(matchOutput: MatchOutput, r1Rating: Int, r2Rating: Int) = {
       val data = createData(matchOutput, r1Rating, r2Rating)
-      run(schema.insert(lift(data)).returningGenerated(_.id))
+      val id = run(schema.insert(lift(data)).returningGenerated(_.id))
+      data.copy(id = id)
     }
   }
 
