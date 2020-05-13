@@ -20,13 +20,22 @@
     </div>
 
     <div class="matches">
-        <h5>Matches</h5>
+        <h4>Matches</h4>
         @if(battles.nonEmpty) {
-            <ul>
-            @for((battle, r2) <- battles) {
-                <li>@tags.battle(battle, robot, r2, assetsFinder, forRobot = true)</li>
-            }
-            </ul>
+          <table>
+          @for((battle, r2) <- battles) {
+              <tr>
+                  <td><img src="@{
+                      val imgPath = Battles.didR1Win(battle, robot.id) match {
+                          case Some(won) => if(won) "images/win.svg" else "images/loss.svg"
+                          case None => "images/draw.svg"
+                      }
+                      assetsFinder.path(imgPath)
+                  }"></td>
+                  <td><a href="@routes.RobotController.viewBattle(battle.id)">vs @r2.name</a></td>
+              </tr>
+          }
+          </table>
         } else {
             <p>None yet!</p>
         }

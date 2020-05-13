@@ -23,6 +23,8 @@ GET         /p/:user/:robot/challenge              controllers.RobotController.c
 GET         /p/:user/:robot/publish                controllers.RobotController.publish(user, robot)
 POST        /publish/:robotId                      controllers.RobotController.postPublish(robotId: Long)
 
+GET         /b/:id                           controllers.RobotController.viewBattle(id: Long)
+
 + nocsrf
 POST        /api/login                             controllers.UserController.apiLogin
 + nocsrf
@@ -33,7 +35,5 @@ POST        /api/update-robot-code/:robotId        controllers.RobotController.a
 GET         /api/get-user-robots/:user             controllers.RobotController.apiGetUserRobots(user)
 GET         /api/get-robot/:user/:robot            controllers.RobotController.apiGetRobot(user, robot)
 GET         /api/get-robot-code/:robotId           controllers.RobotController.apiGetRobotCode(robotId: Long)
-
-GET         /m/:id                                 controllers.RobotController.viewMatch(id)
 
 GET         /assets/*file                          controllers.Assets.at(file)

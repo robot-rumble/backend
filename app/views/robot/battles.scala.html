@@ -3,9 +3,11 @@
 @main("Warehouse", "warehouse", assetsFinder) {
     <h1>Battles</h1>
 
-    <ul>
+    <table>
     @for((battle, r1, r2) <- battles) {
-        <li>@tags.battle(battle, r1, r2, assetsFinder, forRobot = false)</li>
+        <tr>
+            <td><a href="@routes.RobotController.viewBattle(battle.id)">@r1.name vs @r2.name</a></td>
+        </tr>
     }
-    </ul>
+    </table>
 }
