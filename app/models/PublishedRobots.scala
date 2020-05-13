@@ -33,7 +33,8 @@ object PublishedRobots {
 
     def create(robotId: Long, code: String) = {
       val data = createData(robotId, code)
-      run(schema.insert(lift(data)).returningGenerated(_.id))
+      val id = run(schema.insert(lift(data)).returningGenerated(_.id))
+      data.copy(id = id)
     }
   }
 

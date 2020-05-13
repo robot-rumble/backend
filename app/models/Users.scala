@@ -25,7 +25,8 @@ object Users {
 
     def create(username: String, password: String) = {
       val data = createData(username, password)
-      run(schema.insert(lift(data)).returningGenerated(_.id))
+      val id = run(schema.insert(lift(data)).returningGenerated(_.id))
+      data.copy(id = id)
     }
   }
 

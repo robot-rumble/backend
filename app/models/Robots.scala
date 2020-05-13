@@ -1,7 +1,6 @@
 package models
 
 import javax.inject.Inject
-import org.postgresql.util.PGobject
 import play.api.libs.json.{Json, Reads, Writes}
 import services.Db
 
@@ -102,7 +101,8 @@ object Robots {
 
     def create(userId: Long, name: String, lang: Lang.Value) = {
       val data = createData(userId, name, lang)
-      run(schema.insert(lift(data)).returningGenerated(_.id))
+      val id = run(schema.insert(lift(data)).returningGenerated(_.id))
+      dataToBasic(data.copy(id = id))
     }
 
     def update(id: Long, devCode: String) = {
