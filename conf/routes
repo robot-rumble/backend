@@ -26,8 +26,6 @@ POST        /publish/:robotId                      controllers.RobotController.p
 + nocsrf
 POST        /api/login                             controllers.UserController.apiLogin
 + nocsrf
-POST        /api/logout                            controllers.UserController.apiLogout
-+ nocsrf
 POST        /api/create-robot                      controllers.RobotController.apiCreate
 + nocsrf
 POST        /api/update-robot-code/:robotId        controllers.RobotController.apiUpdate(robotId: Long)
