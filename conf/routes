@@ -18,7 +18,7 @@ GET         /create-robot                     controllers.RobotController.create
 POST        /create-robot                     controllers.RobotController.postCreate
 GET         /p/:user/:robot                   controllers.RobotController.view(user, robot)
 GET         /p/:user/:robot/edit              controllers.RobotController.edit(user, robot)
-GET         /viewCode/:robotId                controllers.RobotController.viewPublishedCode(robotId: Long)
+GET         /view-code/:robotId                controllers.RobotController.viewPublishedCode(robotId: Long)
 GET         /p/:user/:robot/challenge         controllers.RobotController.challenge(user, robot)
 GET         /p/:user/:robot/publish           controllers.RobotController.publish(user, robot)
 POST        /publish/:robotId                 controllers.RobotController.postPublish(robotId: Long)
@@ -28,11 +28,11 @@ POST        /api/login                        controllers.UserController.apiLogi
 + nocsrf
 POST        /api/logout                       controllers.UserController.apiLogout
 + nocsrf
-POST        /api/updateRobotCode/:robotId     controllers.RobotController.apiUpdate(robotId: Long)
+POST        /api/update-robot-code/:robotId     controllers.RobotController.apiUpdate(robotId: Long)
 
-GET         /api/getUserRobots/:user          controllers.RobotController.apiGetUserRobots(user)
-GET         /api/getRobotSlug/:user/:robot    controllers.RobotController.apiGetRobotSlug(user, robot)
-GET         /api/getRobotCode/:robotId        controllers.RobotController.apiGetRobotCode(robotId: Long)
+GET         /api/get-user-robots/:user          controllers.RobotController.apiGetUserRobots(user)
+GET         /api/get-robot-slug/:user/:robot    controllers.RobotController.apiGetRobotSlug(user, robot)
+GET         /api/get-robot-code/:robotId        controllers.RobotController.apiGetRobotCode(robotId: Long)
 
 GET         /m/:id                            controllers.RobotController.viewMatch(id)
 
