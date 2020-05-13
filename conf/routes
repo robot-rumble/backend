@@ -28,6 +28,8 @@ POST        /api/login                             controllers.UserController.ap
 + nocsrf
 POST        /api/logout                            controllers.UserController.apiLogout
 + nocsrf
+POST        /api/create-robot                      controllers.RobotController.apiCreate
++ nocsrf
 POST        /api/update-robot-code/:robotId        controllers.RobotController.apiUpdate(robotId: Long)
 
 GET         /api/get-user-robots/:user             controllers.RobotController.apiGetUserRobots(user)

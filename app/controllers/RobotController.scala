@@ -36,29 +36,60 @@ class RobotController @Inject()(
           BadRequest(views.html.robot.create(formWithErrors, assetsFinder))
         },
         data => {
-          val name = data.name.trim()
-          robotsRepo.find(user, name) match {
-            case Some(_) =>
+          createOnSuccess(user, data) match {
+            case Left(robot) =>
+              Redirect(routes.RobotController.view(user.username, robot.name))
+            case Right(error) =>
               BadRequest(
                 views.html.robot.create(
                   CreateRobotForm.form
                     .fill(data)
-                    .withGlobalError("Robot with this name already exists"),
+                    .withGlobalError(error),
                   assetsFinder
                 )
               )
-            case None =>
-              QuillUtils.serialize(Robots.Lang, data.lang) match {
-                case Some(lang) =>
-                  robotsRepo.create(user.id, name, lang)
-                  Redirect(routes.RobotController.view(user.username, name))
-                case None =>
-                  BadRequest("Invalid lang field value.")
-              }
           }
         }
       )
     }
+
+  def apiCreate =
+    auth.actionForce { user => implicit request =>
+      CreateRobotForm.form.bindFromRequest.fold(
+        formWithErrors => {
+          BadRequest(formWithErrors.errorsAsJson)
+        },
+        data => {
+          createOnSuccess(user, data) match {
+            case Left(robot) =>
+              Ok(Json.toJson(robot))
+            case Right(error) =>
+              BadRequest(
+                CreateRobotForm.form
+                  .withGlobalError(error)
+                  .errorsAsJson
+              )
+          }
+        }
+      )
+    }
+
+  private def createOnSuccess(
+      user: Users.Data,
+      data: CreateRobotForm.Data
+  ): Either[Robots.BasicData, String] = {
+    val name = data.name.trim()
+    robotsRepo.find(user, name) match {
+      case Some(_) => Right("Robot with this name already exists")
+      case None =>
+        QuillUtils.serialize(Robots.Lang, data.lang) match {
+          case Some(lang) =>
+            Left(robotsRepo.create(user.id, name, lang))
+          case None =>
+            Right("Invalid lang field value.")
+        }
+    }
+  }
 
   def view(user: String, robot: String) =
     auth.action { authUser => implicit request =>
