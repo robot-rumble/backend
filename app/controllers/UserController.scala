@@ -105,10 +105,6 @@ class UserController @Inject()(
     Auth.logout(Redirect(routes.HomeController.index()))
   }
 
-  def apiLogout = Action { implicit request =>
-    Auth.logout(Ok(""))
-  }
-
   def profile(username: String) =
     auth.action { authUser => implicit request =>
       usersRepo.find(username) match {
