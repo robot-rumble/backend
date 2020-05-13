@@ -166,13 +166,14 @@ class RobotController @Inject()(
       }
     }
 
-  def apiGetRobotSlug(user: String, robot: String) =
+  def apiGetRobot(user: String, robot: String) =
     auth.action { authUser => implicit request =>
       (for {
         user <- usersRepo.find(user)
         robot <- robotsRepo.find(user, robot)
       } yield robot) match {
-        case Some(robot) if robot.isPublished || authUser.forall(_.id == robot.userId) =>
+        case Some(robot)
+            if robot.isPublished || authUser.forall(_.id == robot.userId) =>
           Ok(Json.toJson(robot))
         case _ => NotFound("404")
       }
