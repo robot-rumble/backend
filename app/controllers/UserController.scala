@@ -4,6 +4,7 @@ import com.github.t3hnar.bcrypt._
 import forms.{LoginForm, SignupForm}
 import javax.inject._
 import models.{Robots, Users}
+import play.api.libs.json.Json
 import play.api.mvc._
 
 @Singleton
@@ -100,6 +101,11 @@ class UserController @Inject()(
       }
     )
   }
+
+  def apiWhoami =
+    auth.actionForce { authUser => implicit request =>
+      Ok(Json.toJson((authUser.username, authUser.id)))
+    }
 
   def logout = Action { implicit request =>
     Auth.logout(Redirect(routes.HomeController.index()))
