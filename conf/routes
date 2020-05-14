@@ -27,6 +27,7 @@ GET         /b/:id                           controllers.RobotController.viewBat
 
 + nocsrf
 POST        /api/login                             controllers.UserController.apiLogin
+GET         /api/whoami                            controllers.UserController.apiWhoami
 + nocsrf
 POST        /api/create-robot                      controllers.RobotController.apiCreate
 + nocsrf
