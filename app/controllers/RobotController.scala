@@ -13,7 +13,7 @@ class RobotController @Inject()(
     auth: Auth,
     robotsRepo: Robots.Repo,
     usersRepo: Users.Repo,
-    matchesRepo: Battles.Repo
+    battlesRepo: Battles.Repo
 ) extends MessagesAbstractController(cc) {
 
   def warehouse = Action { implicit request =>
@@ -21,7 +21,7 @@ class RobotController @Inject()(
   }
 
   def battles = Action { implicit request =>
-    Ok(views.html.robot.battles(matchesRepo.findAll(), assetsFinder))
+    Ok(views.html.robot.battles(battlesRepo.findAll(), assetsFinder))
   }
 
   def create =
@@ -104,7 +104,7 @@ class RobotController @Inject()(
               user,
               authUser.forall(_.id == user.id),
               robot,
-              matchesRepo.findForRobot(robot.id),
+              battlesRepo.findForRobot(robot.id),
               assetsFinder
             )
           )
@@ -144,7 +144,21 @@ class RobotController @Inject()(
       }
     }
 
-  def viewBattle(battleId: Long) = TODO
+  def viewBattle(battleId: Long) = Action { implicit request =>
+    battlesRepo.find(battleId) match {
+      case Some(battle) =>
+        (for {
+          r1 <- robotsRepo.findById(battle.r1Id)
+          r2 <- robotsRepo.findById(battle.r2Id)
+        } yield (r1, r2)) match {
+          case Some((r1, r2)) =>
+            Ok(views.html.robot.battle(battle, r1, r2, assetsFinder))
+          case None => InternalServerError("Something bad has happened.")
+        }
+
+      case None => NotFound("404")
+    }
+  }
 
   def viewPublishedCode(robotId: Long) = Action { implicit request =>
     robotsRepo.getPublishedCode(robotId) match {
