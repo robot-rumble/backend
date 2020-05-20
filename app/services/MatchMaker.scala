@@ -38,7 +38,10 @@ class MatchMaker @Inject()(
 
       robots.map {
         case ((r1, r1p), (r2, r2p)) =>
-          MatchInput(r1p.robotId, r1p.code, r2p.robotId, r2p.code)
+          MatchInput(
+            r1p.robotId, r1p.code, r1.lang,
+            r2p.robotId, r2p.code, r2.lang,
+          )
       }
     }
     println("Sending", matchInputs)
