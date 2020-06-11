@@ -13,7 +13,7 @@ class WasmFilter @Inject()(implicit ec: ExecutionContext)
       next(request).map { result =>
         if (request.headers
               .get("Raw-Request-URI")
-              .forall(_.contains(".wasm"))) {
+              .exists(_.contains(".wasm"))) {
           result.as("application/wasm")
         } else result
       }

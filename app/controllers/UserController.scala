@@ -119,7 +119,7 @@ class UserController @Inject()(
           Ok(
             views.html.user.profile(
               user,
-              authUser.forall(_.id == user.id),
+              authUser.exists(_.id == user.id),
               robots,
               assetsFinder
             )

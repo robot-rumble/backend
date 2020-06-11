@@ -114,7 +114,7 @@ class RobotController @Inject()(
           Ok(
             views.html.robot.view(
               user,
-              authUser.forall(_.id == user.id),
+              authUser.exists(_.id == user.id),
               robot,
               matchesRepo.findForRobot(robot.id, page, 10),
               assetsFinder
@@ -200,8 +200,8 @@ class RobotController @Inject()(
         user <- usersRepo.findById(robot.userId)
       } yield (user, robot)) match {
         case Some((user, robot))
-            if robot.isPublished || authUser.forall(_.id == user.id) =>
-          val code = if (authUser.forall(_.id == user.id)) {
+            if robot.isPublished || authUser.exists(_.id == user.id) =>
+          val code = if (authUser.exists(_.id == user.id)) {
             robotsRepo.getDevCode(robotId)
           } else robotsRepo.getPublishedCode(robotId)
           Ok(Json.toJson(code.get))
@@ -216,7 +216,7 @@ class RobotController @Inject()(
         robot <- robotsRepo.find(user, robot)
       } yield robot) match {
         case Some(robot)
-            if robot.isPublished || authUser.forall(_.id == robot.userId) =>
+            if robot.isPublished || authUser.exists(_.id == robot.userId) =>
           Ok(Json.toJson(robot))
         case _ => NotFound("404")
       }
@@ -229,7 +229,7 @@ class RobotController @Inject()(
           val robots = robotsRepo
             .findAllForUser(user)
             .filter(
-              robot => robot.isPublished || authUser.forall(_.id == user.id)
+              robot => robot.isPublished || authUser.exists(_.id == user.id)
             )
           Ok(Json.toJson(robots))
         case None => NotFound("404")
