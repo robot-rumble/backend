@@ -39,8 +39,12 @@ class MatchMaker @Inject()(
       robots.map {
         case ((r1, r1p), (r2, r2p)) =>
           MatchInput(
-            r1p.robotId, r1p.code, r1.lang,
-            r2p.robotId, r2p.code, r2.lang,
+            r1p.robotId,
+            r1p.code,
+            r1.lang,
+            r2p.robotId,
+            r2p.code,
+            r2.lang,
           )
       }
     }
@@ -59,9 +63,10 @@ class MatchMaker @Inject()(
 
     val getRobotInfo = (id: Long) => {
       val r = robotsRepo.findById(id).get
-      val rGames = battlesRepo.findForRobot(r.id)
+      // TODO: don't use a hack
+      val rGamesNum = battlesRepo.findForRobot(r.id, 0, 1)._3
       val rPlayer =
-        new Player(rating = r.rating, startingGameCount = rGames.length)
+        new Player(rating = r.rating, startingGameCount = rGamesNum.toInt)
       (r, rPlayer)
     }
     val ((r1, r1Player), (r2, r2Player)) =

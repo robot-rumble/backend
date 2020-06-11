@@ -17,24 +17,18 @@ class RobotController @Inject()(
 ) extends MessagesAbstractController(cc) {
 
   def warehouse(page: Long = 0) = Action { implicit request =>
-    val numPerPage = 30
     Ok(
       views.html.robot.warehouse(
-        robotsRepo.findAll(page, numPerPage),
-        page,
-        QuillUtils.computePageNum(robotsRepo.count, numPerPage),
+        robotsRepo.findAll(page, 30),
         assetsFinder
       )
     )
   }
 
   def battles(page: Long = 0) = Action { implicit request =>
-    val numPerPage = 30
     Ok(
       views.html.robot.battles(
-        matchesRepo.findAll(page, numPerPage),
-        page,
-        QuillUtils.computePageNum(matchesRepo.count, numPerPage),
+        matchesRepo.findAll(page, 30),
         assetsFinder
       )
     )
@@ -54,7 +48,9 @@ class RobotController @Inject()(
         data => {
           createOnSuccess(user, data) match {
             case Left(robot) =>
-              Redirect(routes.RobotController.view(user.username, robot.name))
+              Redirect(
+                routes.RobotController.view(user.username, robot.name, 0)
+              )
             case Right(error) =>
               BadRequest(
                 views.html.robot.create(
@@ -107,20 +103,20 @@ class RobotController @Inject()(
     }
   }
 
-  def view(user: String, robot: String) =
+  def view(user: String, robot: String, page: Long = 0) =
     auth.action { authUser => implicit request =>
       (for {
         user <- usersRepo.find(user)
         robot <- robotsRepo.find(user, robot)
       } yield (user, robot)) match {
         case Some((user, robot))
-            if robot.isPublished || authUser.forall(_.id == user.id) =>
+            if robot.isPublished || authUser.exists(_.id == user.id) =>
           Ok(
             views.html.robot.view(
               user,
               authUser.forall(_.id == user.id),
               robot,
-              matchesRepo.findForRobot(robot.id),
+              matchesRepo.findForRobot(robot.id, page, 10),
               assetsFinder
             )
           )
@@ -192,7 +188,7 @@ class RobotController @Inject()(
       } yield (user, robot)) match {
         case Some((user, robot)) =>
           robotsRepo.publish(robot.id)
-          Redirect(routes.RobotController.view(user.username, robot.name))
+          Redirect(routes.RobotController.view(user.username, robot.name, 0))
         case None => NotFound("404")
       }
     }

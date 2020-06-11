@@ -83,8 +83,12 @@ object Battles {
     def find(id: Long): Option[Data] =
       run(schema.filter(_.id == lift(id))).headOption
 
-    def findForRobot(robotId: Long): List[(Data, Robots.BasicData)] = {
-      run(
+    def findForRobot(
+        robotId: Long,
+        page: Long,
+        numPerPage: Int
+    ): (List[(Data, Robots.BasicData)], Long, Long) = {
+      val all = quote {
         for {
           m <- schema
           otherR <- robotSchema
@@ -93,15 +97,23 @@ object Battles {
               || (m.r2Id == lift(robotId) && m.r1Id == otherR.id)
           )
         } yield (m, otherR)
-      ).map(tuple => (tuple._1, dataToBasic(tuple._2)))
+      }
+      val count = run(all.size)
+      val allPaged = quote {
+        all.drop(lift(page.toInt * numPerPage)).take(lift(numPerPage))
+      }
+      val data = run(allPaged)
+      (
+        data.map(tuple => (tuple._1, dataToBasic(tuple._2))),
+        page,
+        Paginate.computeNumPages(count, numPerPage)
+      )
     }
-
-    def count: Long = run(schema.size)
 
     def findAll(
         page: Long,
         numPerPage: Int
-    ): List[(Data, Robots.BasicData, Robots.BasicData)] = {
+    ): (List[(Data, Robots.BasicData, Robots.BasicData)], Long, Long) = {
       val all = quote {
         for {
           battle <- schema
@@ -109,11 +121,18 @@ object Battles {
           r2 <- robotSchema if battle.r2Id == r2.id
         } yield (battle, r1, r2)
       }
+      val count = run(all.size)
       val allPaged = quote {
         all.drop(lift(page.toInt * numPerPage)).take(lift(numPerPage))
       }
-      run(allPaged)
-        .map(tuple => (tuple._1, dataToBasic(tuple._2), dataToBasic(tuple._3)))
+      val data = run(allPaged)
+      (
+        data.map(
+          tuple => (tuple._1, dataToBasic(tuple._2), dataToBasic(tuple._3))
+        ),
+        page,
+        Paginate.computeNumPages(count, numPerPage)
+      )
     }
 
     def create(matchOutput: MatchOutput, r1Rating: Int, r2Rating: Int) = {

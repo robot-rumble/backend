@@ -1,15 +1,15 @@
-@(battles: List[(Battles.Data, Robots.BasicData, Robots.BasicData)], page: Long, totalPages: Long, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+@(pagedBattles: (List[(Battles.Data, Robots.BasicData, Robots.BasicData)], Long, Long), assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
 @main("Warehouse", "warehouse", assetsFinder) {
     <h1>Battles</h1>
 
     <table>
-    @for((battle, r1, r2) <- battles) {
+    @for((battle, r1, r2) <- pagedBattles._1) {
         <tr>
             <td><a href="@routes.RobotController.viewBattle(battle.id)">@r1.name vs @r2.name</a></td>
         </tr>
     }
     </table>
 
-    @pageControls(routes.RobotController.battles, page, totalPages)
+    @pageControls(routes.RobotController.battles, pagedBattles._2, pagedBattles._3)
 }

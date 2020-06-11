@@ -7,7 +7,7 @@
         <table>
         @for(robot <- robots) {
             <tr>
-                <td><a href="@routes.RobotController.view(user.username, robot.name)">@robot.name</a></td>
+                <td><a href="@routes.RobotController.view(user.username, robot.name, 0)">@robot.name</a></td>
                 <td class="d-flex">
                     <p class="mr-2">@robot.rating</p>
                 </td>

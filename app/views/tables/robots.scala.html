@@ -1,7 +1,7 @@
 @(user: Users.Data, robot: Robots.BasicData, assetsFinder: AssetsFinder, showUser: Boolean)
 
 <ul class="robot panel">
-    <li><a href="@routes.RobotController.view(user.username, robot.name)">@robot.name</a></li>
+    <li><a href="@routes.RobotController.view(user.username, robot.name, 0)">@robot.name</a></li>
     <li class="separator"></li>
     @if(showUser) {
         <li>by <a href="@routes.UserController.profile(user.username)">@user.username</a></li>

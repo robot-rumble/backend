@@ -16,7 +16,7 @@ GET         /p/:username                           controllers.UserController.pr
 
 GET         /create-robot                          controllers.RobotController.create
 POST        /create-robot                          controllers.RobotController.postCreate
-GET         /p/:user/:robot                        controllers.RobotController.view(user, robot)
+GET         /p/:user/:robot                        controllers.RobotController.view(user, robot, page: Long)
 GET         /p/:user/:robot/edit                   controllers.RobotController.edit(user, robot)
 GET         /view-code/:robotId                    controllers.RobotController.viewPublishedCode(robotId: Long)
 GET         /p/:user/:robot/challenge              controllers.RobotController.challenge(user, robot)
