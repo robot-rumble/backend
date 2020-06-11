@@ -1,4 +1,4 @@
-@(robots: List[(Robots.BasicData, Users.Data)], assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+@(robots: List[(Robots.BasicData, Users.Data)], page: Long, totalPages: Long, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
 @main("Warehouse", "warehouse", assetsFinder) {
     <h1>Warehouse</h1>
@@ -14,4 +14,6 @@
         </tr>
     }
     </table>
+
+    @pageControls(routes.RobotController.battles, page, totalPages)
 }

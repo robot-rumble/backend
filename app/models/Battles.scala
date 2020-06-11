@@ -96,14 +96,24 @@ object Battles {
       ).map(tuple => (tuple._1, dataToBasic(tuple._2)))
     }
 
-    def findAll(): List[(Data, Robots.BasicData, Robots.BasicData)] = {
-      run(
+    def count: Long = run(schema.size)
+
+    def findAll(
+        page: Long,
+        numPerPage: Int
+    ): List[(Data, Robots.BasicData, Robots.BasicData)] = {
+      val all = quote {
         for {
           battle <- schema
           r1 <- robotSchema if battle.r1Id == r1.id
-          r2 <- robotSchema if battle.r2Id == r1.id
+          r2 <- robotSchema if battle.r2Id == r2.id
         } yield (battle, r1, r2)
-      ).map(tuple => (tuple._1, dataToBasic(tuple._2), dataToBasic(tuple._3)))
+      }
+      val allPaged = quote {
+        all.drop(lift(page.toInt * numPerPage)).take(lift(numPerPage))
+      }
+      run(allPaged)
+        .map(tuple => (tuple._1, dataToBasic(tuple._2), dataToBasic(tuple._3)))
     }
 
     def create(matchOutput: MatchOutput, r1Rating: Int, r2Rating: Int) = {

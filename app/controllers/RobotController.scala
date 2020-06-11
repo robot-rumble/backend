@@ -16,12 +16,28 @@ class RobotController @Inject()(
     matchesRepo: Battles.Repo
 ) extends MessagesAbstractController(cc) {
 
-  def warehouse = Action { implicit request =>
-    Ok(views.html.robot.warehouse(robotsRepo.findAll(), assetsFinder))
+  def warehouse(page: Long = 0) = Action { implicit request =>
+    val numPerPage = 30
+    Ok(
+      views.html.robot.warehouse(
+        robotsRepo.findAll(page, numPerPage),
+        page,
+        QuillUtils.computePageNum(robotsRepo.count, numPerPage),
+        assetsFinder
+      )
+    )
   }
 
-  def battles = Action { implicit request =>
-    Ok(views.html.robot.battles(matchesRepo.findAll(), assetsFinder))
+  def battles(page: Long = 0) = Action { implicit request =>
+    val numPerPage = 30
+    Ok(
+      views.html.robot.battles(
+        matchesRepo.findAll(page, numPerPage),
+        page,
+        QuillUtils.computePageNum(matchesRepo.count, numPerPage),
+        assetsFinder
+      )
+    )
   }
 
   def create =

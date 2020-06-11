@@ -94,9 +94,19 @@ object Robots {
     def findAllForUser(user: Users.Data): List[BasicData] =
       run(schema.filter(_.userId == lift(user.id))).map(dataToBasic)
 
-    def findAll(): List[(BasicData, Users.Data)] = {
-      run(schema.join(usersSchema).on(_.userId == _.id))
-        .map(tuple => (dataToBasic(tuple._1), tuple._2))
+    def count: Long = run(schema.size)
+
+    def findAll(
+        page: Long,
+        numPerPage: Int
+    ): List[(BasicData, Users.Data)] = {
+      val all = quote {
+        schema.join(usersSchema).on(_.userId == _.id)
+      }
+      val allPaged = quote {
+        all.drop(lift(page.toInt * numPerPage)).take(lift(numPerPage))
+      }
+      run(allPaged).map(tuple => (dataToBasic(tuple._1), tuple._2))
     }
 
     def create(userId: Long, name: String, lang: Lang.Value) = {

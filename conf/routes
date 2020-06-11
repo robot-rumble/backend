@@ -4,8 +4,8 @@
 
 GET         /                                      controllers.HomeController.index
 GET         /rules                                 controllers.HomeController.rules
-GET         /warehouse                             controllers.RobotController.warehouse
-GET         /battles                               controllers.RobotController.battles
+GET         /warehouse                             controllers.RobotController.warehouse(page: Long)
+GET         /battles                               controllers.RobotController.battles(page: Long)
 
 GET         /signup                                controllers.UserController.create
 POST        /signup                                controllers.UserController.postCreate
