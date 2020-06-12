@@ -4,8 +4,8 @@
 
 GET         /                                      controllers.HomeController.index
 GET         /rules                                 controllers.HomeController.rules
-GET         /warehouse                             controllers.RobotController.warehouse(page: Long)
-GET         /battles                               controllers.RobotController.battles(page: Long)
+GET         /warehouse                             controllers.RobotController.warehouse(page: Long ?= 0)
+GET         /battles                               controllers.RobotController.battles(page: Long ?= 0)
 
 GET         /signup                                controllers.UserController.create
 POST        /signup                                controllers.UserController.postCreate
@@ -16,7 +16,7 @@ GET         /p/:username                           controllers.UserController.pr
 
 GET         /create-robot                          controllers.RobotController.create
 POST        /create-robot                          controllers.RobotController.postCreate
-GET         /p/:user/:robot                        controllers.RobotController.view(user, robot, page: Long)
+GET         /p/:user/:robot                        controllers.RobotController.view(user, robot, page: Long ?= 0)
 GET         /p/:user/:robot/edit                   controllers.RobotController.edit(user, robot)
 GET         /view-code/:robotId                    controllers.RobotController.viewPublishedCode(robotId: Long)
 GET         /p/:user/:robot/challenge              controllers.RobotController.challenge(user, robot)
