@@ -23,7 +23,7 @@ GET         /p/:user/:robot/challenge              controllers.RobotController.c
 GET         /p/:user/:robot/publish                controllers.RobotController.publish(user, robot)
 POST        /publish/:robotId                      controllers.RobotController.postPublish(robotId: Long)
 
-GET         /b/:id                           controllers.RobotController.viewBattle(id: Long)
+GET         /b/:id                                 controllers.RobotController.viewBattle(id: Long)
 
 + nocsrf
 POST        /api/login                             controllers.UserController.apiLogin
