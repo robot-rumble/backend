@@ -31,19 +31,21 @@ class MatchMaker @Inject()(
     val matchInputs = List.range(0, 3).flatMap { _ =>
       val robots = for {
         r1 <- robotsRepo.random()
-        r1Published <- publishedRobotsRepo.find(r1.id)
+        pr1 <- publishedRobotsRepo.find(r1.id)
         r2 <- robotsRepo.random()
-        r2Published <- publishedRobotsRepo.find(r2.id)
-      } yield ((r1, r1Published), (r2, r2Published))
+        pr2 <- publishedRobotsRepo.find(r2.id)
+      } yield ((r1, pr1), (r2, pr2))
 
       robots.map {
-        case ((r1, r1p), (r2, r2p)) =>
+        case ((r1, pr1), (r2, pr2)) =>
           MatchInput(
-            r1p.robotId,
-            r1p.code,
+            r1.id,
+            pr1.id,
+            pr1.code,
             r1.lang,
-            r2p.robotId,
-            r2p.code,
+            r2.id,
+            pr2.id,
+            pr2.code,
             r2.lang,
           )
       }

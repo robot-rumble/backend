@@ -28,7 +28,9 @@ object Battles {
   ): Data = {
     Data(
       r1Id = matchOutput.r1Id,
+      pr1Id = matchOutput.pr1Id,
       r2Id = matchOutput.r2Id,
+      pr2Id = matchOutput.pr2Id,
       winner = matchOutput.winner,
       errored = matchOutput.errored,
       r1Time = matchOutput.r1Time,
@@ -45,6 +47,8 @@ object Battles {
       id: Long = -1,
       r1Id: Long,
       r2Id: Long,
+      pr1Id: Long,
+      pr2Id: Long,
       ranked: Boolean,
       winner: Winner.Value,
       errored: Boolean,

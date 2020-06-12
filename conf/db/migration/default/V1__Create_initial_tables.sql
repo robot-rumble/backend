@@ -37,6 +37,8 @@ CREATE TABLE battles
     created   TIMESTAMP      NOT NULL,
     r1_id     SERIAL         NOT NULL REFERENCES robots (id),
     r2_id     SERIAL         NOT NULL REFERENCES robots (id),
+    pr1_id    SERIAL         NOT NULL REFERENCES published_robots (id),
+    pr2_id    SERIAL         NOT NULL REFERENCES published_robots (id),
     ranked    BOOL           NOT NULL,
     winner    battle_outcome NOT NULL,
 --  If `errored` and r1_won/r2_won, then the other robot errored. Otherwise, both errored.
