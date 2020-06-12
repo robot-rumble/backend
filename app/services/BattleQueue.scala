@@ -36,8 +36,12 @@ object BattleQueue {
   )(MatchOutput.apply _)
 
   case class MatchInput(
-    r1Id: Long, r1Code: String, r1Lang: Lang.Value,
-    r2Id: Long, r2Code: String, r2Lang: Lang.Value,
+      r1Id: Long,
+      r1Code: String,
+      r1Lang: Lang.Value,
+      r2Id: Long,
+      r2Code: String,
+      r2Lang: Lang.Value,
   )
 
   case class MatchOutput(
