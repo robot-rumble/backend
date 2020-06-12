@@ -1,5 +1,7 @@
 package models
 
+import java.time.LocalDate
+
 import javax.inject.Inject
 import play.api.libs.json.{Json, Reads, Writes}
 import services.Db
@@ -7,7 +9,7 @@ import services.Db
 object Robots {
 
   private def createData(userId: Long, name: String, lang: Lang.Value): Data = {
-    Data(name = name, userId = userId, lang = lang)
+    Data(name = name, userId = userId, lang = lang, created = LocalDate.now())
   }
 
   case class Data(
@@ -18,7 +20,8 @@ object Robots {
       automatch: Boolean = true,
       isPublished: Boolean = false,
       rating: Int = 1000,
-      lang: Lang.Value
+      lang: Lang.Value,
+      created: LocalDate
   )
 
   def dataToBasic(data: Data): BasicData =

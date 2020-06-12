@@ -1,15 +1,22 @@
 package models
 
+import java.time.LocalDate
+
 import com.github.t3hnar.bcrypt._
 import javax.inject.Inject
 import services.Db
 
 object Users {
   private def createData(username: String, password: String): Data = {
-    Data(username, password.bcrypt)
+    Data(username, password.bcrypt, created = LocalDate.now())
   }
 
-  case class Data(username: String, password: String, id: Long = -1)
+  case class Data(
+      username: String,
+      password: String,
+      id: Long = -1,
+      created: LocalDate
+  )
 
   class Repo @Inject()(val db: Db) {
 

@@ -1,7 +1,7 @@
 CREATE TABLE users
 (
     id       SERIAL PRIMARY KEY,
-    created  TIMESTAMP   NOT NULL DEFAULT current_timestamp,
+    created  TIMESTAMP   NOT NULL,
     username VARCHAR(15) NOT NULL,
     password VARCHAR(60) NOT NULL
 );
@@ -11,7 +11,7 @@ CREATE TYPE lang AS ENUM ('PYTHON', 'JAVASCRIPT');
 CREATE TABLE robots
 (
     id           SERIAL PRIMARY KEY,
-    created      TIMESTAMP   NOT NULL DEFAULT current_timestamp,
+    created      TIMESTAMP   NOT NULL,
     user_id      SERIAL      NOT NULL REFERENCES users (id),
     name         VARCHAR(15) NOT NULL,
     dev_code     TEXT        NOT NULL,
@@ -25,7 +25,7 @@ CREATE TABLE published_robots
 (
     id       SERIAL PRIMARY KEY,
     robot_id SERIAL    NOT NULL REFERENCES robots (id),
-    created  TIMESTAMP NOT NULL DEFAULT current_timestamp,
+    created  TIMESTAMP NOT NULL,
     code     TEXT      NOT NULL
 );
 
@@ -34,7 +34,7 @@ CREATE TYPE battle_outcome AS ENUM ('R1', 'R2', 'DRAW');
 CREATE TABLE battles
 (
     id        SERIAL PRIMARY KEY,
-    created   TIMESTAMP      NOT NULL DEFAULT current_timestamp,
+    created   TIMESTAMP      NOT NULL,
     r1_id     SERIAL         NOT NULL REFERENCES robots (id),
     r2_id     SERIAL         NOT NULL REFERENCES robots (id),
     ranked    BOOL           NOT NULL,
