@@ -1,6 +1,7 @@
 @(battle: Battles.Data, r1: Robots.BasicData, r2: Robots.BasicData, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
 @main(s"Battle: ${r1.name} vs ${r2.name}", "battle", assetsFinder) {
+    <link rel="stylesheet" type="text/css" href="@assetsFinder.path("dist/battle_css.css")">
     <script src="@assetsFinder.path("dist/battle_js.js")" type="text/javascript"></script>
     <battle-el data="@battle.data"></battle-el>
 }
