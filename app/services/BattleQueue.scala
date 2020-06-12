@@ -3,6 +3,7 @@ package services
 import akka.NotUsed
 import akka.stream.scaladsl.{Sink, Source}
 import models.Battles.Winner
+import models.Robots.Lang
 import play.api.libs.functional.syntax._
 
 trait BattleQueue {
@@ -32,7 +33,14 @@ object BattleQueue {
       (JsPath \ "data").read[String]
   )(MatchOutput.apply _)
 
-  case class MatchInput(r1Id: Long, r1Code: String, r2Id: Long, r2Code: String)
+  case class MatchInput(
+      r1Id: Long,
+      r1Code: String,
+      r1Lang: Lang.Value,
+      r2Id: Long,
+      r2Code: String,
+      r2Lang: Lang.Value
+  )
 
   case class MatchOutput(
       r1Id: Long,
