@@ -28,6 +28,10 @@ class MatchMaker @Inject()(
   import BattleQueue._
 
   def prepareMatches(): List[MatchInput] = {
+    var pairs = Vector.empty
+
+//    for (pr <- publishedRobotsRepo.findAllStale()) {}
+
     val matchInputs = List.range(0, 3).flatMap { _ =>
       val robots = for {
         r1 <- robotsRepo.random()
