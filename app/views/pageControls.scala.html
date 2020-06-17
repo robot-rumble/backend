@@ -1,9 +1,7 @@
-@(template: Long => Call, page: Long, totalPages: Long)(implicit request: Request[AnyContent])
+@(template: Long => Call, page: Long)(implicit request: Request[AnyContent])
 <div class="flex mt-4">
     @if(page > 0) {
         <a href="@template(page - 1)" class="mr-3">previous page</a>
     }
-    @if(page < totalPages) {
-        <a href="@template(page + 1)">next page</a>
-    }
+    <a href="@template(page + 1)">next page</a>
 </div>

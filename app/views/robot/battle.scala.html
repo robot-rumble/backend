@@ -1,5 +1,5 @@
-@import models.Battles.Winner
-@(battle: Battles.Data, r1: Robots.BasicData, r2: Robots.BasicData, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+@import db.PostgresEnums.Winners
+@(battle: Battles.Data, r1: Robots.Data, r2: Robots.Data, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
 @main(s"Battle: ${r1.name} vs ${r2.name}", "battle", assetsFinder) {
     <link rel="stylesheet" type="text/css" href="@assetsFinder.path("dist/battle_css.css")">
@@ -8,13 +8,13 @@
     <h1 class="mb-3 text-center">@r1.name vs @r2.name</h1>
     <h3 class="mb-5 text-center">
         @battle.winner match {
-            case Winner.R1 => {
+            case Winners.R1 => {
                 Winner: @r1.name
             }
-            case Winner.R2 => {
+            case Winners.R2 => {
                 Winner: @r2.name
             }
-            case Winner.Draw => {
+            case Winners.Draw => {
                 Draw
             }
         }

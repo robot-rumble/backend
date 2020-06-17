@@ -3,12 +3,31 @@ package models
 import java.time.LocalDate
 
 import javax.inject.Inject
+import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.libs.json.{Json, Reads, Writes}
-import services.Db
+import slick.jdbc.JdbcProfile
+import db.PostgresProfile.api._
+
+import scala.concurrent.{ExecutionContext, Future}
 
 object Robots {
+  import db.PostgresEnums.Langs.Lang
 
-  private def createData(userId: Long, name: String, lang: Lang.Value): Data = {
+  class DataTable(tag: Tag) extends Table[Data](tag, "robots") {
+    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+    def userId = column[Long]("user_id")
+    def name = column[String]("name")
+    def devCode = column[String]("dev_code")
+    def automatch = column[Boolean]("automatch")
+    def isPublished = column[Boolean]("is_published")
+    def rating = column[Int]("rating")
+    def lang = column[Lang]("lang")
+    def created = column[LocalDate]("created")
+    def * =
+      (id, userId, name, devCode, automatch, isPublished, rating, lang, created) <> (Data.tupled, Data.unapply)
+  }
+
+  private def createData(userId: Long, name: String, lang: Lang): Data = {
     Data(name = name, userId = userId, lang = lang, created = LocalDate.now())
   }
 
@@ -20,140 +39,101 @@ object Robots {
       automatch: Boolean = true,
       isPublished: Boolean = false,
       rating: Int = 1000,
-      lang: Lang.Value,
+      lang: Lang,
       created: LocalDate
   )
 
-  def dataToBasic(data: Data): BasicData =
-    BasicData(
-      id = data.id,
-      userId = data.userId,
-      name = data.name,
-      rating = data.rating,
-      isPublished = data.isPublished,
-      lang = data.lang
-    )
-
-  case class BasicData(
-      id: Long,
-      userId: Long,
-      name: String,
-      rating: Int,
-      isPublished: Boolean,
-      lang: Lang.Value
-  )
-
-  implicit val basicDataWrites = new Writes[BasicData] {
-    def writes(basicData: BasicData) = Json.obj(
-      "id" -> basicData.id,
-      "userId" -> basicData.userId,
-      "name" -> basicData.name,
-      "rating" -> basicData.rating,
-      "lang" -> basicData.lang
+  implicit val dataWrites = new Writes[Data] {
+    def writes(data: Data) = Json.obj(
+      "id" -> data.id,
+      "userId" -> data.userId,
+      "name" -> data.name,
+      "rating" -> data.rating,
+      "lang" -> data.lang
     )
   }
 
   class Repo @Inject()(
-      val db: Db,
+      protected val dbConfigProvider: DatabaseConfigProvider,
       val usersRepo: Users.Repo,
       val publishedRobotsRepo: PublishedRobots.Repo
-  ) {
+  )(
+      implicit ec: ExecutionContext
+  ) extends HasDatabaseConfigProvider[JdbcProfile] {
 
-    import db.ctx._
+    val schema = TableQuery[DataTable]
 
-    implicit val decoderSource =
-      QuillUtils
-        .generateEnumDecoder(db.ctx, Lang)
-        .asInstanceOf[Decoder[Lang.Value]]
-    implicit val encoderSource =
-      QuillUtils
-        .generateEnumEncoder(db.ctx, Lang, "lang")
-        .asInstanceOf[Encoder[Lang.Value]]
+    def find(id: Long): Future[Option[Data]] =
+      db.run(
+        schema.filter(_.id === id).result.headOption
+      )
 
-    val schema = quote(querySchema[Data]("robots"))
+    def find(userId: Long, name: String): Future[Option[Data]] =
+      db.run(
+        schema
+          .filter(r => r.userId === userId && r.name === name)
+          .result
+          .headOption
+      )
 
-    val usersSchema =
-      usersRepo.schema.asInstanceOf[Quoted[EntityQuery[Users.Data]]]
-
-    def find(
-        user: Users.Data,
+    def findWithUser(
+        username: String,
         name: String
-    ): Option[BasicData] =
-      run(
-        schema.filter(
-          r => r.userId == lift(user.id) && r.name == lift(name)
-        )
-      ).headOption.map(dataToBasic)
+    ): Future[Option[(Users.Data, Data)]] = {
+      val query = for {
+        u <- usersRepo.schema if u.username === username
+        r <- schema if r.userId === u.id && r.name === name
+      } yield (u, r)
+      db.run(query.result.headOption)
+    }
 
-    def findById(id: Long): Option[BasicData] =
-      run(schema.filter(_.id == lift(id))).headOption.map(dataToBasic)
+    def findAll(userId: Long): Future[Seq[Data]] =
+      db.run(schema.filter(_.userId === userId).result)
 
-    def getDevCode(id: Long): Option[String] =
-      run(schema.filter(_.id == lift(id))).headOption.map(_.devCode)
-
-    def getPublishedCode(id: Long): Option[String] =
-      publishedRobotsRepo.find(id).map(_.code)
-
-    def findAllForUser(user: Users.Data): List[BasicData] =
-      run(schema.filter(_.userId == lift(user.id))).map(dataToBasic)
+    def findAll(username: String): Future[Seq[Data]] = {
+      val query = for {
+        u <- usersRepo.schema if u.username === username
+        r <- schema if r.userId === u.id
+      } yield r
+      db.run(query.result)
+    }
 
     def findAll(
         page: Long,
         numPerPage: Int
-    ): (List[(BasicData, Users.Data)], Long, Long) = {
-      val all = quote {
-        schema.join(usersSchema).on(_.userId == _.id)
-      }
-      val count = run(all.size)
-      val allPaged = quote {
-        all.drop(lift(page.toInt * numPerPage)).take(lift(numPerPage))
-      }
-      val data = run(allPaged)
-      (
-        data.map(tuple => (dataToBasic(tuple._1), tuple._2)),
-        page,
-        Paginate.computeNumPages(count, numPerPage)
-      )
+    ): Future[Seq[(Data, Users.Data)]] = {
+      val query = for {
+        u <- usersRepo.schema
+        r <- schema if r.userId === u.id
+      } yield (r, u)
+      db.run(Utils.paginate(query, page, numPerPage).result)
     }
 
-    def create(userId: Long, name: String, lang: Lang.Value) = {
+    def create(userId: Long, name: String, lang: Lang): Future[Data] = {
       val data = createData(userId, name, lang)
-      val id = run(schema.insert(lift(data)).returningGenerated(_.id))
-      dataToBasic(data.copy(id = id))
+      val id = db.run((schema returning schema.map(_.id)) += data)
+      id.map(id => data.copy(id = id))
     }
 
     def update(id: Long, devCode: String) = {
-      run(
-        schema.filter(_.id == lift(id)).update(_.devCode -> lift(devCode))
+      db.run(
+        schema.filter(_.id === id).map(_.devCode).update(devCode)
       )
     }
 
     def publish(id: Long) = {
-      run(schema.filter(_.id == lift(id))).headOption.map(robot => {
-        if (!robot.devCode.isBlank) {
-          publishedRobotsRepo.create(id, robot.devCode)
-          run(schema.filter(_.id == lift(id)).update(_.isPublished -> true))
-        }
-      })
+      db.run(
+        schema.filter(_.id === id).map(_.isPublished).update(true)
+          >> schema.filter(_.id === id).map(_.devCode).result.head
+      ) flatMap { devCode =>
+        publishedRobotsRepo.create(id, devCode)
+      }
     }
 
     def updateRating(id: Long, rating: Int) = {
-      run(
-        schema.filter(_.id == lift(id)).update(_.rating -> lift(rating))
+      db.run(
+        schema.filter(_.id === id).map(_.rating).update(rating)
       )
     }
-
-    def random(): Option[Data] = {
-      run(schema.sortBy(_ => infix"RANDOM()".as[Int])(Ord.desc)).headOption
-    }
-  }
-
-  //noinspection TypeAnnotation
-  object Lang extends Enumeration {
-    val PYTHON = Value("PYTHON")
-    val JAVASCRIPT = Value("JAVASCRIPT")
-
-    implicit val winnerReads = Reads.enumNameReads(Lang)
-    implicit val winnerWrites = Writes.enumNameWrites
   }
 }

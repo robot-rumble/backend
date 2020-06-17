@@ -4,20 +4,69 @@ import java.time.LocalDate
 
 import javax.inject.Inject
 import services.BattleQueue.MatchOutput
-import play.api.libs.json.{Reads, Writes}
-import services.Db
 
-import Robots.dataToBasic
+import scala.concurrent.{ExecutionContext, Future}
+import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
+import slick.jdbc.JdbcProfile
+import db.PostgresProfile.api._
 
 object Battles {
+  import db.PostgresEnums.Winners.Winner
+  import db.PostgresEnums.Winners
+
+  class DataTable(tag: Tag) extends Table[Data](tag, "battles") {
+    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+    def r1Id = column[Long]("r1_id")
+    def r2Id = column[Long]("r2_id")
+    def ranked = column[Boolean]("ranked")
+    def winner = column[Winner]("winner")
+    def errored = column[Boolean]("errored")
+    def r1Rating = column[Int]("r1_rating")
+    def r2Rating = column[Int]("r2_rating")
+    def r1Time = column[Float]("r1_time")
+    def r2Time = column[Float]("r2_time")
+    def data = column[String]("data")
+    def created = column[LocalDate]("created")
+    def * =
+      (
+        id,
+        r1Id,
+        r2Id,
+        ranked,
+        winner,
+        errored,
+        r1Rating,
+        r2Rating,
+        r1Time,
+        r2Time,
+        data,
+        created
+      ) <> (Data.tupled, Data.unapply)
+  }
+
+  case class Data(
+      id: Long = -1,
+      r1Id: Long,
+      r2Id: Long,
+      ranked: Boolean = true,
+      winner: Winner,
+      errored: Boolean,
+      r1Rating: Int,
+      r2Rating: Int,
+      r1Time: Float,
+      r2Time: Float,
+      data: String,
+      created: LocalDate,
+  )
+
   def didR1Win(
       battle: Data,
       r1Id: Long,
   ): Option[Boolean] = {
     battle.winner match {
-      case Winner.R1 | Winner.R2 =>
-        Some(battle.winner == Winner.R1 && battle.r1Id == r1Id)
-      case Winner.Draw => None
+      case Winners.R1 | Winners.R2 =>
+        Some(battle.winner == Winners.R1 && battle.r1Id == r1Id)
+      case Winners.Draw => None
     }
   }
 
@@ -34,121 +83,69 @@ object Battles {
       r1Time = matchOutput.r1Time,
       r2Time = matchOutput.r2Time,
       data = matchOutput.data,
-      ranked = true,
       r1Rating = r1Rating,
       r2Rating = r2Rating,
       created = LocalDate.now()
     )
   }
 
-  case class Data(
-      id: Long = -1,
-      r1Id: Long,
-      r2Id: Long,
-      ranked: Boolean,
-      winner: Winner.Value,
-      errored: Boolean,
-      r1Rating: Int,
-      r2Rating: Int,
-      r1Time: Float,
-      r2Time: Float,
-      data: String,
-      created: LocalDate,
-  )
-
   class Repo @Inject()(
-      val db: Db,
+      protected val dbConfigProvider: DatabaseConfigProvider,
       val usersRepo: Users.Repo,
       val robotsRepo: Robots.Repo
-  ) {
+  )(
+      implicit ec: ExecutionContext
+  ) extends HasDatabaseConfigProvider[JdbcProfile] {
 
-    import db.ctx._
+    val schema = TableQuery[DataTable]
 
-    implicit val robotDecoderSource =
-      robotsRepo.decoderSource.asInstanceOf[Decoder[Robots.Lang.Value]]
+    def find(id: Long): Future[Option[Data]] =
+      db.run(schema.filter(_.id === id).result.headOption)
 
-    implicit val decoderSource =
-      QuillUtils
-        .generateEnumDecoder(db.ctx, Winner)
-        .asInstanceOf[Decoder[Winner.Value]]
-    implicit val encoderSource =
-      QuillUtils
-        .generateEnumEncoder(db.ctx, Winner, "battle_outcome")
-        .asInstanceOf[Encoder[Winner.Value]]
+    def findWithRobots(
+        id: Long
+    ): Future[Option[(Data, Robots.Data, Robots.Data)]] = {
+      val query = for {
+        b <- schema if b.id === id
+        r1 <- robotsRepo.schema if r1.id === b.r1Id
+        r2 <- robotsRepo.schema if r2.id === b.r2Id
+      } yield (b, r1, r2)
+      db.run(query.result.headOption)
+    }
 
-    val robotSchema =
-      robotsRepo.schema.asInstanceOf[Quoted[EntityQuery[Robots.Data]]]
-    val schema = quote(querySchema[Data]("battles"))
-
-    def find(id: Long): Option[Data] =
-      run(schema.filter(_.id == lift(id))).headOption
-
-    def findForRobot(
+    def findAllForRobot(
         robotId: Long,
         page: Long,
         numPerPage: Int
-    ): (List[(Data, Robots.BasicData)], Long, Long) = {
-      val all = quote {
-        for {
-          m <- schema
-          otherR <- robotSchema
-          if (
-            (m.r1Id == lift(robotId) && m.r2Id == otherR.id)
-              || (m.r2Id == lift(robotId) && m.r1Id == otherR.id)
-          )
-        } yield (m, otherR)
-      }
-      val count = run(all.size)
-      val allPaged = quote {
-        all.drop(lift(page.toInt * numPerPage)).take(lift(numPerPage))
-      }
-      val data = run(allPaged)
-      (
-        data.map(tuple => (tuple._1, dataToBasic(tuple._2))),
-        page,
-        Paginate.computeNumPages(count, numPerPage)
-      )
+    ): Future[Seq[(Data, Robots.Data)]] = {
+      val query = for {
+        b <- schema
+        otherR <- robotsRepo.schema
+        if (
+          (b.r1Id === robotId && b.r2Id === otherR.id)
+            || (b.r2Id === robotId && b.r1Id === otherR.id)
+        )
+      } yield (b, otherR)
+      db.run(Utils.paginate(query, page, numPerPage).result)
     }
 
     def findAll(
         page: Long,
         numPerPage: Int
-    ): (List[(Data, Robots.BasicData, Robots.BasicData)], Long, Long) = {
-      val all = quote {
+    ): Future[Seq[(Data, Robots.Data, Robots.Data)]] = {
+      val query =
         for {
-          battle <- schema
-          r1 <- robotSchema if battle.r1Id == r1.id
-          r2 <- robotSchema if battle.r2Id == r2.id
-        } yield (battle, r1, r2)
-      }
-      val count = run(all.size)
-      val allPaged = quote {
-        all.drop(lift(page.toInt * numPerPage)).take(lift(numPerPage))
-      }
-      val data = run(allPaged)
-      (
-        data.map(
-          tuple => (tuple._1, dataToBasic(tuple._2), dataToBasic(tuple._3))
-        ),
-        page,
-        Paginate.computeNumPages(count, numPerPage)
-      )
+          b <- schema
+          r1 <- robotsRepo.schema if b.r1Id === r1.id
+          r2 <- robotsRepo.schema if b.r2Id === r2.id
+        } yield (b, r1, r2)
+      db.run(Utils.paginate(query, page, numPerPage).result)
     }
 
     def create(matchOutput: MatchOutput, r1Rating: Int, r2Rating: Int) = {
       val data = createData(matchOutput, r1Rating, r2Rating)
-      val id = run(schema.insert(lift(data)).returningGenerated(_.id))
-      data.copy(id = id)
+      val id = db.run((schema returning schema.map(_.id)) += data)
+      id.map(id => data.copy(id = id))
     }
-  }
-
-  //noinspection TypeAnnotation
-  object Winner extends Enumeration {
-    val R1 = Value("R1")
-    val R2 = Value("R2")
-    val Draw = Value("Draw")
-
-    implicit val winnerReads = Reads.enumNameReads(Winner)
-    implicit val winnerWrites = Writes.enumNameWrites
   }
 }

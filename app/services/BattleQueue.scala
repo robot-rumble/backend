@@ -2,9 +2,9 @@ package services
 
 import akka.NotUsed
 import akka.stream.scaladsl.{Sink, Source}
-import models.Battles.Winner
 import play.api.libs.functional.syntax._
-import models.Robots.Lang
+import db.PostgresEnums.Winners.Winner
+import db.PostgresEnums.Langs.Lang
 
 trait BattleQueue {
   val sink: Sink[BattleQueue.MatchInput, NotUsed]
@@ -30,7 +30,7 @@ object BattleQueue {
       (JsPath \ "r1_time").read[Float] and
       (JsPath \ "r2_id").read[Long] and
       (JsPath \ "r2_time").read[Float] and
-      (JsPath \ "winner").read[Winner.Value] and
+      (JsPath \ "winner").read[Winner] and
       (JsPath \ "errored").read[Boolean] and
       (JsPath \ "data").read[String]
   )(MatchOutput.apply _)
@@ -38,10 +38,10 @@ object BattleQueue {
   case class MatchInput(
       r1Id: Long,
       r1Code: String,
-      r1Lang: Lang.Value,
+      r1Lang: Lang,
       r2Id: Long,
       r2Code: String,
-      r2Lang: Lang.Value,
+      r2Lang: Lang,
   )
 
   case class MatchOutput(
@@ -49,7 +49,7 @@ object BattleQueue {
       r1Time: Float,
       r2Id: Long,
       r2Time: Float,
-      winner: Winner.Value,
+      winner: Winner,
       errored: Boolean,
       data: String
   )

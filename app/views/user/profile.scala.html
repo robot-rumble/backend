@@ -1,4 +1,4 @@
-@(user: Users.Data, isAuthenticated: Boolean, robots: List[Robots.BasicData], assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+@(user: Users.Data, isAuthenticated: Boolean, robots: Seq[Robots.Data], assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
 @main("Profile", "profile", assetsFinder) {
     <h1>@user.username</h1>
@@ -7,7 +7,7 @@
         <table>
         @for(robot <- robots) {
             <tr>
-                <td><a href="@routes.RobotController.view(user.username, robot.name, 0)">@robot.name</a></td>
+                <td><a href="@routes.RobotController.view(user.username, robot.name)">@robot.name</a></td>
                 <td class="d-flex">
                     <p class="mr-2">@robot.rating</p>
                 </td>

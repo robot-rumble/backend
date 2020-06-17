@@ -1,4 +1,4 @@
-@(user: Users.Data, robot: Robots.BasicData, assetsFinder: AssetsFinder, showUser: Boolean)
+@(user: Users.Data, robot: Robots.Data, assetsFinder: AssetsFinder, showUser: Boolean)
 
 <ul class="robot panel">
     <li><a href="@routes.RobotController.view(user.username, robot.name, 0)">@robot.name</a></li>

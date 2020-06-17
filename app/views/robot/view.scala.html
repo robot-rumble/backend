@@ -1,4 +1,4 @@
-@(user: Users.Data, isOwner: Boolean, robot: Robots.BasicData, pagedBattles: (List[(Battles.Data, Robots.BasicData)], Long, Long), assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+@(user: Users.Data, isOwner: Boolean, robot: Robots.Data, pagedBattles: Seq[(Battles.Data, Robots.Data)], page: Long, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
 @main(s"Robot ${robot.name}", "robot-page", assetsFinder) {
     <h1>@robot.name <span>(@robot.lang.toString)</span></h1>
@@ -21,9 +21,9 @@
 
     <div class="matches">
         <h4>Matches</h4>
-        @if(pagedBattles._1.nonEmpty) {
+        @if(pagedBattles.nonEmpty) {
           <table>
-          @for((battle, r2) <- pagedBattles._1) {
+          @for((battle, r2) <- pagedBattles) {
               <tr>
                   <td><img src="@{
                       val imgPath = Battles.didR1Win(battle, robot.id) match {
@@ -37,7 +37,7 @@
           }
           </table>
 
-          @pageControls((page) => routes.RobotController.view(user.username, robot.name, page), pagedBattles._2, pagedBattles._3)
+          @pageControls((page) => routes.RobotController.view(user.username, robot.name, page), page)
         } else {
             <p>None yet!</p>
         }

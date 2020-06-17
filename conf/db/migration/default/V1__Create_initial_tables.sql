@@ -29,21 +29,21 @@ CREATE TABLE published_robots
     code     TEXT      NOT NULL
 );
 
-CREATE TYPE battle_outcome AS ENUM ('R1', 'R2', 'DRAW');
+CREATE TYPE winner AS ENUM ('R1', 'R2', 'DRAW');
 
 CREATE TABLE battles
 (
     id        SERIAL PRIMARY KEY,
-    created   TIMESTAMP      NOT NULL,
-    r1_id     SERIAL         NOT NULL REFERENCES robots (id),
-    r2_id     SERIAL         NOT NULL REFERENCES robots (id),
-    ranked    BOOL           NOT NULL,
-    winner    battle_outcome NOT NULL,
+    created   TIMESTAMP NOT NULL,
+    r1_id     SERIAL    NOT NULL REFERENCES robots (id),
+    r2_id     SERIAL    NOT NULL REFERENCES robots (id),
+    ranked    BOOL      NOT NULL,
+    winner    winner    NOT NULL,
 --  If `errored` and r1_won/r2_won, then the other robot errored. Otherwise, both errored.
-    errored   BOOL           NOT NULL,
-    r1_rating INT            NOT NULL,
-    r2_rating INT            NOT NULL,
-    r1_time   REAL           NOT NULL,
-    r2_time   REAL           NOT NULL,
-    data      TEXT           NOT NULL
+    errored   BOOL      NOT NULL,
+    r1_rating INT       NOT NULL,
+    r2_rating INT       NOT NULL,
+    r1_time   REAL      NOT NULL,
+    r2_time   REAL      NOT NULL,
+    data      TEXT      NOT NULL
 );

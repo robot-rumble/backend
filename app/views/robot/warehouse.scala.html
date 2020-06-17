@@ -1,10 +1,10 @@
-@(pagedRobots: (List[(Robots.BasicData, Users.Data)], Long, Long), assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+@(pagedRobots: Seq[(Robots.Data, Users.Data)], page: Long, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
 @main("Warehouse", "warehouse", assetsFinder) {
     <h1>Warehouse</h1>
 
     <table>
-    @for((robot, user) <- pagedRobots._1) {
+    @for((robot, user) <- pagedRobots) {
         <tr>
             <td><a href="@routes.RobotController.view(user.username, robot.name, 0)">@robot.name</a></td>
             <td>by <a href="@routes.UserController.profile(user.username)">@user.username</a></td>
@@ -15,5 +15,5 @@
     }
     </table>
 
-    @pageControls(routes.RobotController.battles, pagedRobots._2, pagedRobots._3)
+    @pageControls(routes.RobotController.battles, page)
 }

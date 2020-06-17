@@ -2,9 +2,11 @@ package controllers
 
 import forms.{CreateRobotForm, UpdateRobotCodeForm}
 import javax.inject._
-import models.{Battles, QuillUtils, Robots, Users}
+import models.{Battles, PublishedRobots, Robots, Users}
 import play.api.libs.json.Json
 import play.api.mvc._
+
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class RobotController @Inject()(
@@ -12,44 +14,68 @@ class RobotController @Inject()(
     assetsFinder: AssetsFinder,
     auth: Auth,
     robotsRepo: Robots.Repo,
-    usersRepo: Users.Repo,
+    publishedRobotsRepo: PublishedRobots.Repo,
     battlesRepo: Battles.Repo
-) extends MessagesAbstractController(cc) {
+)(implicit ec: ExecutionContext)
+    extends MessagesAbstractController(cc) {
+  import db.PostgresEnums.Langs
 
-  def warehouse(page: Long = 0) = Action { implicit request =>
-    Ok(
-      views.html.robot.warehouse(
-        robotsRepo.findAll(page, 30),
-        assetsFinder
+  def warehouse(page: Long = 0) = Action.async { implicit request =>
+    robotsRepo.findAll(page, 30) map { robots =>
+      Ok(
+        views.html.robot.warehouse(
+          robots,
+          page,
+          assetsFinder
+        )
       )
-    )
+    }
   }
 
-  def battles(page: Long = 0) = Action { implicit request =>
-    Ok(
-      views.html.robot.battles(
-        battlesRepo.findAll(page, 30),
-        assetsFinder
+  def battles(page: Long = 0) = Action.async { implicit request =>
+    battlesRepo.findAll(page, 30) map { battles =>
+      Ok(
+        views.html.robot.battles(battles, page, assetsFinder)
       )
-    )
+    }
   }
 
   def create =
     auth.actionForce { _ => implicit request =>
-      Ok(views.html.robot.create(CreateRobotForm.form, assetsFinder))
+      Future successful Ok(
+        views.html.robot
+          .create(CreateRobotForm.form, assetsFinder)
+      )
     }
+
+  private def createOnSuccess(
+      user: Users.Data,
+      data: CreateRobotForm.Data
+  ): Future[Either[Robots.Data, String]] = {
+    val name = data.name.trim()
+    robotsRepo.find(user.id, name) flatMap {
+      case Some(_) =>
+        Future successful Right("Robot with this name already exists")
+      case None =>
+        robotsRepo
+          .create(user.id, name, Langs.withName(data.lang))
+          .map(Left.apply)
+    }
+  }
 
   def postCreate =
     auth.actionForce { user => implicit request =>
       CreateRobotForm.form.bindFromRequest.fold(
         formWithErrors => {
-          BadRequest(views.html.robot.create(formWithErrors, assetsFinder))
+          Future successful BadRequest(
+            views.html.robot.create(formWithErrors, assetsFinder)
+          )
         },
         data => {
-          createOnSuccess(user, data) match {
+          createOnSuccess(user, data) map {
             case Left(robot) =>
               Redirect(
-                routes.RobotController.view(user.username, robot.name, 0)
+                routes.RobotController.view(user.username, robot.name)
               )
             case Right(error) =>
               BadRequest(
@@ -69,10 +95,10 @@ class RobotController @Inject()(
     auth.actionForce { user => implicit request =>
       CreateRobotForm.form.bindFromRequest.fold(
         formWithErrors => {
-          BadRequest(formWithErrors.errorsAsJson)
+          Future successful BadRequest(formWithErrors.errorsAsJson)
         },
         data => {
-          createOnSuccess(user, data) match {
+          createOnSuccess(user, data) map {
             case Left(robot) =>
               Ok(Json.toJson(robot))
             case Right(error) =>
@@ -86,108 +112,75 @@ class RobotController @Inject()(
       )
     }
 
-  private def createOnSuccess(
-      user: Users.Data,
-      data: CreateRobotForm.Data
-  ): Either[Robots.BasicData, String] = {
-    val name = data.name.trim()
-    robotsRepo.find(user, name) match {
-      case Some(_) => Right("Robot with this name already exists")
-      case None =>
-        QuillUtils.serialize(Robots.Lang, data.lang) match {
-          case Some(lang) =>
-            Left(robotsRepo.create(user.id, name, lang))
-          case None =>
-            Right("Invalid lang field value.")
-        }
-    }
-  }
-
-  def view(user: String, robot: String, page: Long = 0) =
+  def view(username: String, robot: String, page: Long = 0) =
     auth.action { authUser => implicit request =>
-      (for {
-        user <- usersRepo.find(user)
-        robot <- robotsRepo.find(user, robot)
-      } yield (user, robot)) match {
+      robotsRepo.findWithUser(username, robot) flatMap {
         case Some((user, robot))
             if robot.isPublished || authUser.exists(_.id == user.id) =>
-          Ok(
-            views.html.robot.view(
-              user,
-              authUser.exists(_.id == user.id),
-              robot,
-              battlesRepo.findForRobot(robot.id, page, 10),
-              assetsFinder
+          battlesRepo.findAllForRobot(robot.id, page, 10) map { battles =>
+            Ok(
+              views.html.robot.view(
+                user,
+                authUser.exists(_.id == user.id),
+                robot,
+                battles,
+                page,
+                assetsFinder
+              )
             )
-          )
-        case None => NotFound("404")
+          }
+        case None => Future successful NotFound("404")
       }
     }
 
-  def edit(user: String, robot: String) =
+  def edit(_username: String, robot: String) =
     auth.actionForce { authUser => implicit request =>
-      (for {
-        user <- usersRepo.find(user) if user.id == authUser.id
-        robot <- robotsRepo.find(user, robot)
-        code <- robotsRepo.getDevCode(robot.id)
-      } yield (user, robot, code)) match {
-        case Some((user, robot, code)) =>
-          Ok(views.html.robot.edit(user, robot, code, assetsFinder))
+      robotsRepo.find(authUser.id, robot) map {
+        case Some(robot) =>
+          Ok(views.html.robot.edit(authUser, robot, assetsFinder))
         case None => NotFound("404")
       }
     }
 
   def apiUpdate(robotId: Long) =
     auth.actionForce { authUser => implicit request =>
-      (for {
-        robot <- robotsRepo.findById(robotId)
-      } yield robot) match {
+      robotsRepo.find(robotId) flatMap {
         case Some(robot) if robot.userId == authUser.id =>
           UpdateRobotCodeForm.form.bindFromRequest.fold(
             formWithErrors => {
-              BadRequest(formWithErrors.errorsAsJson)
+              Future successful BadRequest(formWithErrors.errorsAsJson)
             },
             data => {
-              robotsRepo.update(robot.id, data.code)
-              Ok("")
+              robotsRepo.update(robot.id, data.code) map { _ =>
+                Ok("")
+              }
             }
           )
-        case None => NotFound("404")
+        case None => Future successful NotFound("404")
       }
     }
 
-  def viewBattle(battleId: Long) = Action { implicit request =>
-    battlesRepo.find(battleId) match {
-      case Some(battle) =>
-        (for {
-          r1 <- robotsRepo.findById(battle.r1Id)
-          r2 <- robotsRepo.findById(battle.r2Id)
-        } yield (r1, r2)) match {
-          case Some((r1, r2)) =>
-            Ok(views.html.robot.battle(battle, r1, r2, assetsFinder))
-          case None => InternalServerError("Something bad has happened.")
-        }
-
+  def viewBattle(battleId: Long) = Action.async { implicit request =>
+    battlesRepo.findWithRobots(battleId) map {
+      case Some((battle, r1, r2)) =>
+        Ok(views.html.robot.battle(battle, r1, r2, assetsFinder))
       case None => NotFound("404")
     }
   }
 
-  def viewPublishedCode(robotId: Long) = Action { implicit request =>
-    robotsRepo.getPublishedCode(robotId) match {
-      case Some(publishedCode) =>
-        Ok(views.html.robot.viewCode(publishedCode, assetsFinder))
+  def viewPublishedCode(robotId: Long) = Action.async { implicit request =>
+    publishedRobotsRepo.findLatest(robotId) map {
+      case Some(publishedRobot) =>
+        Ok(views.html.robot.viewCode(publishedRobot.code, assetsFinder))
       case None => NotFound("404")
     }
   }
 
   def challenge(user: String, robot: String) = TODO
 
-  def publish(user: String, robot: String) =
+  def publish(_username: String, robot: String) =
     auth.actionForce { authUser => implicit request =>
-      (for {
-        user <- usersRepo.find(user) if user.id == authUser.id
-        robot <- robotsRepo.find(user, robot)
-      } yield robot) match {
+      robotsRepo.find(authUser.id, robot) map {
         case Some(robot) =>
           Ok(views.html.robot.publish(robot, assetsFinder))
         case None => NotFound("404")
@@ -196,41 +189,30 @@ class RobotController @Inject()(
 
   def postPublish(robotId: Long) =
     auth.actionForce { authUser => implicit request =>
-      (for {
-        robot <- robotsRepo.findById(robotId)
-        user <- usersRepo.findById(robot.userId) if user.id == authUser.id
-      } yield (user, robot)) match {
-        case Some((user, robot)) =>
+      robotsRepo.find(robotId) map {
+        case Some(robot) if robot.userId == authUser.id =>
           robotsRepo.publish(robot.id)
-          Redirect(routes.RobotController.view(user.username, robot.name, 0))
+          Redirect(
+            routes.RobotController.view(authUser.username, robot.name)
+          )
         case None => NotFound("404")
       }
     }
 
   def apiGetRobotCode(robotId: Long) =
-    auth.action { authUser => implicit request =>
-      (for {
-        robot <- robotsRepo.findById(robotId)
-        user <- usersRepo.findById(robot.userId)
-      } yield (user, robot)) match {
-        case Some((user, robot))
-            if robot.isPublished || authUser.exists(_.id == user.id) =>
-          val code = if (authUser.exists(_.id == user.id)) {
-            robotsRepo.getDevCode(robotId)
-          } else robotsRepo.getPublishedCode(robotId)
-          Ok(Json.toJson(code.get))
-        case None => NotFound("404")
+    auth.action { _authUser => implicit request =>
+      publishedRobotsRepo.findLatest(robotId) map {
+        case Some(publishedRobot) => Ok(Json.toJson(publishedRobot.code))
+        case None                 => NotFound("404")
       }
     }
 
   def apiGetRobot(user: String, robot: String) =
     auth.action { authUser => implicit request =>
-      (for {
-        user <- usersRepo.find(user)
-        robot <- robotsRepo.find(user, robot)
-      } yield robot) match {
-        case Some(robot)
-            if robot.isPublished || authUser.exists(_.id == robot.userId) =>
+      robotsRepo.findWithUser(user, robot) map {
+        // TODO: no need for user
+        case Some((user, robot))
+            if robot.isPublished || authUser.exists(_.id == user.id) =>
           Ok(Json.toJson(robot))
         case _ => NotFound("404")
       }
@@ -238,15 +220,11 @@ class RobotController @Inject()(
 
   def apiGetUserRobots(user: String) =
     auth.action { authUser => implicit request =>
-      usersRepo.find(user) match {
-        case Some(user) =>
-          val robots = robotsRepo
-            .findAllForUser(user)
-            .filter(
-              robot => robot.isPublished || authUser.exists(_.id == user.id)
-            )
-          Ok(Json.toJson(robots))
-        case None => NotFound("404")
+      robotsRepo.findAll(user) map { robots =>
+        val filteredRobots = robots.filter(
+          robot => robot.isPublished || authUser.exists(_.id == robot.userId)
+        )
+        Ok(Json.toJson(filteredRobots))
       }
     }
 }

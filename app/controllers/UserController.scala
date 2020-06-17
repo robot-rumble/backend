@@ -7,6 +7,8 @@ import models.{Robots, Users}
 import play.api.libs.json.Json
 import play.api.mvc._
 
+import scala.concurrent.{Future, ExecutionContext}
+
 @Singleton
 class UserController @Inject()(
     cc: MessagesControllerComponents,
@@ -14,30 +16,36 @@ class UserController @Inject()(
     robotRepo: Robots.Repo,
     assetsFinder: AssetsFinder,
     auth: Auth,
-) extends MessagesAbstractController(cc) {
+)(implicit ec: ExecutionContext)
+    extends MessagesAbstractController(cc) {
   def create = Action { implicit request =>
     Ok(views.html.user.signup(SignupForm.form, assetsFinder))
   }
 
-  def postCreate = Action { implicit request =>
+  def postCreate = Action.async { implicit request =>
     SignupForm.form.bindFromRequest.fold(
       formWithErrors => {
-        BadRequest(views.html.user.signup(formWithErrors, assetsFinder))
+        Future.successful(
+          BadRequest(views.html.user.signup(formWithErrors, assetsFinder))
+        )
       },
       data => {
         val username = data.username.trim()
-        usersRepo.find(username) match {
+        usersRepo.find(username) flatMap {
           case Some(_) =>
-            BadRequest(
-              views.html.user.signup(
-                SignupForm.form.fill(data).withGlobalError("Username taken"),
-                assetsFinder
+            Future.successful(
+              BadRequest(
+                views.html.user.signup(
+                  SignupForm.form.fill(data).withGlobalError("Username taken"),
+                  assetsFinder
+                )
               )
             )
           case None =>
-            usersRepo.create(username, data.password)
-            Redirect(routes.UserController.profile(username))
-              .withSession("USERNAME" -> username)
+            usersRepo.create(username, data.password).map { _ =>
+              Redirect(routes.UserController.profile(username))
+                .withSession("USERNAME" -> username)
+            }
         }
       }
     )
@@ -45,8 +53,8 @@ class UserController @Inject()(
 
   private def loginOnSuccess(
       data: LoginForm.Data
-  ): Either[Users.Data, String] = {
-    usersRepo.find(data.username) match {
+  ): Future[Either[Users.Data, String]] = {
+    usersRepo.find(data.username) map {
       case Some(user) if data.password.isBcrypted(user.password) =>
         Left(user)
       case _ =>
@@ -58,13 +66,15 @@ class UserController @Inject()(
     Ok(views.html.user.login(LoginForm.form, assetsFinder))
   }
 
-  def postLogin = Action { implicit request =>
+  def postLogin = Action.async { implicit request =>
     LoginForm.form.bindFromRequest.fold(
       formWithErrors => {
-        Forbidden(views.html.user.login(formWithErrors, assetsFinder))
+        Future.successful(
+          Forbidden(views.html.user.login(formWithErrors, assetsFinder))
+        )
       },
       data => {
-        loginOnSuccess(data) match {
+        loginOnSuccess(data) map {
           case Left(user) =>
             Auth.login(user.username)(
               Redirect(routes.UserController.profile(user.username))
@@ -82,13 +92,13 @@ class UserController @Inject()(
     )
   }
 
-  def apiLogin = Action { implicit request =>
+  def apiLogin = Action.async { implicit request =>
     LoginForm.form.bindFromRequest.fold(
       formWithErrors => {
-        BadRequest(formWithErrors.errorsAsJson)
+        Future.successful(BadRequest(formWithErrors.errorsAsJson))
       },
       data => {
-        loginOnSuccess(data) match {
+        loginOnSuccess(data) map {
           case Left(user) =>
             Auth.login(user.username)(Ok(""))
           case Right(error) =>
@@ -104,7 +114,7 @@ class UserController @Inject()(
 
   def apiWhoami =
     auth.actionForce { authUser => implicit request =>
-      Ok(Json.toJson((authUser.username, authUser.id)))
+      Future successful Ok(Json.toJson((authUser.username, authUser.id)))
     }
 
   def logout = Action { implicit request =>
@@ -113,18 +123,19 @@ class UserController @Inject()(
 
   def profile(username: String) =
     auth.action { authUser => implicit request =>
-      usersRepo.find(username) match {
+      usersRepo.find(username) flatMap {
         case Some(user) =>
-          val robots = robotRepo.findAllForUser(user)
-          Ok(
-            views.html.user.profile(
-              user,
-              authUser.exists(_.id == user.id),
-              robots,
-              assetsFinder
+          robotRepo.findAll(user.id) map { robots =>
+            Ok(
+              views.html.user.profile(
+                user,
+                authUser.exists(_.id == user.id),
+                robots,
+                assetsFinder
+              )
             )
-          )
-        case None => NotFound("404")
+          }
+        case None => Future successful NotFound("404")
       }
     }
 }

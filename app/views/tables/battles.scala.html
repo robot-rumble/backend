@@ -1,4 +1,4 @@
-@(battles: List[(Battles.Data, Robots.BasicData, Robots.BasicData)], r2: Robots.BasicData, assetsFinder: AssetsFinder, forRobot: Boolean)
+@(battles: List[(Battles.Data, Robots.Data, Robots.Data)], r2: Robots.Data, assetsFinder: AssetsFinder, forRobot: Boolean)
 
 <table>
     @for((battle, r1, r2) <- battles) {

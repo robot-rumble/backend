@@ -3,38 +3,56 @@ package models
 import java.time.LocalDate
 
 import javax.inject.Inject
-import services.Db
+import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
+import slick.jdbc.JdbcProfile
+import db.PostgresProfile.api._
+
+import scala.concurrent.{ExecutionContext, Future}
 
 object PublishedRobots {
 
-  private def createData(robotId: Long, code: String): Data = {
-    Data(robotId = robotId, code = code)
+  class DataTable(tag: Tag) extends Table[Data](tag, "published_robots") {
+    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+    def created = column[LocalDate]("created")
+    def robotId = column[Long]("robot_id")
+    def code = column[String]("code")
+    def * =
+      (id, created, robotId, code) <> (Data.tupled, Data.unapply)
   }
 
   case class Data(
       id: Long = -1,
-      created: LocalDate = LocalDate.now(),
+      created: LocalDate,
       robotId: Long,
       code: String,
   )
 
-  class Repo @Inject()(val db: Db, val usersRepo: Users.Repo) {
+  private def createData(robotId: Long, code: String): Data = {
+    Data(created = LocalDate.now(), robotId = robotId, code = code)
+  }
 
-    import db.ctx._
+  class Repo @Inject()(
+      protected val dbConfigProvider: DatabaseConfigProvider,
+      val usersRepo: Users.Repo,
+  )(
+      implicit ec: ExecutionContext
+  ) extends HasDatabaseConfigProvider[JdbcProfile] {
 
-    val schema = quote(querySchema[Data]("published_robots"))
+    val schema = TableQuery[DataTable]
 
-    def find(robotId: Long): Option[Data] =
-      run(
+    def findLatest(robotId: Long): Future[Option[Data]] =
+      db.run(
         schema
-          .filter(_.robotId == lift(robotId))
-          .sortBy(_.created)(Ord.desc)
-      ).headOption
+          .filter(_.robotId === robotId)
+          .sortBy(_.created.desc)
+          .result
+          .headOption
+      )
 
-    def create(robotId: Long, code: String) = {
+    def create(robotId: Long, code: String): Future[Data] = {
       val data = createData(robotId, code)
-      val id = run(schema.insert(lift(data)).returningGenerated(_.id))
-      data.copy(id = id)
+      val id = db.run((schema returning schema.map(_.id)) += data)
+      id.map(id => data.copy(id = id))
     }
   }
 

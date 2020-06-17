@@ -1,4 +1,4 @@
-@(user: Users.Data, robot: Robots.BasicData, code: String, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+@(user: Users.Data, robot: Robots.Data, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
     @basic(s"The Garage -- editing ${robot.name}", assetsFinder) {
         <link rel="stylesheet" type="text/css" href="@assetsFinder.path("dist/garage_css.css")">
@@ -16,6 +16,6 @@
         <script>window.jsRoutes = jsRoutes</script>
 
         <div class="garage">
-            <garage-el user="@user.username" robot="@robot.name" robotId="@robot.id" code="@code" lang="@robot.lang"></garage-el>
+            <garage-el user="@user.username" robot="@robot.name" robotId="@robot.id" code="@robot.devCode" lang="@robot.lang"></garage-el>
         </div>
     }
