@@ -28,8 +28,10 @@ class MockQueue @Inject()(
     val winner = (Json.parse(jsonOutput) \ "winner").get
     MatchOutput(
       input.r1Id,
+      input.pr1Id,
       0,
       input.r2Id,
+      input.pr2Id,
       0,
       if (winner == JsString("Red")) Winners.R1 else Winners.R2,
       false,

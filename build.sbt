@@ -44,3 +44,19 @@ scalacOptions ++= Seq(
   "-deprecation",
   "-Xfatal-warnings"
 )
+
+initialCommands in console :=
+  """
+    |import play.api.inject.guice.GuiceApplicationBuilder
+    |import scala.concurrent.duration._
+    |import scala.concurrent.{Future, Await}
+    |import scala.concurrent.ExecutionContext.Implicits.global
+    |import db.PostgresProfile.api._
+    |import models._
+    |def exec[T](program: Future[T]): T = Await.result(program, 2.seconds)
+    |val app = new GuiceApplicationBuilder().build()
+    |val usersRepo = app.injector.instanceOf[Users.Repo]
+    |val robotsRepo = app.injector.instanceOf[Robots.Repo]
+    |val publishedRobotsRepo = app.injector.instanceOf[PublishedRobots.Repo]
+    |val battlesRepo = app.injector.instanceOf[Battles.Repo]
+  """.trim.stripMargin

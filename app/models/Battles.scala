@@ -14,10 +14,13 @@ object Battles {
   import db.PostgresEnums.Winners.Winner
   import db.PostgresEnums.Winners
 
+  // format: off
   class DataTable(tag: Tag) extends Table[Data](tag, "battles") {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
     def r1Id = column[Long]("r1_id")
     def r2Id = column[Long]("r2_id")
+    def pr1Id = column[Long]("pr1_id")
+    def pr2Id = column[Long]("pr2_id")
     def ranked = column[Boolean]("ranked")
     def winner = column[Winner]("winner")
     def errored = column[Boolean]("errored")
@@ -27,30 +30,21 @@ object Battles {
     def r2Time = column[Float]("r2_time")
     def data = column[String]("data")
     def created = column[LocalDate]("created")
-    def * =
-      (
-        id,
-        r1Id,
-        r2Id,
-        ranked,
-        winner,
-        errored,
-        r1Rating,
-        r2Rating,
-        r1Time,
-        r2Time,
-        data,
-        created
-      ) <> (Data.tupled, Data.unapply)
+    def * = (id, r1Id, r2Id, pr1Id, pr2Id, ranked, winner, errored, r1Rating, r2Rating, r1Time, r2Time, data, created) <> (Data.tupled, Data.unapply)
 
-    def r1 = foreignKey("r1_fk", r1Id, TableQuery[Robots.DataTable])(_.id)
-    def r2 = foreignKey("r2_fk", r2Id, TableQuery[Robots.DataTable])(_.id)
+    def r1 = foreignKey("battles_r1_id_fkey", r1Id, TableQuery[Robots.DataTable])(_.id)
+    def r2 = foreignKey("battles_r2_id_fkey", r2Id, TableQuery[Robots.DataTable])(_.id)
+    def pr1 = foreignKey("battles_pr1_id_fkey", r1Id, TableQuery[PublishedRobots.DataTable])(_.id)
+    def pr2 = foreignKey("battles_pr2_id_fkey", r2Id, TableQuery[PublishedRobots.DataTable])(_.id)
   }
+  // format: on
 
   case class Data(
       id: Long = -1,
       r1Id: Long,
       r2Id: Long,
+      pr1Id: Long,
+      pr2Id: Long,
       ranked: Boolean = true,
       winner: Winner,
       errored: Boolean,
@@ -80,7 +74,9 @@ object Battles {
   ): Data = {
     Data(
       r1Id = matchOutput.r1Id,
+      pr1Id = matchOutput.pr1Id,
       r2Id = matchOutput.r2Id,
+      pr2Id = matchOutput.pr2Id,
       winner = matchOutput.winner,
       errored = matchOutput.errored,
       r1Time = matchOutput.r1Time,
@@ -145,10 +141,54 @@ object Battles {
       db.run(Utils.paginate(query, page, numPerPage).result)
     }
 
-    def create(matchOutput: MatchOutput, r1Rating: Int, r2Rating: Int) = {
-      val data = createData(matchOutput, r1Rating, r2Rating)
-      val id = db.run((schema returning schema.map(_.id)) += data)
-      id.map(id => data.copy(id = id))
+    val write = schema returning schema.map(_.id) into ((data, id) => data.copy(id))
+
+    def create(matchOutput: MatchOutput, r1Rating: Int, r2Rating: Int) =
+      db.run(write += createData(matchOutput, r1Rating, r2Rating))
+
+//    def groupByB[F](f: ((Rep[Long], Query[Battles.DataTable, Battles.Data, Seq])) => F) = {
+//      val r1Results = schema.groupBy(_.r1Id).map(f)
+//      val r2Results = schema.groupBy(_.r2Id).map(f)
+//      r1Results union r2Results
+//    }
+//
+//    def withLatestOpponents(): Future[Seq[(Data, Seq[Long])]] = {
+//      val numOfOpponents = 5
+//      db.run(
+//        groupByB({
+//          case (id, q) => (id, q.sortBy(_.created).arrayAgg)
+//        }).result
+//      )
+//    }
+
+    private val withPr = for { r <- robotsRepo.schema; pr <- r.pr } yield (r, pr)
+
+    private val bJoinOnR = (
+        r: DataTable,
+        b: Battles.DataTable
+    ) => b.r1Id === r.id || b.r2Id === r.id
+
+    val bJoinOnPr = (
+        pr: PublishedRobots.DataTable,
+        b: Battles.DataTable
+    ) => b.pr1Id === pr.id || b.pr2Id === pr.id
+
+    def findAllStaleRobots(): Future[Seq[Robots.Data]] = {
+      val noBattles = {
+        for {
+          (pr, b) <- withPr joinLeft schema on ((rs, b) => bJoinOnPr(rs._2, b))
+          if b.isEmpty
+        } yield pr
+      }
+
+      val staleBattles = {
+        for {
+          (pr, b) <- withPr join schema on ((rs, b) => bJoinOnPr(rs._2, b))
+          if b.created < LocalDate.now().minusDays(1)
+        } yield pr
+      }
+
+      db.run((noBattles ++ staleBattles).map(_._1).result)
     }
   }
 }

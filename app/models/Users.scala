@@ -46,11 +46,10 @@ object Users {
     def find(id: Long): Future[Option[Data]] =
       db.run(schema.filter(_.id === id).result.headOption)
 
+    private val write = schema returning schema.map(_.id) into ((data, id) => data.copy(id))
+
     def create(username: String, password: String): Future[Data] = {
-      val data = createData(username, password)
-      val id = db.run((schema returning schema.map(_.id)) += data)
-      id.map(id => data.copy(id = id))
+      db.run(write += createData(username, password))
     }
   }
-
 }

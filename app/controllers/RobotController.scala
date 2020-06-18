@@ -14,7 +14,6 @@ class RobotController @Inject()(
     assetsFinder: AssetsFinder,
     auth: Auth,
     robotsRepo: Robots.Repo,
-    publishedRobotsRepo: PublishedRobots.Repo,
     battlesRepo: Battles.Repo
 )(implicit ec: ExecutionContext)
     extends MessagesAbstractController(cc) {
@@ -115,8 +114,7 @@ class RobotController @Inject()(
   def view(username: String, robot: String, page: Long = 0) =
     auth.action { authUser => implicit request =>
       robotsRepo.findWithUser(username, robot) flatMap {
-        case Some((user, robot))
-            if robot.isPublished || authUser.exists(_.id == user.id) =>
+        case Some((user, robot)) if robot.isPublished || authUser.exists(_.id == user.id) =>
           battlesRepo.findAllForRobot(robot.id, page, 10) map { battles =>
             Ok(
               views.html.robot.view(
@@ -169,9 +167,9 @@ class RobotController @Inject()(
   }
 
   def viewPublishedCode(robotId: Long) = Action.async { implicit request =>
-    publishedRobotsRepo.findLatest(robotId) map {
-      case Some(publishedRobot) =>
-        Ok(views.html.robot.viewCode(publishedRobot.code, assetsFinder))
+    robotsRepo.getPublishedCode(robotId) map {
+      case Some(code) =>
+        Ok(views.html.robot.viewCode(code, assetsFinder))
       case None => NotFound("404")
     }
   }
@@ -200,10 +198,10 @@ class RobotController @Inject()(
     }
 
   def apiGetRobotCode(robotId: Long) =
-    auth.action { _authUser => implicit request =>
-      publishedRobotsRepo.findLatest(robotId) map {
-        case Some(publishedRobot) => Ok(Json.toJson(publishedRobot.code))
-        case None                 => NotFound("404")
+    Action.async { implicit request =>
+      robotsRepo.getPublishedCode(robotId) map {
+        case Some(code) => Ok(Json.toJson(code))
+        case None       => NotFound("404")
       }
     }
 
@@ -211,8 +209,7 @@ class RobotController @Inject()(
     auth.action { authUser => implicit request =>
       robotsRepo.findWithUser(user, robot) map {
         // TODO: no need for user
-        case Some((user, robot))
-            if robot.isPublished || authUser.exists(_.id == user.id) =>
+        case Some((user, robot)) if robot.isPublished || authUser.exists(_.id == user.id) =>
           Ok(Json.toJson(robot))
         case _ => NotFound("404")
       }
