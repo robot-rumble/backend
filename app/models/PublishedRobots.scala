@@ -18,6 +18,9 @@ object PublishedRobots {
     def code = column[String]("code")
     def * =
       (id, created, robotId, code) <> (Data.tupled, Data.unapply)
+
+    def robot =
+      foreignKey("robot_fk", robotId, TableQuery[Robots.DataTable])(_.id)
   }
 
   case class Data(

@@ -10,7 +10,7 @@ CREATE TYPE lang AS ENUM ('PYTHON', 'JAVASCRIPT');
 
 CREATE TABLE robots
 (
-    id           SERIAL PRIMARY KEY,
+    id           BIGSERIAL PRIMARY KEY,
     created      TIMESTAMP   NOT NULL,
     user_id      SERIAL      NOT NULL REFERENCES users (id),
     name         VARCHAR(15) NOT NULL,
@@ -23,7 +23,7 @@ CREATE TABLE robots
 
 CREATE TABLE published_robots
 (
-    id       SERIAL PRIMARY KEY,
+    id       BIGSERIAL PRIMARY KEY,
     robot_id SERIAL    NOT NULL REFERENCES robots (id),
     created  TIMESTAMP NOT NULL,
     code     TEXT      NOT NULL
@@ -33,7 +33,7 @@ CREATE TYPE winner AS ENUM ('R1', 'R2', 'DRAW');
 
 CREATE TABLE battles
 (
-    id        SERIAL PRIMARY KEY,
+    id        BIGSERIAL PRIMARY KEY,
     created   TIMESTAMP NOT NULL,
     r1_id     SERIAL    NOT NULL REFERENCES robots (id),
     r2_id     SERIAL    NOT NULL REFERENCES robots (id),

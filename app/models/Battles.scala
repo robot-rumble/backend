@@ -42,6 +42,9 @@ object Battles {
         data,
         created
       ) <> (Data.tupled, Data.unapply)
+
+    def r1 = foreignKey("r1_fk", r1Id, TableQuery[Robots.DataTable])(_.id)
+    def r2 = foreignKey("r2_fk", r2Id, TableQuery[Robots.DataTable])(_.id)
   }
 
   case class Data(
@@ -107,8 +110,8 @@ object Battles {
     ): Future[Option[(Data, Robots.Data, Robots.Data)]] = {
       val query = for {
         b <- schema if b.id === id
-        r1 <- robotsRepo.schema if r1.id === b.r1Id
-        r2 <- robotsRepo.schema if r2.id === b.r2Id
+        r1 <- b.r1
+        r2 <- b.r2
       } yield (b, r1, r2)
       db.run(query.result.headOption)
     }
@@ -120,12 +123,12 @@ object Battles {
     ): Future[Seq[(Data, Robots.Data)]] = {
       val query = for {
         b <- schema
-        otherR <- robotsRepo.schema
+        r <- robotsRepo.schema
         if (
-          (b.r1Id === robotId && b.r2Id === otherR.id)
-            || (b.r2Id === robotId && b.r1Id === otherR.id)
+          (b.r1Id === robotId && b.r2Id === r.id)
+            || (b.r2Id === robotId && b.r1Id === r.id)
         )
-      } yield (b, otherR)
+      } yield (b, r)
       db.run(Utils.paginate(query, page, numPerPage).result)
     }
 
@@ -136,8 +139,8 @@ object Battles {
       val query =
         for {
           b <- schema
-          r1 <- robotsRepo.schema if b.r1Id === r1.id
-          r2 <- robotsRepo.schema if b.r2Id === r2.id
+          r1 <- b.r1
+          r2 <- b.r2
         } yield (b, r1, r2)
       db.run(Utils.paginate(query, page, numPerPage).result)
     }

@@ -25,6 +25,8 @@ object Robots {
     def created = column[LocalDate]("created")
     def * =
       (id, userId, name, devCode, automatch, isPublished, rating, lang, created) <> (Data.tupled, Data.unapply)
+
+    def user = foreignKey("user_fk", userId, TableQuery[Users.DataTable])(_.id)
   }
 
   private def createData(userId: Long, name: String, lang: Lang): Data = {
@@ -81,8 +83,8 @@ object Robots {
         name: String
     ): Future[Option[(Users.Data, Data)]] = {
       val query = for {
-        u <- usersRepo.schema if u.username === username
-        r <- schema if r.userId === u.id && r.name === name
+        r <- schema if r.name === name
+        u <- r.user if u.username === username
       } yield (u, r)
       db.run(query.result.headOption)
     }
@@ -92,8 +94,8 @@ object Robots {
 
     def findAll(username: String): Future[Seq[Data]] = {
       val query = for {
-        u <- usersRepo.schema if u.username === username
-        r <- schema if r.userId === u.id
+        r <- schema
+        u <- r.user if u.username === username
       } yield r
       db.run(query.result)
     }
@@ -103,8 +105,8 @@ object Robots {
         numPerPage: Int
     ): Future[Seq[(Data, Users.Data)]] = {
       val query = for {
-        u <- usersRepo.schema
-        r <- schema if r.userId === u.id
+        r <- schema
+        u <- r.user
       } yield (r, u)
       db.run(Utils.paginate(query, page, numPerPage).result)
     }
