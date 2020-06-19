@@ -1,11 +1,12 @@
-@(battles: List[(Battles.Data, Robots.Data, Robots.Data)], r2: Robots.Data, assetsFinder: AssetsFinder, forRobot: Boolean)
+@import models.Schema._
+@(battles: List[(Battle, Robot, Robot)], r2: Robot, assetsFinder: AssetsFinder, forRobot: Boolean)
 
 <table>
     @for((battle, r1, r2) <- battles) {
         <tr>
         @if(forRobot) {
             <td><img src="@{
-                val imgPath = Battles.didR1Win(battle, r1.id) match {
+                val imgPath = battle.didR1Win(r1.id) match {
                     case Some(won) => if(won) "images/win.svg" else "images/loss.svg"
                     case None => "images/draw.svg"
                 }

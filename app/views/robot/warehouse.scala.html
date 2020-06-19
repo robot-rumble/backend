@@ -1,4 +1,5 @@
-@(pagedRobots: Seq[(Robots.Data, Users.Data)], page: Long, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+@import models.Schema._
+@(pagedRobots: Seq[(Robot, User)], page: Long, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
 @main("Warehouse", "warehouse", assetsFinder) {
     <h1>Warehouse</h1>

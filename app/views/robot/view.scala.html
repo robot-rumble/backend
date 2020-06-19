@@ -1,4 +1,5 @@
-@(user: Users.Data, isOwner: Boolean, robot: Robots.Data, pagedBattles: Seq[(Battles.Data, Robots.Data)], page: Long, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+@import models.Schema._
+@(user: User, isOwner: Boolean, robot: Robot, pagedBattles: Seq[(Battle, Robot)], page: Long, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
 @main(s"Robot ${robot.name}", "robot-page", assetsFinder) {
     <h1>@robot.name <span>(@robot.lang.toString)</span></h1>
@@ -19,14 +20,14 @@
         }
     </div>
 
-    <div class="matches">
-        <h4>Matches</h4>
+    <div class="battles">
+        <h4>Battles</h4>
         @if(pagedBattles.nonEmpty) {
           <table>
           @for((battle, r2) <- pagedBattles) {
               <tr>
                   <td><img src="@{
-                      val imgPath = Battles.didR1Win(battle, robot.id) match {
+                      val imgPath = battle.didR1Win(robot.id) match {
                           case Some(won) => if(won) "images/win.svg" else "images/loss.svg"
                           case None => "images/draw.svg"
                       }

@@ -6,14 +6,14 @@ import akka.stream.scaladsl.Keep
 import akka.stream.scaladsl.{Sink, Source}
 import com.github.esap120.scala_elo._
 import javax.inject._
-import models.{Battles, PublishedRobots, Robots}
 import play.api.mvc._
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
-import db.PostgresEnums.Winners
+import models._
+import models.Schema._
 
 @Singleton
 class MatchMaker @Inject()(
@@ -21,9 +21,8 @@ class MatchMaker @Inject()(
     ec: ExecutionContext,
     mat: Materializer,
     cc: ControllerComponents,
-    robotsRepo: Robots.Repo,
-    battlesRepo: Battles.Repo,
-    publishedRobotsRepo: PublishedRobots.Repo,
+    robotsRepo: Robots,
+    battlesRepo: Battles,
     battleQueue: BattleQueue
 ) {
   import BattleQueue._

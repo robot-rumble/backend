@@ -5,7 +5,7 @@
         @helper.inputText(form("name"), Symbol("_showConstraints") -> false)
         @helper.select(
             form("lang"),
-            Seq("PYTHON" -> "Python", "JAVASCRIPT" -> "Javascript"),
+            Seq("Python" -> "Python", "Javascript" -> "Javascript"),
             Symbol("_showConstraints") -> false
         )
         @helper.CSRF.formField

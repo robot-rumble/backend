@@ -1,4 +1,5 @@
-@(user: Users.Data, isAuthenticated: Boolean, robots: Seq[Robots.Data], assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+@import models.Schema._
+@(user: User, isAuthenticated: Boolean, robots: Seq[Robot], assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
 @main("Profile", "profile", assetsFinder) {
     <h1>@user.username</h1>

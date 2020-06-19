@@ -3,8 +3,8 @@ package services
 import akka.NotUsed
 import akka.stream.scaladsl.{Sink, Source}
 import play.api.libs.functional.syntax._
-import db.PostgresEnums.Winners.Winner
-import db.PostgresEnums.Langs.Lang
+
+import models.Schema.{Winner, Lang}
 
 trait BattleQueue {
   val sink: Sink[BattleQueue.MatchInput, NotUsed]

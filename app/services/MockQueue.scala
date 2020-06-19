@@ -1,17 +1,14 @@
 package services
 
-import akka.NotUsed
-import akka.stream.{Materializer, OverflowStrategy}
-import akka.stream.scaladsl.{Flow, Keep, Sink, Source}
 import javax.inject.Inject
+import akka.stream.Materializer
+import akka.stream.scaladsl.{Flow, Keep, Sink, Source}
 import play.api.libs.json.{JsString, Json}
 import services.BattleQueue.{MatchInput, MatchOutput}
 
-import scala.concurrent.duration._
-import scala.util.Random
 import sys.process._
 
-import db.PostgresEnums.Winners
+import models.Schema.Winner
 
 class MockQueue @Inject()(
     implicit materializer: Materializer
@@ -33,7 +30,7 @@ class MockQueue @Inject()(
       input.r2Id,
       input.pr2Id,
       0,
-      if (winner == JsString("Red")) Winners.R1 else Winners.R2,
+      if (winner == JsString("Red")) Winner.R1 else Winner.R2,
       false,
       jsonOutput
     )

@@ -1,168 +1,85 @@
 package models
 
-import java.time.LocalDate
+import TwitterConverters._
 
 import javax.inject.Inject
-import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
-import play.api.libs.json.{Json, Writes}
-import slick.jdbc.JdbcProfile
-import db.PostgresProfile.api._
-import scala.language.higherKinds
 
 import scala.concurrent.{ExecutionContext, Future}
+import Schema._
 
-object Robots {
-  import db.PostgresEnums.Langs.Lang
+class Robots @Inject()(
+    val schema: Schema,
+    val usersRepo: Users,
+)(
+    implicit ec: ExecutionContext
+) {
+  import schema.ctx._
+  import schema._
 
-  // format: off
-  class DataTable(tag: Tag) extends Table[Data](tag, "robots") {
-    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
-    def userId = column[Long]("user_id")
-    def prId = column[Long]("pr_id")
-    def name = column[String]("name")
-    def devCode = column[String]("dev_code")
-    def automatch = column[Boolean]("automatch")
-    def rating = column[Int]("rating")
-    def lang = column[Lang]("lang")
-    def created = column[LocalDate]("created")
-    def * =
-      (id, userId, prId.?, name, devCode, automatch, rating, lang, created) <> (Data.tupled, Data.unapply)
+  implicit class RobotQuotedQuery(query: Quoted[EntityQuery[Robot]]) {
+    def withPr(): Quoted[Query[(Robot, PublishedRobot)]] =
+      query.join(publishedRobots).on { case (r, pr) => r.prId.contains(pr.id) }
 
-    def user = foreignKey("robots_user_id_fkey", userId, TableQuery[Users.DataTable])(_.id)
-    def pr = foreignKey("robots_pr_id_fkey", prId, TableQuery[PublishedRobots.DataTable])(_.id)
-  }
-  // format: on
+    def withUser(): Quoted[Query[(Robot, User)]] =
+      query.join(users).on(_.userId == _.id)
 
-  private def createData(userId: Long, name: String, lang: Lang): Data = {
-    Data(name = name, userId = userId, lang = lang, created = LocalDate.now())
+    def byId(id: Long): Quoted[EntityQuery[Robot]] =
+      query.filter(_.id == lift(id))
+
+    def byUserId(userId: Long): Quoted[EntityQuery[Robot]] =
+      query.filter(_.userId == lift(userId))
   }
 
-  case class Data(
-      id: Long = -1,
-      userId: Long,
-      prId: Option[Long] = None,
-      name: String,
-      devCode: String = "",
-      automatch: Boolean = true,
-      rating: Int = 1000,
-      lang: Lang,
-      created: LocalDate
-  ) {
-    def isPublished: Boolean = prId.isDefined
-  }
+  def find(id: Long): Future[Option[Robot]] =
+    run(robots.byId(id)).map(_.headOption)
 
-  implicit val dataWrites = new Writes[Data] {
-    def writes(data: Data) = Json.obj(
-      "id" -> data.id,
-      "userId" -> data.userId,
-      "name" -> data.name,
-      "rating" -> data.rating,
-      "lang" -> data.lang
-    )
-  }
+  def find(userId: Long, name: String): Future[Option[Robot]] =
+    run(robots.byUserId(userId).filter(_.name == lift(name))).map(_.headOption)
 
-  class Repo @Inject()(
-      protected val dbConfigProvider: DatabaseConfigProvider,
-      val usersRepo: Users.Repo,
-      val publishedRobotsRepo: PublishedRobots.Repo
-  )(
-      implicit ec: ExecutionContext
-  ) extends HasDatabaseConfigProvider[JdbcProfile] {
-
-    implicit class QueryEnrichment[C[_]](q: Query[DataTable, Data, C]) {
-      def withPr(): Query[(DataTable, PublishedRobots.DataTable), (Data, PublishedRobots.Data), C] =
-        q.join(publishedRobotsRepo.schema).on(_.prId === _.id)
-
-      def findById(id: Long): Query[DataTable, Data, C] = {
-        q.filter(_.id === id)
+  def find(username: String, name: String): Future[Option[(Robot, User)]] = {
+    val query = quote {
+      robots.withUser().filter {
+        case (r, u) => u.username == lift(username) && r.name == lift(name)
       }
     }
-
-    val schema = TableQuery[DataTable]
-
-    def find(id: Long): Future[Option[Data]] =
-      db.run(
-        schema.findById(id).result.headOption
-      )
-
-    def find(userId: Long, name: String): Future[Option[Data]] =
-      db.run(
-        schema
-          .filter(r => r.userId === userId && r.name === name)
-          .result
-          .headOption
-      )
-
-    def findWithUser(
-        username: String,
-        name: String
-    ): Future[Option[(Users.Data, Data)]] = {
-      val query = for {
-        r <- schema if r.name === name
-        u <- r.user if u.username === username
-      } yield (u, r)
-      db.run(query.result.headOption)
-    }
-
-    def findAll(userId: Long): Future[Seq[Data]] =
-      db.run(schema.filter(_.userId === userId).result)
-
-    def findAll(username: String): Future[Seq[Data]] = {
-      val query = for {
-        r <- schema
-        u <- r.user if u.username === username
-      } yield r
-      db.run(query.result)
-    }
-
-    def findAll(
-        page: Long,
-        numPerPage: Int
-    ): Future[Seq[(Data, Users.Data)]] = {
-      val query = for {
-        r <- schema
-        u <- r.user
-      } yield (r, u)
-      db.run(Utils.paginate(query, page, numPerPage).result)
-    }
-
-    private val write = schema returning schema.map(_.id) into ((data, id) => data.copy(id))
-
-    def create(userId: Long, name: String, lang: Lang): Future[Data] = {
-      db.run(write += createData(userId, name, lang))
-    }
-
-    def update(id: Long, devCode: String) = {
-      db.run(
-        schema.findById(id).map(_.devCode).update(devCode)
-      )
-    }
-
-    def publish(id: Long) = {
-      db.run(
-        for {
-          code <- schema.findById(id).map(_.devCode).result.head
-          pr <- publishedRobotsRepo.create(code)
-          _ <- schema.findById(id).map(_.prId).update(pr.id)
-        } yield ()
-      )
-    }
-
-    def getPublishedCode(id: Long): Future[Option[String]] = {
-      db.run(
-        schema
-          .findById(id)
-          .withPr()
-          .map(_._2.code)
-          .result
-          .headOption
-      )
-    }
-
-    def updateRating(id: Long, rating: Int) = {
-      db.run(
-        schema.findById(id).map(_.rating).update(rating)
-      )
-    }
+    run(query).map(_.headOption)
   }
+
+  def findAll(userId: Long): Future[Seq[Robot]] =
+    run(robots.byUserId(userId))
+
+  def findAll(username: String): Future[Seq[(Robot, User)]] = {
+    val query = quote {
+      robots.withUser().filter { case (_, u) => u.username == lift(username) }
+    }
+    run(query)
+  }
+
+  def findAllPaged(page: Long, numPerPage: Int): Future[Seq[(Robot, User)]] =
+    run(robots.withUser().paginate(page, numPerPage))
+
+  def create(userId: Long, name: String, lang: Lang): Future[Robot] = {
+    val robot = Robot(userId, name, lang)
+    run(robots.insert(lift(robot)).returningGenerated(_.id)).map(robot.copy(_))
+  }
+
+  def updateDevCode(id: Long, devCode: String): Future[Long] =
+    if (!devCode.isEmpty)
+      run(robots.byId(id).update(_.devCode -> devCode))
+    else throw new Exception("Updating robot with empty code.")
+
+  def updateRating(id: Long, rating: Int): Future[Long] =
+    run(robots.byId(id).update(_.rating -> rating))
+
+  def publish(id: Long): Future[Unit] =
+    for {
+      code <- run(robots.byId(id).map(_.devCode)).map(_.head)
+      prId <- run(
+        publishedRobots.insert(lift(PublishedRobot(code = code))).returningGenerated(_.id)
+      )
+      _ <- run(robots.byId(id).update(_.prId -> lift(Some(prId))))
+    } yield ()
+
+  def getPublishedCode(id: Long): Future[Option[String]] =
+    run(robots.byId(id).withPr().map(_._2.code)).map(_.headOption)
 }

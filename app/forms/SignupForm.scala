@@ -1,9 +1,9 @@
 package forms
 
-object SignupForm {
+import play.api.data.Form
+import play.api.data.Forms._
 
-  import play.api.data.Form
-  import play.api.data.Forms._
+object SignupForm {
 
   val form: Form[Data] = Form(
     mapping(

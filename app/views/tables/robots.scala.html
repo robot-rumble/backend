@@ -1,4 +1,5 @@
-@(user: Users.Data, robot: Robots.Data, assetsFinder: AssetsFinder, showUser: Boolean)
+@import models.Schema._
+@(user: User, robot: Robot, assetsFinder: AssetsFinder, showUser: Boolean)
 
 <ul class="robot panel">
     <li><a href="@routes.RobotController.view(user.username, robot.name, 0)">@robot.name</a></li>

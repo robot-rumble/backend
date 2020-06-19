@@ -1,21 +1,21 @@
 package controllers
 
-import com.github.t3hnar.bcrypt._
-import forms.{LoginForm, SignupForm}
 import javax.inject._
-import models.{Robots, Users}
+import com.github.t3hnar.bcrypt._
+import scala.concurrent.{Future, ExecutionContext}
+
 import play.api.libs.json.Json
 import play.api.mvc._
 
-import scala.concurrent.{Future, ExecutionContext}
-
+import forms.{LoginForm, SignupForm}
+import models._
 @Singleton
 class UserController @Inject()(
     cc: MessagesControllerComponents,
-    usersRepo: Users.Repo,
-    robotRepo: Robots.Repo,
+    usersRepo: Users,
+    robotRepo: Robots,
     assetsFinder: AssetsFinder,
-    auth: Auth,
+    auth: Auth
 )(implicit ec: ExecutionContext)
     extends MessagesAbstractController(cc) {
   def create = Action { implicit request =>
@@ -53,7 +53,7 @@ class UserController @Inject()(
 
   private def loginOnSuccess(
       data: LoginForm.Data
-  ): Future[Either[Users.Data, String]] = {
+  ): Future[Either[Schema.User, String]] = {
     usersRepo.find(data.username) map {
       case Some(user) if data.password.isBcrypted(user.password) =>
         Left(user)

@@ -1,55 +1,24 @@
 package models
 
-import java.time.LocalDate
+import TwitterConverters._
 
-import com.github.t3hnar.bcrypt._
 import javax.inject.Inject
-import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
-import slick.jdbc.JdbcProfile
-import db.PostgresProfile.api._
-
 import scala.concurrent.{ExecutionContext, Future}
 
-object Users {
-  class DataTable(tag: Tag) extends Table[Data](tag, "users") {
-    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
-    def username = column[String]("username")
-    def password = column[String]("password")
-    def created = column[LocalDate]("created")
-    def * = (id, username, password, created) <> (Data.tupled, Data.unapply)
-  }
+import Schema._
 
-  case class Data(
-      id: Long = -1,
-      username: String,
-      password: String,
-      created: LocalDate
-  )
+class Users @Inject()(schema: Schema)(implicit ec: ExecutionContext) {
+  import schema.ctx._
+  import schema._
 
-  private def createData(username: String, password: String): Data = {
-    Data(
-      username = username,
-      password = password.bcrypt,
-      created = LocalDate.now()
-    )
-  }
+  def find(username: String): Future[Option[User]] =
+    run(users.filter(_.username == lift(username))).map(_.headOption)
 
-  class Repo @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)(
-      implicit ec: ExecutionContext
-  ) extends HasDatabaseConfigProvider[JdbcProfile] {
+  def find(id: Long): Future[Option[User]] =
+    run(users.filter(_.id == lift(id))).map(_.headOption)
 
-    val schema = TableQuery[DataTable]
-
-    def find(username: String): Future[Option[Data]] =
-      db.run(schema.filter(_.username === username).result.headOption)
-
-    def find(id: Long): Future[Option[Data]] =
-      db.run(schema.filter(_.id === id).result.headOption)
-
-    private val write = schema returning schema.map(_.id) into ((data, id) => data.copy(id))
-
-    def create(username: String, password: String): Future[Data] = {
-      db.run(write += createData(username, password))
-    }
+  def create(username: String, password: String): Future[User] = {
+    val data = User(username, password)
+    run(users.insert(lift(data)).returningGenerated(_.id)).map(data.copy(_))
   }
 }

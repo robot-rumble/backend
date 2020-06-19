@@ -1,26 +1,27 @@
 package controllers
 
-import forms.{CreateRobotForm, UpdateRobotCodeForm}
 import javax.inject._
-import models.{Battles, PublishedRobots, Robots, Users}
+import scala.concurrent.{ExecutionContext, Future}
+
 import play.api.libs.json.Json
 import play.api.mvc._
 
-import scala.concurrent.{ExecutionContext, Future}
+import forms.{CreateRobotForm, UpdateRobotCodeForm}
+import models._
+import models.Schema._
 
 @Singleton
 class RobotController @Inject()(
     cc: MessagesControllerComponents,
     assetsFinder: AssetsFinder,
     auth: Auth,
-    robotsRepo: Robots.Repo,
-    battlesRepo: Battles.Repo
+    robotsRepo: Robots,
+    battlesRepo: Battles
 )(implicit ec: ExecutionContext)
     extends MessagesAbstractController(cc) {
-  import db.PostgresEnums.Langs
 
   def warehouse(page: Long = 0) = Action.async { implicit request =>
-    robotsRepo.findAll(page, 30) map { robots =>
+    robotsRepo.findAllPaged(page, 30) map { robots =>
       Ok(
         views.html.robot.warehouse(
           robots,
@@ -32,7 +33,7 @@ class RobotController @Inject()(
   }
 
   def battles(page: Long = 0) = Action.async { implicit request =>
-    battlesRepo.findAll(page, 30) map { battles =>
+    battlesRepo.findAllPaged(page, 30) map { battles =>
       Ok(
         views.html.robot.battles(battles, page, assetsFinder)
       )
@@ -48,17 +49,15 @@ class RobotController @Inject()(
     }
 
   private def createOnSuccess(
-      user: Users.Data,
+      user: Schema.User,
       data: CreateRobotForm.Data
-  ): Future[Either[Robots.Data, String]] = {
+  ): Future[Either[Robot, String]] = {
     val name = data.name.trim()
     robotsRepo.find(user.id, name) flatMap {
       case Some(_) =>
         Future successful Right("Robot with this name already exists")
       case None =>
-        robotsRepo
-          .create(user.id, name, Langs.withName(data.lang))
-          .map(Left.apply)
+        robotsRepo.create(user.id, name, data.lang).map(Left.apply)
     }
   }
 
@@ -113,9 +112,9 @@ class RobotController @Inject()(
 
   def view(username: String, robot: String, page: Long = 0) =
     auth.action { authUser => implicit request =>
-      robotsRepo.findWithUser(username, robot) flatMap {
-        case Some((user, robot)) if robot.isPublished || authUser.exists(_.id == user.id) =>
-          battlesRepo.findAllForRobot(robot.id, page, 10) map { battles =>
+      robotsRepo.find(username, robot) flatMap {
+        case Some((robot, user)) if robot.isPublished || authUser.exists(_.id == user.id) =>
+          battlesRepo.findAllForRobotPaged(robot.id, page, 10) map { battles =>
             Ok(
               views.html.robot.view(
                 user,
@@ -149,7 +148,7 @@ class RobotController @Inject()(
               Future successful BadRequest(formWithErrors.errorsAsJson)
             },
             data => {
-              robotsRepo.update(robot.id, data.code) map { _ =>
+              robotsRepo.updateDevCode(robot.id, data.code) map { _ =>
                 Ok("")
               }
             }
@@ -207,9 +206,8 @@ class RobotController @Inject()(
 
   def apiGetRobot(user: String, robot: String) =
     auth.action { authUser => implicit request =>
-      robotsRepo.findWithUser(user, robot) map {
-        // TODO: no need for user
-        case Some((user, robot)) if robot.isPublished || authUser.exists(_.id == user.id) =>
+      robotsRepo.find(user, robot) map {
+        case Some((robot, _)) if robot.isPublished || authUser.exists(_.id == robot.userId) =>
           Ok(Json.toJson(robot))
         case _ => NotFound("404")
       }
@@ -217,10 +215,10 @@ class RobotController @Inject()(
 
   def apiGetUserRobots(user: String) =
     auth.action { authUser => implicit request =>
-      robotsRepo.findAll(user) map { robots =>
-        val filteredRobots = robots.filter(
-          robot => robot.isPublished || authUser.exists(_.id == robot.userId)
-        )
+      robotsRepo.findAll(user) map { robotsUsers =>
+        val filteredRobots = robotsUsers
+          .map(_._1)
+          .filter(robot => robot.isPublished || authUser.exists(_.id == robot.userId))
         Ok(Json.toJson(filteredRobots))
       }
     }

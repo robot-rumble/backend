@@ -1,4 +1,5 @@
-@(user: Users.Data, robot: Robots.Data, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+@import models.Schema._
+@(user: Schema.User, robot: Robot, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
     @basic(s"The Garage -- editing ${robot.name}", assetsFinder) {
         <link rel="stylesheet" type="text/css" href="@assetsFinder.path("dist/garage_css.css")">

@@ -1,10 +1,12 @@
 package controllers
 
 import javax.inject._
-import models.Users
+import scala.concurrent.{Future, ExecutionContext}
+
 import play.api.mvc._
 
-import scala.concurrent.{Future, ExecutionContext}
+import models.Users
+import models.Schema._
 
 object Auth {
   val KEY = "USERNAME"
@@ -20,11 +22,11 @@ object Auth {
 
 class Auth @Inject()(
     cc: MessagesControllerComponents,
-    usersRepo: Users.Repo
+    usersRepo: Users
 )(implicit ec: ExecutionContext)
     extends MessagesAbstractController(cc) {
   def actionForce(
-      f: Users.Data => MessagesRequest[AnyContent] => Future[Result]
+      f: User => MessagesRequest[AnyContent] => Future[Result]
   ): Action[AnyContent] =
     action(
       authUser =>
@@ -37,7 +39,7 @@ class Auth @Inject()(
     )
 
   def action(
-      f: Option[Users.Data] => MessagesRequest[AnyContent] => Future[Result]
+      f: Option[User] => MessagesRequest[AnyContent] => Future[Result]
   ): Action[AnyContent] =
     Action.async { implicit request =>
       request.session.get(Auth.KEY) match {

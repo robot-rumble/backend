@@ -7,15 +7,12 @@ import akka.stream.scaladsl.Flow
 import com.github.matsluni.akkahttpspi.AkkaHttpClient
 import javax.inject._
 import play.api.Configuration
-import play.api.inject.ApplicationLifecycle
 import play.api.libs.json.Json
 import services.BattleQueue.{MatchInput, MatchOutput}
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import software.amazon.awssdk.services.sqs.model.{Message, SendMessageRequest}
-
-import scala.concurrent.Future
 
 class AwsQueue @Inject()(
     implicit system: ActorSystem,
