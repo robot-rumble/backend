@@ -1,11 +1,11 @@
 package controllers
 
+import controllers.Auth.{LoggedIn, Visitor}
 import javax.inject._
-import scala.concurrent.{ExecutionContext, Future}
 
+import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.json.Json
 import play.api.mvc._
-
 import forms.{CreateRobotForm, UpdateRobotCodeForm}
 import models._
 import models.Schema._
@@ -14,14 +14,14 @@ import models.Schema._
 class RobotController @Inject()(
     cc: MessagesControllerComponents,
     assetsFinder: AssetsFinder,
-    auth: Auth,
+    auth: Auth.AuthAction,
     robotsRepo: Robots,
     battlesRepo: Battles
 )(implicit ec: ExecutionContext)
     extends MessagesAbstractController(cc) {
 
   def warehouse(page: Long = 0) = Action.async { implicit request =>
-    robotsRepo.findAllPaged(page, 30) map { robots =>
+    robotsRepo.findAllPublishedPaged(page, 30) map { robots =>
       Ok(
         views.html.robot.warehouse(
           robots,
@@ -41,7 +41,7 @@ class RobotController @Inject()(
   }
 
   def create =
-    auth.actionForce { _ => implicit request =>
+    auth.actionForceLI { _ => implicit request =>
       Future successful Ok(
         views.html.robot
           .create(CreateRobotForm.form, assetsFinder)
@@ -53,7 +53,7 @@ class RobotController @Inject()(
       data: CreateRobotForm.Data
   ): Future[Either[Robot, String]] = {
     val name = data.name.trim()
-    robotsRepo.find(user.id, name) flatMap {
+    robotsRepo.find(user.id, name)(LoggedIn(user)) flatMap {
       case Some(_) =>
         Future successful Right("Robot with this name already exists")
       case None =>
@@ -62,7 +62,7 @@ class RobotController @Inject()(
   }
 
   def postCreate =
-    auth.actionForce { user => implicit request =>
+    auth.actionForceLI { user => implicit request =>
       CreateRobotForm.form.bindFromRequest.fold(
         formWithErrors => {
           Future successful BadRequest(
@@ -90,7 +90,7 @@ class RobotController @Inject()(
     }
 
   def apiCreate =
-    auth.actionForce { user => implicit request =>
+    auth.actionForceLI { user => implicit request =>
       CreateRobotForm.form.bindFromRequest.fold(
         formWithErrors => {
           Future successful BadRequest(formWithErrors.errorsAsJson)
@@ -111,14 +111,14 @@ class RobotController @Inject()(
     }
 
   def view(username: String, robot: String, page: Long = 0) =
-    auth.action { authUser => implicit request =>
-      robotsRepo.find(username, robot) flatMap {
-        case Some((robot, user)) if robot.isPublished || authUser.exists(_.id == user.id) =>
+    auth.action { visitor => implicit request =>
+      robotsRepo.find(username, robot)(visitor) flatMap {
+        case Some((robot, user)) =>
           battlesRepo.findAllForRobotPaged(robot.id, page, 10) map { battles =>
             Ok(
               views.html.robot.view(
                 user,
-                authUser.exists(_.id == user.id),
+                Visitor.isLIAsUser(visitor, user),
                 robot,
                 battles,
                 page,
@@ -131,18 +131,18 @@ class RobotController @Inject()(
     }
 
   def edit(_username: String, robot: String) =
-    auth.actionForce { authUser => implicit request =>
-      robotsRepo.find(authUser.id, robot) map {
+    auth.actionForceLI { user => implicit request =>
+      robotsRepo.find(user.id, robot)(LoggedIn(user)) map {
         case Some(robot) =>
-          Ok(views.html.robot.edit(authUser, robot, assetsFinder))
+          Ok(views.html.robot.edit(user, robot, assetsFinder))
         case None => NotFound("404")
       }
     }
 
   def apiUpdate(robotId: Long) =
-    auth.actionForce { authUser => implicit request =>
-      robotsRepo.find(robotId) flatMap {
-        case Some(robot) if robot.userId == authUser.id =>
+    auth.actionForceLI { visitor => implicit request =>
+      robotsRepo.find(robotId)(LoggedIn(visitor)) flatMap {
+        case Some(robot) =>
           UpdateRobotCodeForm.form.bindFromRequest.fold(
             formWithErrors => {
               Future successful BadRequest(formWithErrors.errorsAsJson)
@@ -176,8 +176,8 @@ class RobotController @Inject()(
   def challenge(user: String, robot: String) = TODO
 
   def publish(_username: String, robot: String) =
-    auth.actionForce { authUser => implicit request =>
-      robotsRepo.find(authUser.id, robot) map {
+    auth.actionForceLI { user => implicit request =>
+      robotsRepo.find(user.id, robot)(LoggedIn(user)) map {
         case Some(robot) =>
           Ok(views.html.robot.publish(robot, assetsFinder))
         case None => NotFound("404")
@@ -185,12 +185,12 @@ class RobotController @Inject()(
     }
 
   def postPublish(robotId: Long) =
-    auth.actionForce { authUser => implicit request =>
-      robotsRepo.find(robotId) map {
-        case Some(robot) if robot.userId == authUser.id =>
+    auth.actionForceLI { user => implicit request =>
+      robotsRepo.find(robotId)(LoggedIn(user)) map {
+        case Some(robot) =>
           robotsRepo.publish(robot.id)
           Redirect(
-            routes.RobotController.view(authUser.username, robot.name)
+            routes.RobotController.view(user.username, robot.name)
           )
         case None => NotFound("404")
       }
@@ -205,21 +205,12 @@ class RobotController @Inject()(
     }
 
   def apiGetRobot(user: String, robot: String) =
-    auth.action { authUser => implicit request =>
-      robotsRepo.find(user, robot) map {
-        case Some((robot, _)) if robot.isPublished || authUser.exists(_.id == robot.userId) =>
+    auth.action { visitor => implicit request =>
+      robotsRepo.find(user, robot)(visitor) map {
+        case Some((robot, _)) =>
           Ok(Json.toJson(robot))
         case _ => NotFound("404")
       }
     }
 
-  def apiGetUserRobots(user: String) =
-    auth.action { authUser => implicit request =>
-      robotsRepo.findAll(user) map { robotsUsers =>
-        val filteredRobots = robotsUsers
-          .map(_._1)
-          .filter(robot => robot.isPublished || authUser.exists(_.id == robot.userId))
-        Ok(Json.toJson(filteredRobots))
-      }
-    }
 }

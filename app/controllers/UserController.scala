@@ -9,13 +9,16 @@ import play.api.mvc._
 
 import forms.{LoginForm, SignupForm}
 import models._
+
+import Auth.Visitor
+
 @Singleton
 class UserController @Inject()(
     cc: MessagesControllerComponents,
     usersRepo: Users,
     robotRepo: Robots,
     assetsFinder: AssetsFinder,
-    auth: Auth
+    auth: Auth.AuthAction
 )(implicit ec: ExecutionContext)
     extends MessagesAbstractController(cc) {
   def create = Action { implicit request =>
@@ -113,8 +116,8 @@ class UserController @Inject()(
   }
 
   def apiWhoami =
-    auth.actionForce { authUser => implicit request =>
-      Future successful Ok(Json.toJson((authUser.username, authUser.id)))
+    auth.actionForceLI { user => implicit request =>
+      Future successful Ok(Json.toJson((user.username, user.id)))
     }
 
   def logout = Action { implicit request =>
@@ -122,18 +125,29 @@ class UserController @Inject()(
   }
 
   def profile(username: String) =
-    auth.action { authUser => implicit request =>
+    auth.action { visitor => implicit request =>
       usersRepo.find(username) flatMap {
         case Some(user) =>
-          robotRepo.findAll(user.id) map { robots =>
+          robotRepo.findAll(user.id)(visitor) map { robots =>
             Ok(
               views.html.user.profile(
                 user,
-                authUser.exists(_.id == user.id),
+                Visitor.isLIAsUser(visitor, user),
                 robots,
                 assetsFinder
               )
             )
+          }
+        case None => Future successful NotFound("404")
+      }
+    }
+
+  def apiGetUserRobots(username: String) =
+    auth.action { visitor => implicit request =>
+      usersRepo.find(username) flatMap {
+        case Some(user) =>
+          robotRepo.findAll(user.id)(visitor) map { robots =>
+            Ok(Json.toJson(robots))
           }
         case None => Future successful NotFound("404")
       }

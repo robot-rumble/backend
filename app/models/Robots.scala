@@ -1,15 +1,14 @@
 package models
 
 import TwitterConverters._
-
 import javax.inject.Inject
 
 import scala.concurrent.{ExecutionContext, Future}
 import Schema._
+import controllers.Auth.{LoggedIn, LoggedOut, Visitor}
 
 class Robots @Inject()(
     val schema: Schema,
-    val usersRepo: Users,
 )(
     implicit ec: ExecutionContext
 ) {
@@ -30,33 +29,33 @@ class Robots @Inject()(
       query.filter(_.userId == lift(userId))
   }
 
-  def find(id: Long): Future[Option[Robot]] =
-    run(robots.byId(id)).map(_.headOption)
+  def robotsAuth(visitor: Visitor): Quoted[EntityQuery[Robot]] = {
+    visitor match {
+      case LoggedIn(user) => robots.filter(r => r.prId.isDefined || r.userId == lift(user.id))
+      case LoggedOut()    => robots.filter(r => r.prId.isDefined)
+    }
+  }
 
-  def find(userId: Long, name: String): Future[Option[Robot]] =
-    run(robots.byUserId(userId).filter(_.name == lift(name))).map(_.headOption)
+  def find(id: Long)(visitor: Visitor): Future[Option[Robot]] =
+    run(robotsAuth(visitor).byId(id)).map(_.headOption)
 
-  def find(username: String, name: String): Future[Option[(Robot, User)]] = {
+  def find(userId: Long, name: String)(visitor: Visitor): Future[Option[Robot]] =
+    run(robotsAuth(visitor).byUserId(userId).filter(_.name == lift(name))).map(_.headOption)
+
+  def find(username: String, name: String)(visitor: Visitor): Future[Option[(Robot, User)]] = {
     val query = quote {
-      robots.withUser().filter {
+      robotsAuth(visitor).withUser().filter {
         case (r, u) => u.username == lift(username) && r.name == lift(name)
       }
     }
     run(query).map(_.headOption)
   }
 
-  def findAll(userId: Long): Future[Seq[Robot]] =
-    run(robots.byUserId(userId))
+  def findAll(userId: Long)(visitor: Visitor): Future[Seq[Robot]] =
+    run(robotsAuth(visitor).byUserId(userId))
 
-  def findAll(username: String): Future[Seq[(Robot, User)]] = {
-    val query = quote {
-      robots.withUser().filter { case (_, u) => u.username == lift(username) }
-    }
-    run(query)
-  }
-
-  def findAllPaged(page: Long, numPerPage: Int): Future[Seq[(Robot, User)]] =
-    run(robots.withUser().paginate(page, numPerPage))
+  def findAllPublishedPaged(page: Long, numPerPage: Int): Future[Seq[(Robot, User)]] =
+    run(robotsAuth(LoggedOut()).withUser().paginate(page, numPerPage))
 
   def create(userId: Long, name: String, lang: Lang): Future[Robot] = {
     val robot = Robot(userId, name, lang)

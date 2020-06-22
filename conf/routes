@@ -33,7 +33,7 @@ POST        /api/create-robot                      controllers.RobotController.a
 + nocsrf
 POST        /api/update-robot-code/:robotId        controllers.RobotController.apiUpdate(robotId: Long)
 
-GET         /api/get-user-robots/:user             controllers.RobotController.apiGetUserRobots(user)
+GET         /api/get-user-robots/:user             controllers.UserController.apiGetUserRobots(user)
 GET         /api/get-robot/:user/:robot            controllers.RobotController.apiGetRobot(user, robot)
 GET         /api/get-robot-code/:robotId           controllers.RobotController.apiGetRobotCode(robotId: Long)
 
