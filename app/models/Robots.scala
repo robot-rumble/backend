@@ -76,7 +76,7 @@ class Robots @Inject()(
       prId <- run(
         publishedRobots.insert(lift(PublishedRobot(code = code))).returningGenerated(_.id)
       )
-      _ <- run(robots.byId(id).update(_.prId -> lift(Some(prId))))
+      _ <- run(robots.byId(id).update(_.prId -> lift(Option(prId))))
     } yield ()
 
   def getPublishedCode(id: Long): Future[Option[String]] =
