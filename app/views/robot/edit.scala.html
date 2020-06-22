@@ -5,17 +5,6 @@
         <link rel="stylesheet" type="text/css" href="@assetsFinder.path("dist/garage_css.css")">
         <script src="@assetsFinder.path("dist/garage_js.js")" type="text/javascript"></script>
     } {
-        @helper.javascriptRouter("jsRoutes")(
-            routes.javascript.RobotController.view,
-            routes.javascript.RobotController.publish,
-            routes.javascript.Assets.at,
-
-            routes.javascript.RobotController.apiUpdate,
-            routes.javascript.RobotController.apiGetRobotCode,
-            routes.javascript.UserController.apiGetUserRobots
-        )
-        <script>window.jsRoutes = jsRoutes</script>
-
         <div class="garage">
             <garage-el user="@user.username" robot="@robot.name" robotId="@robot.id" code="@robot.devCode" lang="@robot.lang"></garage-el>
         </div>
