@@ -20,7 +20,7 @@ GET         /p/:user/:robot                        controllers.RobotController.v
 GET         /p/:user/:robot/edit                   controllers.RobotController.edit(user, robot)
 GET         /view-code/:robotId                    controllers.RobotController.viewPublishedCode(robotId: Long)
 GET         /p/:user/:robot/challenge              controllers.RobotController.challenge(user, robot)
-GET         /p/:user/:robot/publish                controllers.RobotController.publish(user, robot)
+GET         /publish/:robotId                      controllers.RobotController.publish(robotId: Long)
 POST        /publish/:robotId                      controllers.RobotController.postPublish(robotId: Long)
 
 GET         /b/:id                                 controllers.RobotController.viewBattle(id: Long)

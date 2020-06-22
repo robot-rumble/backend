@@ -175,9 +175,9 @@ class RobotController @Inject()(
 
   def challenge(user: String, robot: String) = TODO
 
-  def publish(_username: String, robot: String) =
+  def publish(robotId: Long) =
     auth.actionForceLI { user => implicit request =>
-      robotsRepo.find(user.id, robot)(LoggedIn(user)) map {
+      robotsRepo.find(robotId)(LoggedIn(user)) map {
         case Some(robot) =>
           Ok(views.html.robot.publish(robot, assetsFinder))
         case None => NotFound("404")
