@@ -1,9 +1,10 @@
 package models
 
-import java.time.LocalDate
+import org.joda.time.LocalDateTime
 
 import com.github.t3hnar.bcrypt._
 import enumeratum._
+import io.getquill.{EntityQuery, Query}
 import javax.inject.Inject
 import play.api.libs.json.{Json, Writes}
 import services.BattleQueue.MatchOutput
@@ -31,7 +32,7 @@ object Schema {
       id: Long = -1,
       username: String,
       password: String,
-      created: LocalDate
+      created: LocalDateTime
   )
 
   object User {
@@ -39,7 +40,7 @@ object Schema {
       new User(
         username = username,
         password = password.bcrypt,
-        created = LocalDate.now()
+        created = LocalDateTime.now()
       )
   }
 
@@ -52,7 +53,7 @@ object Schema {
       automatch: Boolean = true,
       rating: Int = 1000,
       lang: Lang,
-      created: LocalDate = LocalDate.now()
+      created: LocalDateTime = LocalDateTime.now()
   ) {
     def isPublished = prId.isDefined
   }
@@ -62,7 +63,11 @@ object Schema {
       new Robot(userId = userId, name = name, devCode = DefaultCode(lang), lang = lang)
   }
 
-  case class PublishedRobot(id: Long = -1, created: LocalDate = LocalDate.now(), code: String)
+  case class PublishedRobot(
+      id: Long = -1,
+      created: LocalDateTime = LocalDateTime.now(),
+      code: String
+  )
 
   implicit val robotWrites = new Writes[Robot] {
     def writes(robot: Robot) = Json.obj(
@@ -88,7 +93,7 @@ object Schema {
       r1Time: Float,
       r2Time: Float,
       data: String,
-      created: LocalDate = LocalDate.now(),
+      created: LocalDateTime = LocalDateTime.now(),
   ) {
     def didR1Win(r1Id: Long): Option[Boolean] = {
       winner match {
@@ -116,7 +121,7 @@ object Schema {
       )
   }
 
-  class Schema @Inject()(db: Database) {
+  class Schema @Inject()(db: Database)(implicit ec: scala.concurrent.ExecutionContext) {
     val ctx = db.ctx
     import ctx._
 
@@ -130,10 +135,41 @@ object Schema {
     val publishedRobots = quote(querySchema[PublishedRobot]("published_robots"))
     val battles = quote(querySchema[Battle]("battles"))
 
-    implicit class RichQuery[T](query: Quoted[Query[T]]) {
+    implicit class RichQuotedQuery[T](query: Quoted[Query[T]]) {
       def paginate(page: Long, numPerPage: Int): Quoted[Query[T]] = quote {
         query.drop(lift(page.toInt * numPerPage)).take(lift(numPerPage))
       }
+    }
+    implicit class RichQuery[T](query: Query[T]) {
+      def arrayAgg = quote {
+        infix"array_agg($query)".as[Seq[T]]
+      }
+    }
+
+    implicit class RobotQuery(query: Quoted[EntityQuery[Robot]]) {
+      def withPr(): Quoted[Query[(Robot, PublishedRobot)]] =
+        query.join(publishedRobots).on { case (r, pr) => r.prId.contains(pr.id) }
+
+      def withUser(): Quoted[Query[(Robot, User)]] =
+        query.join(users).on(_.userId == _.id)
+
+      def byId(id: Long): Quoted[EntityQuery[Robot]] =
+        query.filter(_.id == lift(id))
+
+      def byUserId(userId: Long): Quoted[EntityQuery[Robot]] =
+        query.filter(_.userId == lift(userId))
+    }
+
+    implicit class BattleQuery(query: Quoted[EntityQuery[Battle]]) {
+      def byId(id: Long): Quoted[EntityQuery[Battle]] =
+        query.filter(_.id == lift(id))
+
+      def withRobots(): Quoted[Query[(Battle, Robot, Robot)]] =
+        for {
+          b <- battles
+          r1 <- robots if b.r1Id == r1.id
+          r2 <- robots if b.r2Id == r2.id
+        } yield (b, r1, r2)
     }
   }
 }

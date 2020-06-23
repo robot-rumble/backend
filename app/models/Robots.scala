@@ -1,11 +1,11 @@
 package models
 
-import TwitterConverters._
 import javax.inject.Inject
 
 import scala.concurrent.{ExecutionContext, Future}
 import Schema._
 import controllers.Auth.{LoggedIn, LoggedOut, Visitor}
+import io.getquill.EntityQuery
 
 class Robots @Inject()(
     val schema: Schema,
@@ -14,20 +14,6 @@ class Robots @Inject()(
 ) {
   import schema.ctx._
   import schema._
-
-  implicit class RobotQuotedQuery(query: Quoted[EntityQuery[Robot]]) {
-    def withPr(): Quoted[Query[(Robot, PublishedRobot)]] =
-      query.join(publishedRobots).on { case (r, pr) => r.prId.contains(pr.id) }
-
-    def withUser(): Quoted[Query[(Robot, User)]] =
-      query.join(users).on(_.userId == _.id)
-
-    def byId(id: Long): Quoted[EntityQuery[Robot]] =
-      query.filter(_.id == lift(id))
-
-    def byUserId(userId: Long): Quoted[EntityQuery[Robot]] =
-      query.filter(_.userId == lift(userId))
-  }
 
   def robotsAuth(visitor: Visitor): Quoted[EntityQuery[Robot]] = {
     visitor match {

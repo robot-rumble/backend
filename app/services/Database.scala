@@ -1,12 +1,11 @@
 package services
 
-import io.getquill.context.sql.SqlContext
-import io.getquill.{FinaglePostgresContext, PostgresDialect, SnakeCase}
+import io.getquill.{PostgresJAsyncContext, SnakeCase}
 
 trait Database {
-  val ctx: FinaglePostgresContext[SnakeCase]
+  val ctx: PostgresJAsyncContext[SnakeCase]
 }
 
 class Postgres extends Database {
-  val ctx = new FinaglePostgresContext(SnakeCase, "db.finagle")
+  val ctx = new PostgresJAsyncContext(SnakeCase, "db.default")
 }

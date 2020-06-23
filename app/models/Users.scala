@@ -1,7 +1,5 @@
 package models
 
-import TwitterConverters._
-
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 

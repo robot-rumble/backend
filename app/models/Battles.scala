@@ -1,9 +1,5 @@
 package models
 
-import TwitterConverters._
-
-import java.time.LocalDate
-
 import javax.inject.Inject
 import services.BattleQueue.MatchOutput
 
@@ -19,18 +15,6 @@ class Battles @Inject()(
 ) {
   import schema.ctx._
   import schema._
-
-  implicit class BattleQuery(query: Quoted[EntityQuery[Battle]]) {
-    def withRobots(): Quoted[Query[(Battle, Robot, Robot)]] =
-      for {
-        b <- battles
-        r1 <- robots if b.r1Id == r1.id
-        r2 <- robots if b.r2Id == r2.id
-      } yield (b, r1, r2)
-
-    def byId(id: Long): Quoted[EntityQuery[Battle]] =
-      query.filter(_.id == lift(id))
-  }
 
   def find(id: Long): Future[Option[Battle]] =
     run(battles.byId(id)).map(_.headOption)

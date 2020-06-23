@@ -24,7 +24,7 @@ libraryDependencies ++= Seq(
   "org.postgresql" % "postgresql" % "42.2.8",
   "com.twitter" %% "finagle-core" % "20.5.0",
   "com.twitter" %% "finagle-init" % "20.5.0",
-  "io.getquill" %% "quill-finagle-postgres" % "3.5.1",
+  "io.getquill" %% "quill-jasync-postgres" % "3.5.3-SNAPSHOT",
 )
 
 libraryDependencies ++= Seq(
@@ -46,7 +46,7 @@ libraryDependencies ++= Seq(
 scalacOptions ++= Seq(
   "-feature",
   "-deprecation",
-  "-Xfatal-warnings"
+  "-Xfatal-warnings",
 )
 
 initialCommands in console :=
@@ -56,7 +56,6 @@ initialCommands in console :=
     |import scala.concurrent.{Future, Await}
     |import scala.concurrent.ExecutionContext.Implicits.global
     |import models._
-    |import TwitterConverters._
     |import Schema._
     |val app = new GuiceApplicationBuilder().build()
     |val schema = app.injector.instanceOf[Schema]
