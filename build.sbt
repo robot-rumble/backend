@@ -22,8 +22,6 @@ libraryDependencies += "com.github.t3hnar" %% "scala-bcrypt" % "4.1"
 
 libraryDependencies ++= Seq(
   "org.postgresql" % "postgresql" % "42.2.8",
-  "com.twitter" %% "finagle-core" % "20.5.0",
-  "com.twitter" %% "finagle-init" % "20.5.0",
   "io.getquill" %% "quill-jasync-postgres" % "3.5.3-SNAPSHOT",
 )
 
