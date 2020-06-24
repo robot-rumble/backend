@@ -5,42 +5,50 @@ import akka.stream.Materializer
 import akka.stream.scaladsl.{Sink, Source}
 import com.github.esap120.scala_elo._
 import javax.inject._
-import play.api.mvc.ControllerComponents
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
-import org.joda.time.{LocalDateTime, Duration}
-
+import org.joda.time.{Duration, LocalDateTime}
 import models._
 import models.JodaUtils._
 import models.Schema.Winner
+import play.api.Configuration
 
 @Singleton
 class MatchMaker @Inject()(
-    implicit system: ActorSystem,
-    ec: ExecutionContext,
-    mat: Materializer,
-    cc: ControllerComponents,
+    config: Configuration,
     robotsRepo: Robots,
     battlesRepo: Battles,
     battleQueue: BattleQueue
+)(
+    implicit system: ActorSystem,
+    ec: ExecutionContext,
+    mat: Materializer,
 ) {
   import BattleQueue._
 
-  val RECENT_OPPONENT_NUM = 5
-  val COOLDOWN = Duration.standardDays(1)
+  val USE_MOCK = config.get[Boolean]("queue.useMock")
+
+  val RECENT_OPPONENT_LIMIT =
+    if (USE_MOCK) 0
+    else config.get[Int]("queue.recentOpponentLimit")
+
+  val COOLDOWN =
+    if (USE_MOCK) Duration.ZERO
+    else Duration.standardHours(config.get[Int]("queue.cooldownHours"))
 
   def prepareMatches(): Future[Iterable[MatchInput]] = {
     robotsRepo.findAllPr() flatMap { allRobots =>
       battlesRepo.allOpponents() map { allOpponentsMap =>
-        val recentOpponentsMap = allOpponentsMap.mapValues(_.take(RECENT_OPPONENT_NUM))
+        val recentOpponentsMap = allOpponentsMap.mapValues(_.take(RECENT_OPPONENT_LIMIT))
 
         allRobots
           .filter {
             case (r, _) =>
               recentOpponentsMap.get(r.id) match {
-                case None => true
+                case None        => true
+                case Some(Seq()) => true
                 case Some(opponents) =>
                   opponents
                     .map(_.created)
@@ -77,8 +85,12 @@ class MatchMaker @Inject()(
     }
   }
 
+  val CHECK_EVERY =
+    if (USE_MOCK) 10.seconds
+    else config.get[Int]("queue.checkEveryHours").hours
+
   Source
-    .tick(0.seconds, 5.seconds, "tick")
+    .tick(0.seconds, CHECK_EVERY, "tick")
     .mapAsyncUnordered(1)(_ => prepareMatches())
     .mapConcat(_.toList)
     .alsoTo(Sink.foreach(println))
@@ -122,6 +134,6 @@ class MatchMaker @Inject()(
 
   battleQueue.source.runForeach(processMatches) onComplete {
     case Success(_) => println("BattleQueue exited.")
-    case Failure(t) => println("BattleQueue error: " + t.getMessage)
+    case Failure(e) => println("BattleQueue error: " + e.getMessage)
   }
 }

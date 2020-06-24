@@ -12,11 +12,11 @@ import services._
   * adding `play.modules.enabled` settings to the `application.conf`
   * configuration file.
   */
-class Module(environment: Environment, configuration: Configuration) extends AbstractModule {
+class Module(_env: Environment, config: Configuration) extends AbstractModule {
   override def configure(): Unit = {
     bind(classOf[Database]).to(classOf[Postgres]).asEagerSingleton()
-    if (configuration.get[Boolean]("aws.runQueue")) {
-      if (configuration.get[Boolean]("aws.useMockQueue"))
+    if (config.get[Boolean]("queue.enabled")) {
+      if (config.get[Boolean]("queue.useMock"))
         bind(classOf[BattleQueue]).to(classOf[MockQueue])
       else
         bind(classOf[BattleQueue]).to(classOf[AwsQueue]).asEagerSingleton()

@@ -19,7 +19,8 @@ services:
     volumes:
       - .:/backend
     environment:
-      DATABASE_URL: jdbc:postgresql://db:5432/robot
+      DB_URL: jdbc:postgresql://db:5432/robot
+      QUEUE_ENABLED: ${QUEUE_ENABLED-}
 
     # https://github.com/docker/compose/issues/596#issuecomment-133004835
     stdin_open: true
