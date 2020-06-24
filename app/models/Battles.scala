@@ -5,6 +5,7 @@ import services.BattleQueue.MatchOutput
 
 import scala.concurrent.{ExecutionContext, Future}
 import Schema._
+import org.joda.time.LocalDateTime
 
 class Battles @Inject()(
     val schema: Schema,
@@ -30,23 +31,6 @@ class Battles @Inject()(
     run(battles.insert(lift(battle)).returningGenerated(_.id)).map(battle.copy(_))
   }
 
-//    def groupByB[F](f: ((Rep[Long], Query[BattleTable, Battles.Battle, Seq])) => F) = {
-//      val r1Results = battles.groupBy(_.r1Id).map(f)
-//      val r2Results = battles.groupBy(_.r2Id).map(f)
-//      r1Results union r2Results
-//    }
-//
-//    def withLatestOpponents(): Future[Seq[(Battle, Seq[Long])]] = {
-//      val numOfOpponents = 5
-//      run(
-//        groupByB({
-//          case (id, q) => (id, q.sortBy(_.created).arrayAgg)
-//        }).result
-//      )
-//    }
-
-//  private val withPr = for { r <- robotsRepo.battles; pr <- r.pr } yield (r, pr)
-//
   private val involvesR = quote { (b: Battle, rId: Long) =>
     b.r1Id == rId || b.r2Id == rId
   }
@@ -55,36 +39,69 @@ class Battles @Inject()(
     b.pr1Id == prId || b.pr2Id == prId
   }
 
+  def findAllForRobot_(robotId: Long) = quote {
+    for {
+      b <- battles if involvesR(b, lift(robotId))
+      opponentR <- robots if involvesR(b, opponentR.id)
+    } yield (b, opponentR)
+  }
+
+  def findAllForRobot(robotId: Long): Future[Seq[(Battle, Robot)]] =
+    run(findAllForRobot_(robotId))
+
   def findAllForRobotPaged(
       robotId: Long,
       page: Long,
       numPerPage: Int
-  ): Future[Seq[(Battle, Robot)]] = {
-    val query = quote {
-      for {
-        b <- battles if involvesR(b, lift(robotId))
-        r <- robots if involvesR(b, r.id)
-      } yield (b, r)
-    }
-    run(query.paginate(page, numPerPage))
+  ): Future[Seq[(Battle, Robot)]] =
+    run(findAllForRobot_(robotId).paginate(page, numPerPage))
+
+  def findLatestForRobot(robotId: Long, num: Int): Future[Seq[(Battle, Robot)]] = {
+    run(findAllForRobot_(robotId).sortBy(_._1.created).take(lift(num)))
   }
 
-  //
-//  def findAllStaleRobots(): Future[Seq[Robot]] = {
-//    val noBattles = {
-//      for {
-//        (pr, b) <- withPr joinLeft battles on ((rs, b) => involvesPr(rs._2, b))
-//        if b.isEmpty
-//      } yield pr
-//    }
-//
-//    val staleBattles = {
-//      for {
-//        (pr, b) <- withPr join battles on ((rs, b) => involvesPr(rs._2, b))
-//        if b.created < LocalDate.now().minusDays(1)
-//      } yield pr
-//    }
-//
-//    run((noBattles ++ staleBattles).map(_._1).result)
-//  }
+  case class Opponent(bId: Long, rId: Long, created: LocalDateTime)
+
+  def allOpponents(): Future[Map[Long, Seq[Opponent]]] = {
+    val byP1 = quote {
+      battles
+        .join(robots)
+        .on((b, r) => r.prId.contains(b.pr1Id))
+        .groupBy { case (b, r) => (b.r1Id, r.id) }
+        .map {
+          case ((_pr1Id, r1Id), q) =>
+            (
+              r1Id,
+              unquote(q.map(_._1.id).arrayAgg),
+              unquote(q.map(_._1.r2Id).arrayAgg),
+              unquote(q.map(_._1.created).arrayAgg),
+            )
+        }
+    }
+    val byP2 = quote {
+      battles
+        .join(robots)
+        .on((b, r) => r.prId.contains(b.pr2Id))
+        .groupBy { case (b, r) => (b.r2Id, r.id) }
+        .map {
+          case ((_pr1Id, r1Id), q) =>
+            (
+              r1Id,
+              unquote(q.map(_._1.id).arrayAgg),
+              unquote(q.map(_._1.r1Id).arrayAgg),
+              unquote(q.map(_._1.created).arrayAgg),
+            )
+        }
+    }
+    run(byP1 union byP2) map { result =>
+      result
+        .foldLeft[Map[Long, List[Opponent]]](Map.empty) {
+          case (acc, (rId, bIds, opponentIds, timestamps)) =>
+            val opponentList = bIds.zip(opponentIds.zip(timestamps)) map {
+              case (bId, (oId, timestamp)) => Opponent(bId, oId, timestamp)
+            }
+            acc.updated(rId, opponentList.toList ::: acc.getOrElse(rId, List.empty))
+        }
+    }
+  }
 }

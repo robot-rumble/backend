@@ -37,6 +37,9 @@ class Robots @Inject()(
     run(query).map(_.headOption)
   }
 
+  def findAllPr(): Future[Seq[(Robot, PublishedRobot)]] =
+    run(robotsAuth(LoggedOut()).withPr())
+
   def findAll(userId: Long)(visitor: Visitor): Future[Seq[Robot]] =
     run(robotsAuth(visitor).byUserId(userId))
 
@@ -50,21 +53,24 @@ class Robots @Inject()(
 
   def updateDevCode(id: Long, devCode: String): Future[Long] =
     if (!devCode.isEmpty)
-      run(robots.byId(id).update(_.devCode -> devCode))
+      run(robots.byId(id).update(_.devCode -> lift(devCode)))
     else throw new Exception("Updating robot with empty code.")
 
   def updateRating(id: Long, rating: Int): Future[Long] =
-    run(robots.byId(id).update(_.rating -> rating))
+    run(robots.byId(id).update(_.rating -> lift(rating)))
 
-  def publish(id: Long): Future[Unit] =
+  def publish(id: Long): Future[Long] =
     for {
       code <- run(robots.byId(id).map(_.devCode)).map(_.head)
       prId <- run(
         publishedRobots.insert(lift(PublishedRobot(code = code))).returningGenerated(_.id)
       )
       _ <- run(robots.byId(id).update(_.prId -> lift(Option(prId))))
-    } yield ()
+    } yield (prId)
 
   def getPublishedCode(id: Long): Future[Option[String]] =
     run(robots.byId(id).withPr().map(_._2.code)).map(_.headOption)
+
+  def sortByRating(): Future[Seq[Robot]] =
+    run(robots.sortBy(_.rating))
 }

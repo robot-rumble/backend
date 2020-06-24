@@ -18,8 +18,8 @@ class MockQueue @Inject()(
     val jsonOutput = Seq(
       "../target/release/rumblebot",
       "run",
-      s"inline:${input.r1Lang};${input.r1Code}",
-      s"inline:${input.r2Lang};${input.r2Code}",
+      s"inline:${input.r1Lang.toString.toUpperCase};${input.r1Code}",
+      s"inline:${input.r2Lang.toString.toUpperCase};${input.r2Code}",
       "--raw"
     ).!!
     val winner = (Json.parse(jsonOutput) \ "winner").get
