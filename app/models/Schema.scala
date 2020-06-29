@@ -1,12 +1,12 @@
 package models
 
 import org.joda.time.LocalDateTime
-
 import com.github.t3hnar.bcrypt._
 import enumeratum._
 import io.getquill.{EntityQuery, Query}
 import javax.inject.Inject
 import play.api.libs.json.{Json, Writes}
+import robotCode.LoadCode
 import services.BattleQueue.MatchOutput
 import services.Database
 
@@ -60,7 +60,7 @@ object Schema {
 
   object Robot {
     def apply(userId: Long, name: String, lang: Lang) =
-      new Robot(userId = userId, name = name, devCode = DefaultCode(lang), lang = lang)
+      new Robot(userId = userId, name = name, devCode = LoadCode(lang), lang = lang)
   }
 
   case class PublishedRobot(
