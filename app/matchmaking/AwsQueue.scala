@@ -1,4 +1,4 @@
-package services
+package matchmaking
 
 import akka.actor.ActorSystem
 import akka.stream.alpakka.sqs.scaladsl.{SqsAckSink, SqsPublishSink, SqsSource}
@@ -8,7 +8,7 @@ import com.github.matsluni.akkahttpspi.AkkaHttpClient
 import javax.inject._
 import play.api.Configuration
 import play.api.libs.json.Json
-import services.BattleQueue.{MatchInput, MatchOutput}
+import matchmaking.BattleQueue.{MatchInput, MatchOutput}
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.sqs.SqsAsyncClient

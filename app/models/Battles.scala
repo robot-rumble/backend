@@ -1,7 +1,7 @@
 package models
 
 import javax.inject.Inject
-import services.BattleQueue.MatchOutput
+import matchmaking.BattleQueue.MatchOutput
 
 import scala.concurrent.{ExecutionContext, Future}
 import Schema._

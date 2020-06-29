@@ -1,4 +1,4 @@
-package models
+package db
 
 import org.joda.time.LocalDateTime
 

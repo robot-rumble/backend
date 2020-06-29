@@ -1,4 +1,4 @@
-package services
+package db
 
 import io.getquill.{PostgresJAsyncContext, SnakeCase}
 

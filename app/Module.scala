@@ -1,6 +1,7 @@
 import com.google.inject.AbstractModule
 import play.api.{Configuration, Environment}
-import services._
+import matchmaking._
+import db.{Database, Postgres}
 
 /**
   * This class is a Guice module that tells Guice how to bind several

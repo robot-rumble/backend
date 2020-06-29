@@ -7,8 +7,8 @@ import io.getquill.{EntityQuery, Query}
 import javax.inject.Inject
 import play.api.libs.json.{Json, Writes}
 import robotCode.LoadCode
-import services.BattleQueue.MatchOutput
-import services.Database
+import matchmaking.BattleQueue.MatchOutput
+import db.Database
 
 object Schema {
   sealed trait Lang extends EnumEntry

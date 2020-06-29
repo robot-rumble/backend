@@ -1,4 +1,4 @@
-package services
+package matchmaking
 
 import akka.NotUsed
 import akka.stream.scaladsl.{Sink, Source}

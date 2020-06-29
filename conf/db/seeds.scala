@@ -3,7 +3,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import scala.concurrent.ExecutionContext.Implicits.global
 import models._
 import Schema._
-import services.BattleQueue.MatchOutput
+import matchmaking.BattleQueue.MatchOutput
 
 val app = new GuiceApplicationBuilder().build()
 val usersRepo = app.injector.instanceOf[Users]

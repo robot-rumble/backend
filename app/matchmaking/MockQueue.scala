@@ -1,10 +1,10 @@
-package services
+package matchmaking
 
 import javax.inject.Inject
 import akka.stream.Materializer
 import akka.stream.scaladsl.{Flow, Keep, Sink, Source}
 import play.api.libs.json.{JsString, Json}
-import services.BattleQueue.{MatchInput, MatchOutput}
+import matchmaking.BattleQueue.{MatchInput, MatchOutput}
 
 import sys.process._
 
