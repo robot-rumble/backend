@@ -87,7 +87,7 @@ class MatchMaker @Inject()(
 
   val CHECK_EVERY =
     if (USE_MOCK) 10.seconds
-    else config.get[Int]("queue.checkEveryHours").hours
+    else config.get[Int]("queue.checkEveryMinutes").minutes
 
   Source
     .tick(0.seconds, CHECK_EVERY, "tick")

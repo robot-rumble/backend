@@ -18,8 +18,8 @@ class AwsQueue @Inject()(
     implicit system: ActorSystem,
     config: Configuration,
 ) extends BattleQueue {
-  val inputQueueUrl = config.get[String]("aws.matchQueueInUrl")
-  val outputQueueUrl = config.get[String]("aws.matchQueueOutUrl")
+  val inputQueueUrl = config.get[String]("aws.battleQueueInUrl")
+  val outputQueueUrl = config.get[String]("aws.battleQueueOutUrl")
   val credentialsProvider = DefaultCredentialsProvider.create()
   implicit val awsSqsClient = SqsAsyncClient
     .builder()
