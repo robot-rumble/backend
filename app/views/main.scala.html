@@ -9,7 +9,7 @@
             <div class="d-flex links">
                 <a href="@routes.RobotController.warehouse(0)">warehouse</a>
                 <a href="@routes.RobotController.battles(0)">battles</a>
-                <a href="@routes.HomeController.rules">rules</a>
+                <a href="@routes.HomeController.rules" target="_blank">rules</a>
                 @request.session.get("USERNAME") match {
                     case Some(username) => {
                         <a href="@routes.UserController.profile(username)">profile</a>
