@@ -37,3 +37,5 @@ lerna-debug.log*
 ### JetBrains template
 .idea
 
+### Other
+boxfuse*.conf
