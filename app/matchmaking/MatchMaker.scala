@@ -36,7 +36,7 @@ class MatchMaker @Inject()(
 
   val COOLDOWN =
     if (USE_MOCK) Duration.ZERO
-    else Duration.standardHours(config.get[Int]("queue.cooldownHours"))
+    else Duration.millis(config.get[FiniteDuration]("queue.cooldown").toMillis)
 
   def prepareMatches(): Future[Iterable[MatchInput]] = {
     robotsRepo.findAllPr() flatMap { allRobots =>
@@ -87,7 +87,7 @@ class MatchMaker @Inject()(
 
   val CHECK_EVERY =
     if (USE_MOCK) 10.seconds
-    else config.get[Int]("queue.checkEveryMinutes").minutes
+    else config.get[FiniteDuration]("queue.checkEvery")
 
   Source
     .tick(0.seconds, CHECK_EVERY, "tick")
