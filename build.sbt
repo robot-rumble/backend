@@ -1,7 +1,6 @@
 import play.sbt.PlayScala
 
-name := """robot-rumble"""
-
+name := "rr"
 version := "0.0.1"
 maintainer := "antonoutkine@gmail.com"
 
