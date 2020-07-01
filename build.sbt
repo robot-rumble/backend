@@ -21,7 +21,7 @@ libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "4.0.3
 libraryDependencies += "com.github.t3hnar" %% "scala-bcrypt" % "4.1"
 
 libraryDependencies ++= Seq(
-  "org.postgresql" % "postgresql" % "42.2.8",
+  "org.postgresql" % "postgresql" % "42.1.4",
   "io.getquill" %% "quill-jasync-postgres" % "3.5.3-SNAPSHOT",
 )
 

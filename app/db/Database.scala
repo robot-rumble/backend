@@ -7,5 +7,5 @@ trait Database {
 }
 
 class Postgres extends Database {
-  val ctx = new PostgresJAsyncContext(SnakeCase, "db.default")
+  val ctx = new PostgresJAsyncContext(SnakeCase, "db.default_")
 }
