@@ -2,7 +2,8 @@ import play.sbt.PlayScala
 
 name := """robot-rumble"""
 
-version := "1.0-SNAPSHOT"
+version := "0.0.1"
+maintainer := "antonoutkine@gmail.com"
 
 lazy val root = (project in file("."))
   .enablePlugins(PlayScala)
