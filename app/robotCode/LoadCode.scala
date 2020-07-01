@@ -1,20 +1,26 @@
 package robotCode
 
-import java.io.File
-
 import models.Schema.Lang
 
-import scala.io.Source
-
 object LoadCode {
-  def loadCode(path: String) = {
-    val source = Source.fromFile("app/robotCode/lang-support/" + path)
-    try source.mkString
-    finally source.close()
-  }
-
-  val PYTHON = loadCode("python/default.py")
-  val JAVASCRIPT = loadCode("javascript/default.js")
+  val PYTHON =
+    """
+      |def robot(state, unit, debug):
+      |    if state.turn % 2 == 0:
+      |        return Action.move(Direction.East)
+      |    else:
+      |        return Action.attack(Direction.South)
+      |""".stripMargin
+  val JAVASCRIPT =
+    """
+      |function robot(state, unit, debug) {
+      |  if (state.turn % 2 === 0) {
+      |    return Action.move(Direction.East)
+      |  } else {
+      |    return Action.attack(Direction.South)
+      |  }
+      |}
+      |""".stripMargin
 
   def apply(lang: Lang): String = {
     lang match {
