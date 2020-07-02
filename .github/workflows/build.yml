@@ -13,8 +13,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
-      - run: aws s3 sync public/images s3://${{ secrets.S3_BUCKET }}/web-assets/images
-      - run: aws s3 sync s3://${{ secrets.S3_BUCKET }}/worker-assets public/worker-dist
+      - run: aws s3 sync public/images s3://${{ secrets.S3_BUCKET_PUBLIC }}/images
 
       - uses: actions/setup-java@v1
         with:
@@ -29,7 +28,7 @@ jobs:
           -envvars.BATTLE_QUEUE_IN_URL=${{ secrets.BATTLE_QUEUE_IN_URL }} 
           -envvars.BATTLE_QUEUE_OUT_URL=${{ secrets.BATTLE_QUEUE_OUT_URL }} 
           -envvars.SECRET_KEY='${{ secrets.SECRET_KEY }}' 
-          -envvars.ASSETS_PATH=https://${{ secrets.S3_BUCKET }}.s3.amazonaws.com/web-assets
+          -envvars.ASSETS_PATH=${{ secrets.CLOUDFRONT_URL }}
           -jvm.args=-Ddb.default_.migration.auto=true
           -ports.http=80 
           -env=test
