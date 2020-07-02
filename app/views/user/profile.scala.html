@@ -5,7 +5,7 @@
     <h1>@user.username</h1>
 
     @if(robots.nonEmpty) {
-        <table>
+        <table class="mb-3">
         @for(robot <- robots) {
             <tr>
                 <td><a href="@routes.RobotController.view(user.username, robot.name)">@robot.name</a></td>

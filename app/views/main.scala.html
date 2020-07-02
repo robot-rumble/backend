@@ -9,7 +9,7 @@
             <div class="d-flex links">
                 <a href="@routes.RobotController.warehouse(0)">warehouse</a>
                 <a href="@routes.RobotController.battles(0)">battles</a>
-                <a href="@routes.HomeController.rules" target="_blank">rules</a>
+                <a href="@routes.HomeController.rules" target="_blank">docs</a>
                 @request.session.get("USERNAME") match {
                     case Some(username) => {
                         <a href="@routes.UserController.profile(username)">profile</a>
@@ -34,10 +34,7 @@
 
     <section class="footer d-flex justify-content-between">
         <p>Made with Rust, Scala, Elm, and <3 by Chicode NFP</p>
-        <div class="d-flex">
-            <a href="https://github.com/chicode/robot-rumble">github repo</a>&nbsp;&nbsp;
-            <a href="https://github.com/chicode/robot-rumble/issues/new">report a bug</a>
-        </div>
+        <a href="https://github.com/robot-rumble">github org</a>
     </section>
 
 }
