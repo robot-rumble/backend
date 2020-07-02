@@ -1,11 +1,18 @@
 @import models.Schema._
 @(user: Schema.User, robot: Robot, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
-    @basic(s"The Garage -- editing ${robot.name}", assetsFinder) {
-        <link rel="stylesheet" type="text/css" href="@assetsFinder.path("dist/garage_css.css")">
-        <script src="@assetsFinder.path("dist/garage_js.js")" type="text/javascript"></script>
-    } {
-        <div class="garage">
-            <garage-el user="@user.username" robot="@robot.name" robotId="@robot.id" code="@robot.devCode" lang="@robot.lang"></garage-el>
-        </div>
-    }
+@basic(s"The Garage -- editing ${robot.name}", assetsFinder) {
+    <link rel="stylesheet" type="text/css" href="@assetsFinder.path("dist/garage_css.css")">
+    <script src="@assetsFinder.path("dist/garage_js.js")" type="text/javascript"></script>
+} {
+    <div class="garage">
+        <garage-el
+            user="@user.username"
+            robot="@robot.name"
+            robotId="@robot.id"
+            code="@robot.devCode"
+            lang="@robot.lang"
+            assetsPath="@assetsFinder.assetsUrlPrefix"
+        ></garage-el>
+    </div>
+}
