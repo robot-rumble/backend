@@ -13,13 +13,13 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
+      - run: aws s3 sync public/images s3://${{ secrets.S3_BUCKET }}/web-assets/images
+      - run: aws s3 sync s3://${{ secrets.S3_BUCKET }}/worker-assets public/worker-dist
 
       - uses: actions/setup-java@v1
         with:
             java-version: 1.8
       - run: sbt clean dist
-      - run: aws s3 sync public/images s3://${{ secrets.S3_BUCKET }}/web-assets/images
-      - run: aws s3 sync s3://${{ secrets.S3_BUCKET }}/worker-assets public/worker-dist
 
       - run: wget https://files.boxfuse.com/com/boxfuse/client/boxfuse-commandline/1.33.0.1460/boxfuse-commandline-1.33.0.1460-linux-x64.tar.gz
       - run: tar xf boxfuse-commandline-1.33.0.1460-linux-x64.tar.gz
@@ -29,7 +29,7 @@ jobs:
           -envvars.BATTLE_QUEUE_IN_URL=${{ secrets.BATTLE_QUEUE_IN_URL }} 
           -envvars.BATTLE_QUEUE_OUT_URL=${{ secrets.BATTLE_QUEUE_OUT_URL }} 
           -envvars.SECRET_KEY='${{ secrets.SECRET_KEY }}' 
-          -envvars.ASSETS_PATH=${{ secrets.S3_BUCKET }}/web-assets 
-          -jvm.args='-Ddb.default_.migration.auto=true' 
+          -envvars.ASSETS_PATH=https://${{ secrets.S3_BUCKET }}.s3.amazonaws.com/web-assets
+          -jvm.args=-Ddb.default_.migration.auto=true
           -ports.http=80 
           -env=test
