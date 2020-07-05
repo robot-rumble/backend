@@ -75,7 +75,8 @@ object Schema {
       "userId" -> robot.userId,
       "name" -> robot.name,
       "rating" -> robot.rating,
-      "lang" -> robot.lang
+      "lang" -> robot.lang,
+      "published" -> robot.prId.isDefined
     )
   }
 
