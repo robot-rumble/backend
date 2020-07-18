@@ -5,7 +5,7 @@
     <link rel="stylesheet" type="text/css" href="@assetsFinder.path("dist/battle_css.css")">
     <script src="@assetsFinder.path("dist/battle_js.js")" type="text/javascript"></script>
 
-    <h1 class="mb-3 text-center">@r1.name vs @r2.name</h1>
+    <h1 class="mb-3 text-center"><span class="text-blue">@r1.name</span> vs <span class="text-red">@r2.name</span></h1>
     <h3 class="mb-5 text-center">
         @battle.winner match {
             case Winner.R1 => {
