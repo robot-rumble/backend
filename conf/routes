@@ -11,6 +11,10 @@ GET         /signup                                controllers.UserController.cr
 POST        /signup                                controllers.UserController.postCreate
 GET         /login                                 controllers.UserController.login
 POST        /login                                 controllers.UserController.postLogin
+GET         /password-reset                        controllers.UserController.passwordReset
+POST        /password-reset                        controllers.UserController.postPasswordReset
+GET         /password-reset/complete               controllers.UserController.updatePassword
+POST        /password-reset/complete               controllers.UserController.postUpdatePassword
 GET         /logout                                controllers.UserController.logout
 GET         /p/:username                           controllers.UserController.profile(username)
 

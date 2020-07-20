@@ -11,7 +11,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 import org.joda.time.{Duration, LocalDateTime}
 import models._
-import db.JodaUtils._
+import services.JodaUtils._
 import models.Schema.Winner
 import play.api.Configuration
 

@@ -2,6 +2,7 @@ CREATE TABLE users
 (
     id       BIGSERIAL PRIMARY KEY,
     created  TIMESTAMP   NOT NULL,
+    email    VARCHAR(50) NOT NULL,
     username VARCHAR(15) NOT NULL,
     password VARCHAR(60) NOT NULL
 );
@@ -50,3 +51,10 @@ CREATE TABLE battles
     data      TEXT       NOT NULL
 );
 
+CREATE TABLE password_reset_tokens
+(
+    id      BIGSERIAL PRIMARY KEY,
+    created TIMESTAMP   NOT NULL,
+    token   VARCHAR(15) NOT NULL,
+    user_id BIGINT REFERENCES users (id)
+);

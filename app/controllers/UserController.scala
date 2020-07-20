@@ -2,15 +2,15 @@ package controllers
 
 import javax.inject._
 import com.github.t3hnar.bcrypt._
-import scala.concurrent.{Future, ExecutionContext}
 
+import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.json.Json
 import play.api.mvc._
-
-import forms.{LoginForm, SignupForm}
+import forms.{LoginForm, PasswordResetForm, SignupForm, UpdatePasswordForm}
 import models._
-
 import Auth.Visitor
+import play.api.Configuration
+import services.Mail
 
 @Singleton
 class UserController @Inject()(
@@ -18,7 +18,9 @@ class UserController @Inject()(
     usersRepo: Users,
     robotRepo: Robots,
     assetsFinder: AssetsFinder,
-    auth: Auth.AuthAction
+    auth: Auth.AuthAction,
+    passwordResetRepo: PasswordResets,
+    mail: Mail,
 )(implicit ec: ExecutionContext)
     extends MessagesAbstractController(cc) {
   def create = Action { implicit request =>
@@ -34,21 +36,24 @@ class UserController @Inject()(
       },
       data => {
         val username = data.username.trim()
-        usersRepo.find(username) flatMap {
-          case Some(_) =>
+        (for {
+          usernameUser <- usersRepo.find(username)
+          emailUser <- usersRepo.findByEmail(data.email)
+        } yield (usernameUser, emailUser)) flatMap {
+          case (None, None) =>
+            usersRepo.create(data.email, username, data.password).map { _ =>
+              Redirect(routes.UserController.profile(username))
+                .withSession("USERNAME" -> username)
+            }
+          case _ =>
             Future.successful(
               BadRequest(
                 views.html.user.signup(
-                  SignupForm.form.fill(data).withGlobalError("Username taken"),
+                  SignupForm.form.fill(data).withGlobalError("Username or email taken"),
                   assetsFinder
                 )
               )
             )
-          case None =>
-            usersRepo.create(username, data.password).map { _ =>
-              Redirect(routes.UserController.profile(username))
-                .withSession("USERNAME" -> username)
-            }
         }
       }
     )
@@ -79,9 +84,7 @@ class UserController @Inject()(
       data => {
         loginOnSuccess(data) map {
           case Left(user) =>
-            Auth.login(user.username)(
-              Redirect(routes.UserController.profile(user.username))
-            )
+            Auth.login(user.username)(Redirect(routes.UserController.profile(user.username)))
           case Right(error) =>
             Forbidden(
               views.html.user.login(
@@ -152,4 +155,73 @@ class UserController @Inject()(
         case None => Future successful NotFound("404")
       }
     }
+
+  def passwordReset = Action { implicit request =>
+    Ok(views.html.user.passwordReset(PasswordResetForm.form, assetsFinder))
+  }
+
+  def postPasswordReset = Action.async { implicit request =>
+    PasswordResetForm.form.bindFromRequest.fold(
+      formWithErrors => {
+        Future successful Forbidden(views.html.user.passwordReset(formWithErrors, assetsFinder))
+      },
+      data => {
+        usersRepo.findByEmail(data.email) flatMap {
+          case Some(user) =>
+            passwordResetRepo.create(user.id) flatMap {
+              passwordReset =>
+                mail.mail(
+                  user.email,
+                  "Robot Rumble password reset",
+                  s"""
+                  |Hello ${user.username},
+                  |
+                  |You requested a robotrumble.org password reset. Please go to
+                  |https://robotrumble.org${routes.UserController
+                       .updatePassword()} and inputs this token exactly:
+                  |${passwordReset.token}""".stripMargin
+                )
+            } map { _ =>
+              Redirect(routes.UserController.passwordReset())
+                .flashing("success" -> "Email sent!")
+            }
+          case None =>
+            Future successful Forbidden(
+              views.html.user.passwordReset(
+                PasswordResetForm.form
+                  .withGlobalError("User with this email does not exist"),
+                assetsFinder
+              )
+            )
+        }
+      }
+    )
+  }
+
+  def updatePassword = Action { implicit request =>
+    Ok(views.html.user.updatePassword(UpdatePasswordForm.form, assetsFinder))
+  }
+
+  def postUpdatePassword = Action.async { implicit request =>
+    UpdatePasswordForm.form.bindFromRequest.fold(
+      formWithErrors => {
+        Future successful Forbidden(views.html.user.updatePassword(formWithErrors, assetsFinder))
+      },
+      data => {
+        passwordResetRepo.complete(data.token, data.password) map {
+          case Some(_) =>
+            Redirect(routes.UserController.updatePassword())
+              .flashing("success" -> "Password updated!")
+          case None =>
+            Forbidden(
+              views.html.user.updatePassword(
+                UpdatePasswordForm.form
+                  .withGlobalError("Invalid token!"),
+                assetsFinder
+              )
+            )
+        }
+      }
+    )
+  }
 }

@@ -41,6 +41,8 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-http" % "10.1.11"
 )
 
+libraryDependencies += "com.github.daddykotex" %% "courier" % "2.0.0"
+
 scalacOptions ++= Seq(
   "-feature",
   "-deprecation",

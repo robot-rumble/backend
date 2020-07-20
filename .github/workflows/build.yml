@@ -26,8 +26,9 @@ jobs:
           -user=${{ secrets.BOXFUSE_USER }} 
           -secret=${{ secrets.BOXFUSE_SECRET }} 
           -envvars.BATTLE_QUEUE_IN_URL=${{ secrets.BATTLE_QUEUE_IN_URL }} 
-          -envvars.BATTLE_QUEUE_OUT_URL=${{ secrets.BATTLE_QUEUE_OUT_URL }} 
-          -envvars.SECRET_KEY='${{ secrets.SECRET_KEY }}' 
+          -envvars.BATTLE_QUEUE_OUT_URL=${{ secrets.BATTLE_QUEUE_OUT_URL }}
+          -envvars.EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }}
+          -envvars.SECRET_KEY='${{ secrets.SECRET_KEY }}'
           -envvars.ASSETS_PATH=${{ secrets.CLOUDFRONT_URL }}
           -jvm.args=-Ddb.default_.migration.auto=true
           -ports.http=80 

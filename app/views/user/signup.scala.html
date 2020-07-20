@@ -2,6 +2,7 @@
 
 @main("Signup", "signup", assetsFinder) {
     @helper.form(routes.UserController.postCreate()) {
+        @helper.inputText(form("email"), Symbol("_showConstraints") -> false)
         @helper.inputText(form("username"), Symbol("_showConstraints") -> false)
         @helper.inputPassword(form("password"), Symbol("_showConstraints") -> false)
         @helper.CSRF.formField
@@ -9,7 +10,7 @@
     }
 
     @if(form.hasGlobalErrors) {
-        <ul>
+        <ul class="error">
         @for(error <- form.globalErrors) {
             <li>@error.format</li>
         }

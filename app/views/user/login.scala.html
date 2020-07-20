@@ -9,10 +9,12 @@
     }
 
     @if(form.hasGlobalErrors) {
-        <ul>
+        <ul class="error">
         @for(error <- form.globalErrors) {
             <li>@error.format</li>
         }
         </ul>
     }
+
+    <div class="mt-3"><a href="@routes.UserController.passwordReset">Reset password</a></div>
 }

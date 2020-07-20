@@ -8,7 +8,7 @@ import javax.inject.Inject
 import play.api.libs.json.{Json, Writes}
 import robotCode.LoadCode
 import matchmaking.BattleQueue.MatchOutput
-import db.Database
+import services.Database
 
 object Schema {
   sealed trait Lang extends EnumEntry
@@ -30,14 +30,16 @@ object Schema {
 
   case class User(
       id: Long = -1,
+      email: String,
       username: String,
       password: String,
       created: LocalDateTime
   )
 
   object User {
-    def apply(username: String, password: String) =
+    def apply(email: String, username: String, password: String) =
       new User(
+        email = email,
         username = username,
         password = password.bcrypt,
         created = LocalDateTime.now()
@@ -122,6 +124,18 @@ object Schema {
       )
   }
 
+  case class PasswordReset(
+      id: Long = -1,
+      created: LocalDateTime = LocalDateTime.now(),
+      token: String = scala.util.Random.alphanumeric.take(15).mkString(""),
+      userId: Long
+  )
+
+  object PasswordReset {
+    def apply(userId: Long) =
+      new PasswordReset(userId = userId)
+  }
+
   class Schema @Inject()(db: Database)(implicit ec: scala.concurrent.ExecutionContext) {
     val ctx = db.ctx
     import ctx._
@@ -135,6 +149,7 @@ object Schema {
     val robots = quote(querySchema[Robot]("robots"))
     val publishedRobots = quote(querySchema[PublishedRobot]("published_robots"))
     val battles = quote(querySchema[Battle]("battles"))
+    val passwordResets = quote(querySchema[PasswordReset]("password_reset_tokens"))
 
     implicit class RichQuotedQuery[T](query: Quoted[Query[T]]) {
       def paginate(page: Long, numPerPage: Int): Quoted[Query[T]] = quote {
@@ -171,6 +186,12 @@ object Schema {
           r1 <- robots if b.r1Id == r1.id
           r2 <- robots if b.r2Id == r2.id
         } yield (b, r1, r2)
+    }
+
+    implicit class DateQuotes(left: LocalDateTime) {
+      def >(right: LocalDateTime) = quote(infix"$left > $right".as[Boolean])
+
+      def <(right: LocalDateTime) = quote(infix"$left < $right".as[Boolean])
     }
   }
 }
