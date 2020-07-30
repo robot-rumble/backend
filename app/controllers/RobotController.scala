@@ -1,6 +1,6 @@
 package controllers
 
-import controllers.Auth.{LoggedIn, Visitor}
+import controllers.Auth.{LoggedIn, LoggedOut, Visitor}
 import javax.inject._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -157,10 +157,19 @@ class RobotController @Inject()(
       }
     }
 
-  def viewBattle(battleId: Long) = Action.async { implicit request =>
+  def viewBattle(battleId: Long) = auth.action { visitor => implicit request =>
     battlesRepo.findWithRobots(battleId) map {
       case Some((battle, r1, r2)) =>
-        Ok(views.html.robot.battle(battle, r1, r2, assetsFinder))
+        val userTeam = visitor match {
+          case LoggedIn(user) =>
+            if (r1.userId == user.id) {
+              Some("Blue")
+            } else if (r2.userId == user.id) {
+              Some("Red")
+            } else { None }
+          case LoggedOut() => None
+        }
+        Ok(views.html.robot.battle(battle, r1, r2, userTeam, assetsFinder))
       case None => NotFound("404")
     }
   }

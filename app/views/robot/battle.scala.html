@@ -1,5 +1,5 @@
 @import models.Schema._
-@(battle: Battle, r1: Robot, r2: Robot, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+@(battle: Battle, r1: Robot, r2: Robot, userTeam: Option[String], assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
 @main(s"Battle: ${r1.name} vs ${r2.name}", "battle", assetsFinder) {
     <link rel="stylesheet" type="text/css" href="@assetsFinder.path("dist/battle_css.css")">
@@ -20,6 +20,6 @@
         }
     </h3>
 
-    <battle-el data="@battle.data"></battle-el>
+    <battle-el data="@battle.data" team="@userTeam"></battle-el>
 }
 
