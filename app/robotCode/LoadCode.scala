@@ -5,7 +5,7 @@ import models.Schema.Lang
 object LoadCode {
   val PYTHON =
     """
-      |def robot(state, unit, debug):
+      |def robot(state, unit):
       |    if state.turn % 2 == 0:
       |        return Action.move(Direction.East)
       |    else:
@@ -13,7 +13,7 @@ object LoadCode {
       |""".stripMargin
   val JAVASCRIPT =
     """
-      |function robot(state, unit, debug) {
+      |function robot(state, unit) {
       |  if (state.turn % 2 === 0) {
       |    return Action.move(Direction.East)
       |  } else {
