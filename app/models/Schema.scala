@@ -146,7 +146,9 @@ object Schema {
     implicit val battleIM = insertMeta[Battle](_.id)
 
     val users = quote(querySchema[User]("users"))
-    val robots = quote(querySchema[Robot]("robots"))
+    // column renaming fixes a really weird issue:
+    // (Message, column r.user_id does not exist), (Hint, Perhaps you meant to reference the column "r.userid".)
+    val robots = quote(querySchema[Robot]("robots", _.userId -> "user_id"))
     val publishedRobots = quote(querySchema[PublishedRobot]("published_robots"))
     val battles = quote(querySchema[Battle]("battles"))
     val passwordResets = quote(querySchema[PasswordReset]("password_reset_tokens"))
