@@ -7,15 +7,25 @@
 
     <h1 class="mb-3 text-center"><span class="text-blue">@r1.name</span> vs <span class="text-red">@r2.name</span></h1>
     <h3 class="mb-5 text-center">
-        @battle.winner match {
-            case Winner.R1 => {
+        @(battle.winner, battle.errored) match {
+            case (Some(Team.R1), false) => {
                 Winner: @r1.name
             }
-            case Winner.R2 => {
+            case (Some(Team.R2), false) => {
                 Winner: @r2.name
             }
-            case Winner.Draw => {
+            case (None, false) => {
                 Draw
+            }
+
+            case (Some(Team.R1), true) => {
+                Winner: @r1.name, @r2.name errored
+            }
+            case (Some(Team.R2), true) => {
+                Winner: @r2.name, @r1.name errored
+            }
+            case (None, true) => {
+                Draw, both robots errored
             }
         }
     </h3>

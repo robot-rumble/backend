@@ -11,11 +11,11 @@ val robotsRepo = app.injector.instanceOf[Robots]
 val battlesRepo = app.injector.instanceOf[Battles]
 
 def createBattle(r1Id: Long, pr1Id: Long, r2Id: Long, pr2Id: Long) = {
-  battlesRepo.create(MatchOutput(r1Id, pr1Id, 0, r2Id, pr2Id, 0, Winner.R1, false, ""), 100, 100)
+  battlesRepo.create(MatchOutput(r1Id, pr1Id, 0, r2Id, pr2Id, 0, Some(Team.R1), false, ""), 100, 100)
 }
 
 for {
-  user <- usersRepo.create("test", "test")
+  user <- usersRepo.create("test@test.com", "test", "test")
   r1 <- robotsRepo.create(user.id, "r1", Lang.Python)
   pr1Id <- robotsRepo.publish(r1.id)
   r2 <- robotsRepo.create(user.id, "r2", Lang.Python)

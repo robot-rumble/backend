@@ -19,12 +19,11 @@ object Schema {
     val values = findValues
   }
 
-  sealed trait Winner extends EnumEntry
+  sealed trait Team extends EnumEntry
 
-  case object Winner extends PlayEnum[Winner] with QuillEnum[Winner] {
-    case object R1 extends Winner
-    case object R2 extends Winner
-    case object Draw extends Winner
+  case object Team extends PlayEnum[Team] with QuillEnum[Team] {
+    case object R1 extends Team
+    case object R2 extends Team
     val values = findValues
   }
 
@@ -89,7 +88,7 @@ object Schema {
       pr1Id: Long,
       pr2Id: Long,
       ranked: Boolean = true,
-      winner: Winner,
+      winner: Option[Team],
       errored: Boolean,
       r1Rating: Int,
       r2Rating: Int,
@@ -99,10 +98,8 @@ object Schema {
       created: LocalDateTime = LocalDateTime.now(),
   ) {
     def didR1Win(r1Id: Long): Option[Boolean] = {
-      winner match {
-        case Winner.R1 | Winner.R2 =>
-          Some(winner == Winner.R1 && r1Id == r1Id)
-        case Winner.Draw => None
+      winner.map { w =>
+        w == Team.R1 && r1Id == r1Id
       }
     }
   }

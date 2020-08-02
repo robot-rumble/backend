@@ -12,7 +12,7 @@ import scala.util.{Failure, Success}
 import org.joda.time.{Duration, LocalDateTime}
 import models._
 import services.JodaUtils._
-import models.Schema.Winner
+import models.Schema.Team
 import play.api.Configuration
 
 @Singleton
@@ -121,9 +121,9 @@ class MatchMaker @Inject()(
     } yield (r1Info, r2Info)) map {
       case ((r1, r1Player), (r2, r2Player)) =>
         matchOutput.winner match {
-          case Winner.R1   => r1Player wins r2Player
-          case Winner.R2   => r2Player wins r1Player
-          case Winner.Draw => r1Player draws r2Player
+          case Some(Team.R1) => r1Player wins r2Player
+          case Some(Team.R2) => r2Player wins r1Player
+          case None          => r1Player draws r2Player
         }
 
         r1Player.updateRating(KFactor.USCF)

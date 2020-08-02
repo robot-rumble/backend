@@ -41,8 +41,8 @@ CREATE TABLE battles
     pr1_id    BIGINT     NOT NULL REFERENCES published_robots (id),
     pr2_id    BIGINT     NOT NULL REFERENCES published_robots (id),
     ranked    BOOL       NOT NULL,
-    winner    VARCHAR(5) NOT NULL,
---  If `errored` and r1_won/r2_won, then the other robot errored. Otherwise, both errored.
+    winner    VARCHAR(2),
+--  If `errored` and winner is not null, then the other robot errored. Otherwise, both errored.
     errored   BOOL       NOT NULL,
     r1_rating INT        NOT NULL,
     r2_rating INT        NOT NULL,

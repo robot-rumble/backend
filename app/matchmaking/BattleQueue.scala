@@ -4,7 +4,7 @@ import akka.NotUsed
 import akka.stream.scaladsl.{Sink, Source}
 import play.api.libs.functional.syntax._
 
-import models.Schema.{Winner, Lang}
+import models.Schema.{Team, Lang}
 
 trait BattleQueue {
   val sink: Sink[BattleQueue.MatchInput, NotUsed]
@@ -34,7 +34,7 @@ object BattleQueue {
       (JsPath \ "r2_id").read[Long] and
       (JsPath \ "pr2_id").read[Long] and
       (JsPath \ "r2_time").read[Float] and
-      (JsPath \ "winner").read[Winner] and
+      (JsPath \ "winner").readNullable[Team] and
       (JsPath \ "errored").read[Boolean] and
       (JsPath \ "data").read[String]
   )(MatchOutput.apply _)
@@ -57,7 +57,7 @@ object BattleQueue {
       r2Id: Long,
       pr2Id: Long,
       r2Time: Float,
-      winner: Winner,
+      winner: Option[Team],
       errored: Boolean,
       data: String
   )
