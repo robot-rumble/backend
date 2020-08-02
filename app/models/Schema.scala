@@ -148,10 +148,26 @@ object Schema {
     val users = quote(querySchema[User]("users"))
     // column renaming fixes a really weird issue:
     // (Message, column r.user_id does not exist), (Hint, Perhaps you meant to reference the column "r.userid".)
-    val robots = quote(querySchema[Robot]("robots", _.userId -> "user_id"))
+    val robots = quote(
+      querySchema[Robot](
+        "robots",
+        _.userId -> "user_id",
+        _.prId -> "pr_id",
+      )
+    )
     val publishedRobots = quote(querySchema[PublishedRobot]("published_robots"))
-    val battles = quote(querySchema[Battle]("battles"))
-    val passwordResets = quote(querySchema[PasswordReset]("password_reset_tokens"))
+    val battles = quote(
+      querySchema[Battle](
+        "battles",
+        _.r1Id -> "r1_id",
+        _.r2Id -> "r2_id",
+        _.pr1Id -> "pr1_id",
+        _.pr2Id -> "pr2_id"
+      )
+    )
+    val passwordResets = quote(
+      querySchema[PasswordReset]("password_reset_tokens", _.userId -> "user_id")
+    )
 
     implicit class RichQuotedQuery[T](query: Quoted[Query[T]]) {
       def paginate(page: Long, numPerPage: Int): Quoted[Query[T]] = quote {
