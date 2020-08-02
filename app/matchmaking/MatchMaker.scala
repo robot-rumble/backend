@@ -90,7 +90,7 @@ class MatchMaker @Inject()(
   }
 
   val CHECK_EVERY =
-    if (USE_MOCK) 10.seconds
+    if (USE_MOCK) 2.seconds
     else config.get[FiniteDuration]("queue.checkEvery")
 
   Source
