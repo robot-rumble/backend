@@ -47,8 +47,7 @@ class MatchMaker @Inject()(
           .filter {
             case (r, _) =>
               recentOpponentsMap.get(r.id) match {
-                case None        => true
-                case Some(Seq()) => true
+                case None | Some(Seq()) => true
                 case Some(opponents) =>
                   opponents
                     .map(_.created)
@@ -56,17 +55,22 @@ class MatchMaker @Inject()(
                     .isBefore(LocalDateTime.now().minus(COOLDOWN))
               }
           }
-          .map {
+          .flatMap {
             case (r, pr) =>
-              val o = allRobots
+              allRobots
                 .sortBy {
                   case (r2, _) => (r2.rating - r.rating).abs
                 }
                 .find {
-                  case (r2, _) => r.id != r2.id && !recentOpponentsMap.contains(r2.id)
+                  case (r2, _) =>
+                    r.id != r2.id && (recentOpponentsMap.get(r.id) match {
+                      case None | Some(Seq()) => true
+                      case Some(opponents)    => opponents.forall(_.rId != r2.id)
+                    })
                 }
-                .getOrElse(allRobots.head)
-              ((r, pr), o)
+                .map { o =>
+                  ((r, pr), o)
+                }
           }
           .map {
             case ((r1, pr1), (r2, pr2)) =>
