@@ -184,7 +184,7 @@ object Schema {
 
       def withRobots(): Quoted[Query[(Battle, Robot, Robot)]] =
         for {
-          b <- battles
+          b <- query
           r1 <- robots if b.r1Id == r1.id
           r2 <- robots if b.r2Id == r2.id
         } yield (b, r1, r2)
