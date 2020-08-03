@@ -1,8 +1,11 @@
 @import models.Schema._
 @(user: User, isAuthenticated: Boolean, robots: Seq[Robot], assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
-@main("Profile", "profile", assetsFinder) {
-    <h1>@user.username</h1>
+@title() = @{
+    if (isAuthenticated) { "Profile" } else { s"User ${user.username}" }
+}
+@main(title(), "profile", assetsFinder) {
+    <h1>@title()</h1>
 
     @if(robots.nonEmpty) {
         <table class="mb-3">
