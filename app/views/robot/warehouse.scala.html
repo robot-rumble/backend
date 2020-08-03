@@ -9,9 +9,8 @@
         <tr>
             <td><a href="@routes.RobotController.view(user.username, robot.name, 0)">@robot.name</a></td>
             <td>by <a href="@routes.UserController.profile(user.username)">@user.username</a></td>
-            <td class="d-flex">
-                <p class="mr-2">@robot.rating</p>
-            </td>
+            <td>@robot.lang</td>
+            <td>@robot.rating</td>
         </tr>
     }
     </table>

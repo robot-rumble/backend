@@ -9,8 +9,14 @@
         @for(robot <- robots) {
             <tr>
                 <td><a href="@routes.RobotController.view(user.username, robot.name)">@robot.name</a></td>
-                <td class="d-flex">
-                    <p class="mr-2">@robot.rating</p>
+                <td>@robot.lang</td>
+                <td>@robot.rating</td>
+                <td>
+                    @if(robot.isPublished) {
+                      Published
+                    } else {
+                      Draft
+                    }
                 </td>
             </tr>
         }
