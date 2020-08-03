@@ -21,7 +21,7 @@
     </div>
 
     <div class="battles">
-        <h4>Battles</h4>
+        <h4 class="mb-3">Battles</h4>
         @if(pagedBattles.nonEmpty) {
           <table>
           @for((battle, r2) <- pagedBattles) {
@@ -34,11 +34,12 @@
                       assetsFinder.path(imgPath)
                   }"></td>
                   <td><a href="@routes.RobotController.viewBattle(battle.id)">vs @r2.name</a></td>
+                  <td>@battle.formatCreated()</td>
               </tr>
           }
           </table>
 
-          @pageControls((page) => routes.RobotController.view(user.username, robot.name, page), page)
+          @pageControls(page => routes.RobotController.view(user.username, robot.name, page), page)
         } else {
             <p>None yet!</p>
         }

@@ -3,11 +3,12 @@ package models
 import org.joda.time.LocalDateTime
 import com.github.t3hnar.bcrypt._
 import enumeratum._
-import io.getquill.{EntityQuery, Query}
+import io.getquill.{EntityQuery, Ord, Query}
 import javax.inject.Inject
 import play.api.libs.json.{Json, Writes}
 import robotCode.LoadCode
 import matchmaking.BattleQueue.MatchOutput
+import org.joda.time.format.DateTimeFormatterBuilder
 import services.Database
 
 object Schema {
@@ -101,6 +102,16 @@ object Schema {
       winner.map { w =>
         w == Team.R1 && r1Id == r1Id
       }
+    }
+
+    val createdFormatter = new DateTimeFormatterBuilder()
+      .appendMonthOfYearText()
+      .appendLiteral(' ')
+      .appendDayOfMonth(1)
+      .toFormatter
+
+    def formatCreated(): String = {
+      createdFormatter.print(created)
     }
   }
 

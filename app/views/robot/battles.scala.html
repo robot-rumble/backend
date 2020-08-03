@@ -8,6 +8,7 @@
     @for((battle, r1, r2) <- pagedBattles) {
         <tr>
             <td><a href="@routes.RobotController.viewBattle(battle.id)">@r1.name vs @r2.name</a></td>
+            <td>@battle.formatCreated()</td>
         </tr>
     }
     </table>
