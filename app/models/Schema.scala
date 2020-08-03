@@ -191,16 +191,20 @@ object Schema {
         query.filter(_.userId == lift(userId))
     }
 
-    implicit class BattleQuery(query: Quoted[EntityQuery[Battle]]) {
-      def byId(id: Long): Quoted[EntityQuery[Battle]] =
-        query.filter(_.id == lift(id))
+    implicit class BattleEntityQuery(query: Quoted[EntityQuery[Battle]]) {
+      def byId(id: Long): Quoted[EntityQuery[Battle]] = query.filter(_.id == lift(id))
+    }
 
+    implicit class BattleQuery(query: Quoted[Query[Battle]]) {
       def withRobots(): Quoted[Query[(Battle, Robot, Robot)]] =
         for {
           b <- query
           r1 <- robots if b.r1Id == r1.id
           r2 <- robots if b.r2Id == r2.id
         } yield (b, r1, r2)
+
+      def latestFirst(): Quoted[Query[Battle]] =
+        query.sortBy(_.created)(Ord.desc)
     }
 
     implicit class DateQuotes(left: LocalDateTime) {

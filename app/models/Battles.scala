@@ -24,7 +24,7 @@ class Battles @Inject()(
     run(battles.byId(id).withRobots()).map(_.headOption)
 
   def findAllPaged(page: Long, numPerPage: Int): Future[Seq[(Battle, Robot, Robot)]] =
-    run(battles.withRobots().paginate(page, numPerPage))
+    run(battles.latestFirst().withRobots().paginate(page, numPerPage))
 
   def create(matchOutput: MatchOutput, r1Rating: Int, r2Rating: Int) = {
     val battle = Battle(matchOutput, r1Rating, r2Rating)
@@ -40,10 +40,10 @@ class Battles @Inject()(
   }
 
   def findAllForRobot_(robotId: Long) = quote {
-    for {
-      b <- battles if involvesR(b, lift(robotId))
+    (for {
+      b <- battles.latestFirst() if involvesR(b, lift(robotId))
       opponentR <- robots if involvesR(b, opponentR.id)
-    } yield (b, opponentR)
+    } yield (b, opponentR))
   }
 
   def findAllForRobot(robotId: Long): Future[Seq[(Battle, Robot)]] =
@@ -55,10 +55,6 @@ class Battles @Inject()(
       numPerPage: Int
   ): Future[Seq[(Battle, Robot)]] =
     run(findAllForRobot_(robotId).paginate(page, numPerPage))
-
-  def findLatestForRobot(robotId: Long, num: Int): Future[Seq[(Battle, Robot)]] = {
-    run(findAllForRobot_(robotId).sortBy(_._1.created).take(lift(num)))
-  }
 
   case class Opponent(bId: Long, rId: Long, created: LocalDateTime)
 
