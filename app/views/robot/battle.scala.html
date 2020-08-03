@@ -5,30 +5,30 @@
     <link rel="stylesheet" type="text/css" href="@assetsFinder.path("dist/battle_css.css")">
     <script src="@assetsFinder.path("dist/battle_js.js")" type="text/javascript"></script>
 
-    <h1 class="mb-3 text-center"><span class="text-blue">@r1.name</span> vs <span class="text-red">@r2.name</span></h1>
-    <h3 class="mb-5 text-center">
+    <h1 class="mb-3 text-center">
         @(battle.winner, battle.errored) match {
             case (Some(Team.R1), false) => {
-                Winner: @r1.name
+                <span class="text-blue">@r1.name wins</span> against <span class="text-red">@r2.name</span>
             }
             case (Some(Team.R2), false) => {
-                Winner: @r2.name
+                <span class="text-red">@r2.name wins</span> against <span class="text-blue">@r1.name</span>
             }
             case (None, false) => {
-                Draw
+                Draw between @r1.name and @r2.name
             }
 
             case (Some(Team.R1), true) => {
-                Winner: @r1.name, @r2.name errored
+                <span class="text-blue">@r1.name wins</span>, <span class="text-red">@r2.name forfeits</span> because of error
             }
             case (Some(Team.R2), true) => {
-                Winner: @r2.name, @r1.name errored
+                <span class="text-red">@r2.name wins</span>, <span class="text-blue">@r1.name forfeits</span> because of error
             }
             case (None, true) => {
-                Draw, both robots errored
+                Draw between @r1.name and @r2.name, both forfeit because of error
             }
         }
-    </h3>
+    </h1>
+    <h3 class="mb-5 text-center">battle #@battle.id, @battle.formatCreated()</h3>
 
     <battle-el data="@battle.data" team="@userTeam"></battle-el>
 }
