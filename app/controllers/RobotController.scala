@@ -16,7 +16,8 @@ class RobotController @Inject()(
     assetsFinder: AssetsFinder,
     auth: Auth.AuthAction,
     robotsRepo: Robots,
-    battlesRepo: Battles
+    battlesRepo: Battles,
+    usersRepo: Users
 )(implicit ec: ExecutionContext)
     extends MessagesAbstractController(cc) {
 
@@ -109,6 +110,17 @@ class RobotController @Inject()(
         }
       )
     }
+
+  def viewById(id: Long) = auth.action { visitor => implicit request =>
+    robotsRepo.find(id)(visitor) flatMap {
+      case Some(robot) =>
+        usersRepo.find(robot.userId) map {
+          case Some(user) => Redirect(routes.RobotController.view(user.username, robot.name))
+          case None       => NotFound("404")
+        }
+      case None => Future successful NotFound("404")
+    }
+  }
 
   def view(username: String, robot: String, page: Long = 0) =
     auth.action { visitor => implicit request =>

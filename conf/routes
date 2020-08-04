@@ -28,6 +28,7 @@ GET         /publish/:robotId                      controllers.RobotController.p
 POST        /publish/:robotId                      controllers.RobotController.postPublish(robotId: Long)
 
 GET         /b/:id                                 controllers.RobotController.viewBattle(id: Long)
+GET         /r/:id                                 controllers.RobotController.viewById(id: Long)
 
 + nocsrf
 POST        /api/login                             controllers.UserController.apiLogin
