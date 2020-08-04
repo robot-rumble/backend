@@ -8,7 +8,7 @@ lazy val root = (project in file("."))
   .enablePlugins(PlayScala)
   .dependsOn(scalaElo)
 lazy val scalaElo = ProjectRef(
-  uri("git://github.com/robot-rumble/scala-elo.git#v1.0.3"),
+  uri("git://github.com/robot-rumble/scala-elo.git#v1.0.4"),
   "scala-elo"
 )
 
