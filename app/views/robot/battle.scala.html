@@ -35,8 +35,16 @@
             }
         }
     </h1>
-    <h3 class="mb-5 text-center">battle #@battle.id, @battle.formatCreated()</h3>
+    <h3 class="text-center">battle #@battle.id, @battle.formatCreated()</h3>
+    @userTeam match {
+        case Some(team) => {
+            <h3 class="text-center">viewing as <span class="text-@team.toLowerCase">@team</span></h3>
+        }
+        case None => {}
+    }
 
-    <battle-el data="@battle.data" team="@userTeam"></battle-el>
+    <div class="mt-5">
+        <battle-el data="@battle.data" team="@userTeam"></battle-el>
+    </div>
 }
 
