@@ -18,6 +18,7 @@ class MockQueue @Inject()(
     val jsonOutput = Seq(
       "../cli/target/release/rumblebot",
       "run",
+      "term",
       s"inline:${input.r1Lang};${input.r1Code}",
       s"inline:${input.r2Lang};${input.r2Code}",
       "--raw"
