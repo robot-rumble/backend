@@ -45,6 +45,7 @@ class MatchMaker @Inject()(
     else Duration.millis(config.get[FiniteDuration]("queue.cooldown").toMillis)
 
   def prepareMatches(): Future[Iterable[MatchInput]] = {
+    logger.debug("Preparing matches...")
     robotsRepo.findAllPr() flatMap { allRobots =>
       battlesRepo.allOpponents() map { allOpponentsMap =>
         val recentOpponentsMap = allOpponentsMap.mapValues(_.take(RECENT_OPPONENT_LIMIT))

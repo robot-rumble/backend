@@ -1,7 +1,7 @@
 import com.google.inject.AbstractModule
-import play.api.{Configuration, Environment}
+import play.api.{Configuration, Environment, Logger}
 import matchmaking._
-import services.{Database, Postgres, Mail, GMail}
+import services.{Database, GMail, Mail, Postgres}
 
 /**
   * This class is a Guice module that tells Guice how to bind several
@@ -13,15 +13,18 @@ import services.{Database, Postgres, Mail, GMail}
   * adding `play.modules.enabled` settings to the `application.conf`
   * configuration file.
   */
-class Module(_env: Environment, config: Configuration) extends AbstractModule {
+class Module(_env: Environment, logger: Logger, config: Configuration) extends AbstractModule {
   override def configure(): Unit = {
     bind(classOf[Database]).to(classOf[Postgres]).asEagerSingleton()
     bind(classOf[Mail]).to(classOf[GMail])
     if (config.get[Boolean]("queue.enabled")) {
-      if (config.get[Boolean]("queue.useMock"))
+      if (config.get[Boolean]("queue.useMock")) {
+        logger.debug("Launching Mock Queue...")
         bind(classOf[BattleQueue]).to(classOf[MockQueue])
-      else
+      } else {
+        logger.debug("Launching AWS Queue...")
         bind(classOf[BattleQueue]).to(classOf[AwsQueue]).asEagerSingleton()
+      }
       bind(classOf[MatchMaker]).asEagerSingleton()
     }
   }
