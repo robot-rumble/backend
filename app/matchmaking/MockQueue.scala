@@ -21,6 +21,7 @@ class MockQueue @Inject()(
       "term",
       s"inline:${input.r1Lang};${input.r1Code}",
       s"inline:${input.r2Lang};${input.r2Code}",
+      s"-t ${input.turnNum}",
       "--raw"
     ).!!
     val winner = (Json.parse(jsonOutput) \ "winner").get

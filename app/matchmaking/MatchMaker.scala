@@ -32,6 +32,8 @@ class MatchMaker @Inject()(
 
   val logger: Logger = Logger(this.getClass)
 
+  val TURN_NUM = config.get[Long]("queue.turnNum")
+
   val USE_MOCK = config.get[Boolean]("queue.useMock")
 
   val RECENT_OPPONENT_LIMIT =
@@ -79,6 +81,7 @@ class MatchMaker @Inject()(
           .map {
             case ((r1, pr1), (r2, pr2)) =>
               MatchInput(
+                TURN_NUM,
                 r1.id,
                 pr1.id,
                 pr1.code,

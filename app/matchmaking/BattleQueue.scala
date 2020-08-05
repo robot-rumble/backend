@@ -16,6 +16,7 @@ object BattleQueue {
 
   implicit val matchInputWrites = new Writes[MatchInput] {
     def writes(matchInput: MatchInput) = Json.obj(
+      "turn_num" -> matchInput.turnNum,
       "r1_id" -> matchInput.r1Id,
       "pr1_id" -> matchInput.pr1Id,
       "r1_code" -> matchInput.r1Code,
@@ -40,6 +41,7 @@ object BattleQueue {
   )(MatchOutput.apply _)
 
   case class MatchInput(
+      turnNum: Long,
       r1Id: Long,
       pr1Id: Long,
       r1Code: String,
