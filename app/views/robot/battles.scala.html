@@ -1,7 +1,7 @@
 @import models.Schema._
 @(pagedBattles: Seq[(Battle, Robot, Robot)], page: Long, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
-@main("Warehouse", "warehouse", assetsFinder) {
+@main("Battles", "battles", assetsFinder) {
     <h1>Battles</h1>
 
     <table>
