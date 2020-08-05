@@ -15,6 +15,8 @@ import services.JodaUtils._
 import models.Schema.Team
 import play.api.Configuration
 
+import play.api.Logger
+
 @Singleton
 class MatchMaker @Inject()(
     config: Configuration,
@@ -27,6 +29,8 @@ class MatchMaker @Inject()(
     mat: Materializer,
 ) {
   import BattleQueue._
+
+  val logger: Logger = Logger(this.getClass)
 
   val USE_MOCK = config.get[Boolean]("queue.useMock")
 
@@ -97,11 +101,11 @@ class MatchMaker @Inject()(
     .tick(0.seconds, CHECK_EVERY, "tick")
     .mapAsyncUnordered(1)(_ => prepareMatches())
     .mapConcat(_.toList)
-    .alsoTo(Sink.foreach(println))
+    .alsoTo(Sink.foreach(matchInput => logger.debug("Sending: " + matchInput.toString)))
     .runWith(battleQueue.sink)
 
   def processMatches(matchOutput: MatchOutput) = {
-    println("Received", matchOutput)
+    logger.debug("Received: " + matchOutput.copy(data = "TRUNCATED").toString)
 
     val getRobotInfo = (id: Long) => {
       (for {
@@ -137,7 +141,7 @@ class MatchMaker @Inject()(
   }
 
   battleQueue.source.runForeach(processMatches) onComplete {
-    case Success(_) => println("BattleQueue exited.")
-    case Failure(e) => println("BattleQueue error: " + e.getMessage)
+    case Success(_) => logger.debug("BattleQueue exited.")
+    case Failure(e) => logger.debug("BattleQueue error: " + e.getMessage)
   }
 }

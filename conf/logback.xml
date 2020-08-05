@@ -24,9 +24,9 @@
     <appender-ref ref="STDOUT" />
   </appender>
 
-  <logger name="akka.actor" level="INFO" />
+  <logger name="akka.actor" level="DEBUG" />
 
-  <logger name="play" level="INFO" />
+  <logger name="play" level="DEBUG" />
   <logger name="application" level="DEBUG" />
 
   <!-- Off these ones as they are annoying, and anyway we manage configuration ourselves -->
@@ -41,4 +41,6 @@
   </root>
 
   <logger name="play.mvc.Action" level="DEBUG" />
+
+  <logger name="matchmaking.MatchMaker" level="DEBUG" />
 </configuration>
