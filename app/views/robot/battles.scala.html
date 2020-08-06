@@ -7,7 +7,10 @@
     <table>
     @for((battle, r1, r2) <- pagedBattles) {
         <tr>
-            <td><a href="@routes.RobotController.viewBattle(battle.id)">@r1.name vs @r2.name</a></td>
+            <td><a href="@routes.RobotController.viewBattle(battle.id)">battle #@battle.id</a></td>
+            <td><a href="@routes.RobotController.viewById(battle.r1Id)">@r1.name</a> (@r1.rating)</td>
+            <td>vs</td>
+            <td><a href="@routes.RobotController.viewById(battle.r2Id)">@r2.name</a> (@r2.rating)</td>
             <td>@battle.formatCreated()</td>
         </tr>
     }

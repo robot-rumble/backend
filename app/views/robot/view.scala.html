@@ -34,7 +34,9 @@
                       }
                       assetsFinder.path(imgPath)
                   }"></td>
-                  <td><a href="@routes.RobotController.viewBattle(battle.id)">vs @r2.name</a></td>
+                  <td><a href="@routes.RobotController.viewBattle(battle.id)">battle #@battle.id</a></td>
+                  <td>vs</td>
+                  <td><a href="@routes.RobotController.viewBattle(battle.id)">@r2.name</a> (@r2.rating)</td>
                   <td>@battle.formatCreated()</td>
               </tr>
           }
