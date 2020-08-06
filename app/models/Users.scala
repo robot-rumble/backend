@@ -11,16 +11,16 @@ class Users @Inject()(schema: Schema)(implicit ec: ExecutionContext) {
   import schema._
 
   def find(username: String): Future[Option[User]] =
-    run(users.filter(_.username == lift(username))).map(_.headOption)
+    run(users.filter(_.username == lift(username.toLowerCase))).map(_.headOption)
 
   def find(id: Long): Future[Option[User]] =
     run(users.filter(_.id == lift(id))).map(_.headOption)
 
   def findByEmail(email: String): Future[Option[User]] =
-    run(users.filter(_.email == lift(email))).map(_.headOption)
+    run(users.filter(_.email == lift(email.toLowerCase))).map(_.headOption)
 
   def create(email: String, username: String, password: String): Future[User] = {
-    val data = User(email, username, password)
+    val data = User(email.toLowerCase, username.toLowerCase, password)
     run(users.insert(lift(data)).returningGenerated(_.id)).map(data.copy(_))
   }
 

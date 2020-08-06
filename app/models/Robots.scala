@@ -26,12 +26,13 @@ class Robots @Inject()(
     run(robotsAuth(visitor).byId(id)).map(_.headOption)
 
   def find(userId: Long, name: String)(visitor: Visitor): Future[Option[Robot]] =
-    run(robotsAuth(visitor).byUserId(userId).filter(_.name == lift(name))).map(_.headOption)
+    run(robotsAuth(visitor).byUserId(userId).filter(_.name == lift(name.toLowerCase)))
+      .map(_.headOption)
 
   def find(username: String, name: String)(visitor: Visitor): Future[Option[(Robot, User)]] = {
     val query = quote {
       robotsAuth(visitor).withUser().filter {
-        case (r, u) => u.username == lift(username) && r.name == lift(name)
+        case (r, u) => u.username == lift(username.toLowerCase) && r.name == lift(name.toLowerCase)
       }
     }
     run(query).map(_.headOption)
@@ -47,7 +48,7 @@ class Robots @Inject()(
     run(robotsAuth(LoggedOut()).withUser().paginate(page, numPerPage))
 
   def create(userId: Long, name: String, lang: Lang): Future[Robot] = {
-    val robot = Robot(userId, name, lang)
+    val robot = Robot(userId, name.toLowerCase, lang)
     run(robots.insert(lift(robot)).returningGenerated(_.id)).map(robot.copy(_))
   }
 
@@ -66,7 +67,7 @@ class Robots @Inject()(
         publishedRobots.insert(lift(PublishedRobot(code = code))).returningGenerated(_.id)
       )
       _ <- run(robots.byId(id).update(_.prId -> lift(Option(prId))))
-    } yield (prId)
+    } yield prId
 
   def getPublishedCode(id: Long): Future[Option[String]] =
     run(robots.byId(id).withPr().map(_._2.code)).map(_.headOption)
