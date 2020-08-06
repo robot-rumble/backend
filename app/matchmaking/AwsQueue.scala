@@ -1,9 +1,13 @@
 package matchmaking
 
+import java.io.ByteArrayInputStream
+
 import akka.actor.ActorSystem
 import akka.stream.alpakka.sqs.scaladsl.{SqsAckSink, SqsPublishSink, SqsSource}
 import akka.stream.alpakka.sqs.{MessageAction, SqsSourceSettings}
 import akka.stream.scaladsl.Flow
+import akka.stream.scaladsl.Compression
+import akka.util.ByteString
 import com.github.matsluni.akkahttpspi.AkkaHttpClient
 import javax.inject._
 import play.api.Configuration
@@ -13,6 +17,11 @@ import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import software.amazon.awssdk.services.sqs.model.{Message, SendMessageRequest}
+import java.util.Base64
+import java.nio.charset.StandardCharsets
+import java.util.zip.GZIPInputStream
+
+import scala.util.Try
 
 class AwsQueue @Inject()(
     implicit system: ActorSystem,
@@ -46,5 +55,12 @@ class AwsQueue @Inject()(
         .map(MessageAction.Delete(_))
         .to(SqsAckSink(outputQueueUrl))
     )
-    .map(message => Json.parse(message.body()).as[MatchOutput])
+    .map(
+      message => {
+        val compressed = Base64.getDecoder.decode(message.body.getBytes(StandardCharsets.UTF_8))
+        val inputStream = new GZIPInputStream(new ByteArrayInputStream(compressed))
+        val string = scala.io.Source.fromInputStream(inputStream).mkString
+        Json.parse(string).as[MatchOutput]
+      }
+    )
 }
