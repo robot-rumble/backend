@@ -5,6 +5,7 @@ import matchmaking.BattleQueue.MatchOutput
 
 import scala.concurrent.{ExecutionContext, Future}
 import Schema._
+import io.getquill.Ord
 import org.joda.time.LocalDateTime
 
 class Battles @Inject()(
@@ -41,9 +42,9 @@ class Battles @Inject()(
 
   def findAllForRobot_(robotId: Long) = quote {
     (for {
-      b <- battles.latestFirst() if involvesR(b, lift(robotId))
+      b <- battles if involvesR(b, lift(robotId))
       opponentR <- robots if involvesR(b, opponentR.id)
-    } yield (b, opponentR))
+    } yield (b, opponentR)).sortBy(_._1.created)(Ord.desc)
   }
 
   def findAllForRobot(robotId: Long): Future[Seq[(Battle, Robot)]] =
