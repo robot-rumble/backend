@@ -105,7 +105,14 @@ class MatchMaker @Inject()(
     .tick(0.seconds, CHECK_EVERY, "tick")
     .mapAsyncUnordered(1)(_ => prepareMatches())
     .mapConcat(_.toList)
-    .alsoTo(Sink.foreach(matchInput => logger.debug("Sending: " + matchInput.toString)))
+    .alsoTo(
+      Sink.foreach(
+        matchInput =>
+          logger.debug(
+            "Sending: " + matchInput.copy(r1Code = "TRUNCATED", r2Code = "TRUNCATED").toString
+        )
+      )
+    )
     .runWith(battleQueue.sink)
 
   def processMatches(matchOutput: MatchOutput) = {
