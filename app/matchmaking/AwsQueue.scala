@@ -3,7 +3,7 @@ package matchmaking
 import akka.actor.ActorSystem
 import akka.stream.alpakka.sqs.scaladsl.{SqsAckSink, SqsPublishSink, SqsSource}
 import akka.stream.alpakka.sqs.{MessageAction, SqsSourceSettings}
-import akka.stream.scaladsl.Flow
+import akka.stream.scaladsl.{Flow, RestartSource}
 import com.github.matsluni.akkahttpspi.AkkaHttpClient
 import javax.inject._
 import play.api.Configuration
@@ -17,6 +17,8 @@ import java.util.Base64
 import java.nio.charset.StandardCharsets
 
 import scala.util.Try
+
+import scala.concurrent.duration._
 
 class AwsQueue @Inject()(
     implicit system: ActorSystem,
@@ -42,10 +44,15 @@ class AwsQueue @Inject()(
     })
     .to(SqsPublishSink.messageSink(inputQueueUrl))
 
-  val source = SqsSource(
-    outputQueueUrl,
-    SqsSourceSettings().withCloseOnEmptyReceive(false)
-  ).alsoTo(
+  val restartSource = RestartSource.withBackoff(5.seconds, 30.seconds, 0.2) { () =>
+    SqsSource(
+      outputQueueUrl,
+      SqsSourceSettings().withCloseOnEmptyReceive(false).withWaitTimeSeconds(20)
+    )
+  }
+
+  val source = restartSource
+    .alsoTo(
       Flow[Message]
         .map(MessageAction.Delete(_))
         .to(SqsAckSink(outputQueueUrl))
