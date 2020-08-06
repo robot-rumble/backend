@@ -187,7 +187,7 @@ class UserController @Inject()(
                   |
                   |You requested a robotrumble.org password reset. Please go to
                   |https://robotrumble.org${routes.UserController
-                       .updatePassword()} and inputs this token exactly:
+                       .updatePassword()} and input this token exactly:
                   |${passwordReset.token}""".stripMargin
                 )
             } map { _ =>
