@@ -2,8 +2,8 @@
 @(user: User, isOwner: Boolean, robot: Robot, pagedBattles: Seq[(Battle, Robot)], page: Long, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
 @main(s"Robot ${robot.name}", "robot-page", assetsFinder) {
-    <h1>Robot @robot.name</h1>
-    <h3 class="mb-4">@robot.lang — Rating: @robot.rating</h3>
+    <h1>Robot @robot.name (@robot.rating)</h1>
+    <h3 class="mb-4">@robot.lang robot by <a href="@routes.UserController.profile(user.username)">@user.username</a></h3>
 
     <div class="d-flex actions mb-5">
         @if(robot.isPublished) {
