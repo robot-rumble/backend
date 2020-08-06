@@ -27,9 +27,13 @@ jobs:
           -secret=${{ secrets.BOXFUSE_SECRET }} 
           -envvars.BATTLE_QUEUE_IN_URL=${{ secrets.BATTLE_QUEUE_IN_URL }} 
           -envvars.BATTLE_QUEUE_OUT_URL=${{ secrets.BATTLE_QUEUE_OUT_URL }}
+          -envvars.QUEUE_ENABLED=true
+          -envvars.USE_MOCK_QUEUE=false
           -envvars.EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }}
           -envvars.SECRET_KEY='${{ secrets.SECRET_KEY }}'
           -envvars.ASSETS_PATH=${{ secrets.CLOUDFRONT_URL }}
+          -envvars.AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+          -envvars.AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
           -jvm.args=-Ddb.default_.migration.auto=true
           -ports.http=80 
           -env=test
