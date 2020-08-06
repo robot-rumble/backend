@@ -35,20 +35,20 @@ CREATE TABLE robots
 CREATE TABLE battles
 (
     id        BIGSERIAL PRIMARY KEY,
-    created   TIMESTAMP  NOT NULL,
-    r1_id     BIGINT     NOT NULL REFERENCES robots (id),
-    r2_id     BIGINT     NOT NULL REFERENCES robots (id),
-    pr1_id    BIGINT     NOT NULL REFERENCES published_robots (id),
-    pr2_id    BIGINT     NOT NULL REFERENCES published_robots (id),
-    ranked    BOOL       NOT NULL,
+    created   TIMESTAMP NOT NULL,
+    r1_id     BIGINT    NOT NULL REFERENCES robots (id),
+    r2_id     BIGINT    NOT NULL REFERENCES robots (id),
+    pr1_id    BIGINT    NOT NULL REFERENCES published_robots (id),
+    pr2_id    BIGINT    NOT NULL REFERENCES published_robots (id),
+    ranked    BOOL      NOT NULL,
     winner    VARCHAR(2),
 --  If `errored` and winner is not null, then the other robot errored. Otherwise, both errored.
-    errored   BOOL       NOT NULL,
-    r1_rating INT        NOT NULL,
-    r2_rating INT        NOT NULL,
-    r1_time   REAL       NOT NULL,
-    r2_time   REAL       NOT NULL,
-    data      TEXT       NOT NULL
+    errored   BOOL      NOT NULL,
+    r1_rating INT       NOT NULL,
+    r2_rating INT       NOT NULL,
+    r1_time   REAL      NOT NULL,
+    r2_time   REAL      NOT NULL,
+    data      BYTEA     NOT NULL
 );
 
 CREATE TABLE password_reset_tokens

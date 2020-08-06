@@ -6,7 +6,7 @@ import enumeratum._
 import io.getquill.{EntityQuery, Ord, Query}
 import javax.inject.Inject
 import play.api.libs.json.{Json, Writes}
-import robotCode.LoadCode
+import utils.LoadCode
 import matchmaking.BattleQueue.MatchOutput
 import org.joda.time.format.DateTimeFormatterBuilder
 import services.Database
@@ -95,7 +95,7 @@ object Schema {
       r2Rating: Int,
       r1Time: Float,
       r2Time: Float,
-      data: String,
+      data: Array[Byte],
       created: LocalDateTime = LocalDateTime.now(),
   ) {
     def didR1Win(r1Id: Long): Option[Boolean] = {
@@ -113,6 +113,10 @@ object Schema {
     def formatCreated(): String = {
       createdFormatter.print(created)
     }
+
+    def decompressData(): String = {
+      utils.Gzip.decompress(data)
+    }
   }
 
   object Battle {
@@ -126,7 +130,7 @@ object Schema {
         errored = matchOutput.errored,
         r1Time = matchOutput.r1Time,
         r2Time = matchOutput.r2Time,
-        data = matchOutput.data,
+        data = utils.Gzip.compress(matchOutput.data),
         r1Rating = r1Rating,
         r2Rating = r2Rating
       )
