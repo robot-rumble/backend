@@ -98,9 +98,10 @@ object Schema {
       data: Array[Byte],
       created: LocalDateTime = LocalDateTime.now(),
   ) {
-    def didR1Win(r1Id: Long): Option[Boolean] = {
-      winner.map { w =>
-        w == Team.R1 && r1Id == r1Id
+    def didRobotWin(rId: Long): Option[Boolean] = {
+      winner.map {
+        case Team.R1 => rId == r1Id
+        case Team.R2 => rId == r2Id
       }
     }
 
