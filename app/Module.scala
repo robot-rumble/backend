@@ -3,6 +3,8 @@ import play.api.{Configuration, Environment, Logger}
 import matchmaking._
 import services.{Database, GMail, Mail, Postgres}
 
+import play.api.Logger
+
 /**
   * This class is a Guice module that tells Guice how to bind several
   * different types. This Guice module is created when the Play
@@ -13,8 +15,10 @@ import services.{Database, GMail, Mail, Postgres}
   * adding `play.modules.enabled` settings to the `application.conf`
   * configuration file.
   */
-class Module(_env: Environment, logger: Logger, config: Configuration) extends AbstractModule {
+class Module(_env: Environment, config: Configuration) extends AbstractModule {
+  val logger: Logger = Logger(this.getClass)
   override def configure(): Unit = {
+    logger.debug("Starting Dependency Injection...")
     bind(classOf[Database]).to(classOf[Postgres]).asEagerSingleton()
     bind(classOf[Mail]).to(classOf[GMail])
     if (config.get[Boolean]("queue.enabled")) {
@@ -25,6 +29,7 @@ class Module(_env: Environment, logger: Logger, config: Configuration) extends A
         logger.debug("Launching AWS Queue...")
         bind(classOf[BattleQueue]).to(classOf[AwsQueue]).asEagerSingleton()
       }
+      logger.debug("Launching MatchMaker...")
       bind(classOf[MatchMaker]).asEagerSingleton()
     }
   }

@@ -43,4 +43,5 @@
   <logger name="play.mvc.Action" level="DEBUG" />
 
   <logger name="matchmaking.MatchMaker" level="DEBUG" />
+  <logger name="Module" level="DEBUG" />
 </configuration>
