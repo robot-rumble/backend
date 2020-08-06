@@ -3,7 +3,7 @@ package matchmaking
 import akka.actor.ActorSystem
 import akka.stream.alpakka.sqs.scaladsl.{SqsAckSink, SqsPublishSink, SqsSource}
 import akka.stream.alpakka.sqs.{MessageAction, SqsSourceSettings}
-import akka.stream.scaladsl.{Flow, RestartSource}
+import akka.stream.scaladsl.{Flow, RestartSink, RestartSource}
 import com.github.matsluni.akkahttpspi.AkkaHttpClient
 import javax.inject._
 import play.api.Configuration
@@ -17,13 +17,15 @@ import java.util.Base64
 import java.nio.charset.StandardCharsets
 
 import scala.util.Try
-
 import scala.concurrent.duration._
+import play.api.Logger
 
 class AwsQueue @Inject()(
     implicit system: ActorSystem,
     config: Configuration,
 ) extends BattleQueue {
+  val logger = Logger(this.getClass)
+
   val inputQueueUrl = config.get[String]("aws.battleQueueInUrl")
   val outputQueueUrl = config.get[String]("aws.battleQueueOutUrl")
   val credentialsProvider = DefaultCredentialsProvider.create()
@@ -44,26 +46,37 @@ class AwsQueue @Inject()(
     })
     .to(SqsPublishSink.messageSink(inputQueueUrl))
 
-  val restartSource = RestartSource.withBackoff(5.seconds, 30.seconds, 0.2) { () =>
-    SqsSource(
-      outputQueueUrl,
-      SqsSourceSettings().withCloseOnEmptyReceive(false).withWaitTimeSeconds(20)
-    )
-  }
+  val minBackoff = 5.seconds
+  val maxBackoff = 30.seconds
+  val randomFactor = 0.2
 
-  val source = restartSource
-    .alsoTo(
-      Flow[Message]
-        .map(MessageAction.Delete(_))
-        .to(SqsAckSink(outputQueueUrl))
-    )
-    .map(
-      message => {
-        Try {
-          val compressed = Base64.getDecoder.decode(message.body.getBytes(StandardCharsets.UTF_8))
-          utils.Gzip.decompress(compressed)
-        }.toOption
-      }
-    )
-    .collect { case Some(string) => Json.parse(string).as[MatchOutput] }
+  val source =
+    RestartSource
+      .withBackoff(minBackoff, maxBackoff, randomFactor)(() => {
+        logger.debug("Starting AWS source...")
+        SqsSource(
+          outputQueueUrl,
+          SqsSourceSettings().withCloseOnEmptyReceive(false).withWaitTimeSeconds(20)
+        ).alsoTo(
+            Flow[Message]
+              .map(MessageAction.Delete(_))
+              .to(
+                RestartSink.withBackoff(minBackoff, maxBackoff, randomFactor)(
+                  () => {
+                    logger.debug("Starting AWS sink...")
+                    SqsAckSink(outputQueueUrl)
+                  }
+                )
+              )
+          )
+          .map(
+            message => {
+              logger.debug(s"Got message ${message.messageId()}")
+              val compressed =
+                Base64.getDecoder.decode(message.body.getBytes(StandardCharsets.UTF_8))
+              val string = utils.Gzip.decompress(compressed)
+              Json.parse(string).as[MatchOutput]
+            }
+          )
+      })
 }
