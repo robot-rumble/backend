@@ -16,6 +16,8 @@ import software.amazon.awssdk.services.sqs.model.{Message, SendMessageRequest}
 import java.util.Base64
 import java.nio.charset.StandardCharsets
 
+import scala.util.Try
+
 class AwsQueue @Inject()(
     implicit system: ActorSystem,
     config: Configuration,
@@ -50,9 +52,11 @@ class AwsQueue @Inject()(
     )
     .map(
       message => {
-        val compressed = Base64.getDecoder.decode(message.body.getBytes(StandardCharsets.UTF_8))
-        val string = utils.Gzip.decompress(compressed)
-        Json.parse(string).as[MatchOutput]
+        Try {
+          val compressed = Base64.getDecoder.decode(message.body.getBytes(StandardCharsets.UTF_8))
+          utils.Gzip.decompress(compressed)
+        }.toOption
       }
     )
+    .collect { case Some(string) => Json.parse(string).as[MatchOutput] }
 }
