@@ -5,7 +5,7 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import Schema._
 import controllers.Auth.{LoggedIn, LoggedOut, Visitor}
-import io.getquill.EntityQuery
+import io.getquill.{EntityQuery, Ord}
 
 class Robots @Inject()(
     val schema: Schema,
@@ -44,8 +44,12 @@ class Robots @Inject()(
   def findAll(userId: Long)(visitor: Visitor): Future[Seq[Robot]] =
     run(robotsAuth(visitor).byUserId(userId))
 
-  def findAllPublishedPaged(page: Long, numPerPage: Int): Future[Seq[(Robot, User)]] =
-    run(robotsAuth(LoggedOut()).withUser().paginate(page, numPerPage))
+  def findAllPublishedPaged(page: Long, numPerPage: Int): Future[Seq[(Robot, User)]] = {
+    val allRobots = quote {
+      robotsAuth(LoggedOut()).withUser().sortBy(_._1.rating)(Ord.desc)
+    }
+    run(allRobots.paginate(page, numPerPage))
+  }
 
   def create(userId: Long, name: String, lang: Lang): Future[Robot] = {
     val robot = Robot(userId, name.toLowerCase, lang)
@@ -71,7 +75,4 @@ class Robots @Inject()(
 
   def getPublishedCode(id: Long): Future[Option[String]] =
     run(robots.byId(id).withPr().map(_._2.code)).map(_.headOption)
-
-  def sortByRating(): Future[Seq[Robot]] =
-    run(robots.sortBy(_.rating))
 }
