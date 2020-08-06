@@ -9,7 +9,7 @@ object CreateRobotForm {
 
   val form: Form[Data] = Form(
     mapping(
-      "name" -> nonEmptyText,
+      "name" -> nonEmptyText(1, 15),
       "lang" -> Lang.formField
     )(Data.apply)(Data.unapply)
   )

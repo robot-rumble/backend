@@ -8,8 +8,8 @@ object SignupForm {
   val form: Form[Data] = Form(
     mapping(
       "email" -> email,
-      "username" -> nonEmptyText,
-      "password" -> nonEmptyText
+      "username" -> nonEmptyText(1, 15),
+      "password" -> nonEmptyText(10, 60)
     )(Data.apply)(Data.unapply)
   )
 
