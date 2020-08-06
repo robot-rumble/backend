@@ -1,0 +1,4 @@
+ALTER TABLE battles
+    ADD COLUMN r1_rating_change SMALLINT NOT NULL DEFAULT 0;
+ALTER TABLE battles
+    ADD COLUMN r2_rating_change SMALLINT NOT NULL DEFAULT 0;

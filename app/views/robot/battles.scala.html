@@ -4,14 +4,16 @@
 @main("Battles", "battles", assetsFinder) {
     <h1>Battles</h1>
 
-    <table>
+    <table class="_battles">
     @for((battle, r1, r2) <- pagedBattles) {
         <tr>
+            <td class="text-gray">@battle.formatCreated()</td>
             <td><a href="@routes.RobotController.viewBattle(battle.id)">battle #@battle.id</a></td>
-            <td><a href="@routes.RobotController.viewById(battle.r1Id)">@r1.name</a> (@r1.rating)</td>
+            <td class="_robot pr-0"><a href="@routes.RobotController.viewById(battle.r1Id)">@r1.name</a></td>
+            <td class="_robot _rating">@battle.r1Rating</td>
             <td>vs</td>
-            <td><a href="@routes.RobotController.viewById(battle.r2Id)">@r2.name</a> (@r2.rating)</td>
-            <td>@battle.formatCreated()</td>
+            <td class="_robot pr-0"><a href="@routes.RobotController.viewById(battle.r2Id)">@r2.name</a></td>
+            <td class="_robot _rating">@battle.r2Rating</td>
         </tr>
     }
     </table>

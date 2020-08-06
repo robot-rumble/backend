@@ -150,7 +150,13 @@ class MatchMaker @Inject()(
         for {
           _ <- robotsRepo.updateRating(r1.id, r1Player.rating)
           _ <- robotsRepo.updateRating(r2.id, r2Player.rating)
-          _ <- battlesRepo.create(matchOutput, r1Player.rating, r2Player.rating)
+          _ <- battlesRepo.create(
+            matchOutput,
+            r1.rating,
+            r1Player.rating - r1.rating,
+            r2.rating,
+            r2Player.rating - r2.rating
+          )
         } yield ()
     }
   }

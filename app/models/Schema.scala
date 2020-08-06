@@ -93,6 +93,8 @@ object Schema {
       errored: Boolean,
       r1Rating: Int,
       r2Rating: Int,
+      r1RatingChange: Int,
+      r2RatingChange: Int,
       r1Time: Float,
       r2Time: Float,
       data: Array[Byte],
@@ -106,9 +108,9 @@ object Schema {
     }
 
     val createdFormatter = new DateTimeFormatterBuilder()
-      .appendMonthOfYearText()
-      .appendLiteral(' ')
-      .appendDayOfMonth(1)
+      .appendMonthOfYear(2)
+      .appendLiteral('/')
+      .appendDayOfMonth(2)
       .toFormatter
 
     def formatCreated(): String = {
@@ -121,7 +123,13 @@ object Schema {
   }
 
   object Battle {
-    def apply(matchOutput: MatchOutput, r1Rating: Int, r2Rating: Int) =
+    def apply(
+        matchOutput: MatchOutput,
+        r1Rating: Int,
+        r1RatingChange: Int,
+        r2Rating: Int,
+        r2RatingChange: Int
+    ) =
       new Battle(
         r1Id = matchOutput.r1Id,
         pr1Id = matchOutput.pr1Id,
@@ -133,7 +141,9 @@ object Schema {
         r2Time = matchOutput.r2Time,
         data = utils.Gzip.compress(matchOutput.data),
         r1Rating = r1Rating,
-        r2Rating = r2Rating
+        r2Rating = r2Rating,
+        r1RatingChange = r1RatingChange,
+        r2RatingChange = r2RatingChange
       )
   }
 

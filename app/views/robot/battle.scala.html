@@ -8,34 +8,46 @@
     <a style="color: inherit !important" href="@routes.RobotController.viewById(r2.id)">@r2.name</a>
 }
 
+
+@ratingChange(change: Int) = {
+    @if(change > 0) {
+        (+@change)
+    }
+    @if(change < 0) {
+        (@change)
+    }
+}
+
 @main(s"Battle: ${r1.name} vs ${r2.name}", "battle", assetsFinder) {
     <link rel="stylesheet" type="text/css" href="@assetsFinder.path("dist/battle_css.css")">
     <script src="@assetsFinder.path("dist/battle_js.js")" type="text/javascript"></script>
 
-    <h1 class="mb-3 text-center">
-        @(battle.winner, battle.errored) match {
-            case (Some(Team.R1), false) => {
-                <span class="text-blue">@r1Link() wins</span> against <span class="text-red">@r2Link()</span>
+    <h4 class="text-center text-gray">battle #@battle.id, @battle.formatCreated()</h4>
+    <h1 class="mt-3 mb-2 text-center">
+        @battle.winner match {
+            case Some(Team.R1) => {
+                <span class="text-blue winner">@r1Link()</span> vs <span class="text-red">@r2Link()</span>
             }
-            case (Some(Team.R2), false) => {
-                <span class="text-red">@r2Link() wins</span> against <span class="text-blue">@r1Link()</span>
+            case Some(Team.R2) => {
+                <span class="text-red winner">@r2Link()</span> vs <span class="text-blue">@r1Link()</span>
             }
-            case (None, false) => {
-                Draw between @r1Link() and @r2Link()
-            }
-
-            case (Some(Team.R1), true) => {
-                <span class="text-blue">@r1Link() wins</span>, <span class="text-red">@r2Link() forfeits</span> because of error
-            }
-            case (Some(Team.R2), true) => {
-                <span class="text-red">@r2Link() wins</span>, <span class="text-blue">@r1Link() forfeits</span> because of error
-            }
-            case (None, true) => {
-                Draw between @r1Link() and @r2Link(), both forfeit because of error
+            case None => {
+                <span class="text-blue">@r1Link()</span> vs <span class="text-red">@r2Link()</span>
             }
         }
     </h1>
-    <h3 class="text-center">battle #@battle.id, @battle.formatCreated()</h3>
+    <h3 class="text-center">
+        @battle.winner match {
+            case Some(Team.R1) => {
+                @battle.r1Rating @ratingChange(battle.r1RatingChange) <span style="color: var(--grey-2)">/</span> @battle.r2Rating @ratingChange(battle.r2RatingChange)
+            }
+            case Some(Team.R2) => {
+                @battle.r2Rating @ratingChange(battle.r2RatingChange) <span style="color: var(--grey-2)">/</span> @battle.r1Rating @ratingChange(battle.r1RatingChange)
+            }
+            case None => {
+            }
+        }
+    </h3>
     @userTeam match {
         case Some(team) => {
             <h3 class="text-center">viewing as <span class="text-@team.toLowerCase">@team</span></h3>

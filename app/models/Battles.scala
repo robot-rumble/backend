@@ -27,8 +27,14 @@ class Battles @Inject()(
   def findAllPaged(page: Long, numPerPage: Int): Future[Seq[(Battle, Robot, Robot)]] =
     run(battles.latestFirst().withRobots().paginate(page, numPerPage))
 
-  def create(matchOutput: MatchOutput, r1Rating: Int, r2Rating: Int) = {
-    val battle = Battle(matchOutput, r1Rating, r2Rating)
+  def create(
+      matchOutput: MatchOutput,
+      r1Rating: Int,
+      r1RatingChange: Int,
+      r2Rating: Int,
+      r2RatingChange: Int
+  ) = {
+    val battle = Battle(matchOutput, r1Rating, r1RatingChange, r2Rating, r2RatingChange)
     run(battles.insert(lift(battle)).returningGenerated(_.id)).map(battle.copy(_))
   }
 

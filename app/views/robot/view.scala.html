@@ -1,6 +1,27 @@
 @import models.Schema._
 @(user: User, isOwner: Boolean, robot: Robot, pagedBattles: Seq[(Battle, Robot)], page: Long, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
+@ratingChange(change: Int) = {
+    @if(change > 0) {
+        (+@change)
+    }
+    @if(change < 0) {
+        (@change)
+    }
+}
+
+@ratingChangeImg(change: Int) = {
+    @if(change > 0) {
+        <img src="@assetsFinder.path("images/increase.svg")" />
+    }
+    @if(change < 0) {
+        <img src="@assetsFinder.path("images/decrease.svg")" />
+    }
+    @if(change == 0) {
+        <img src="@assetsFinder.path("images/nochange.svg")" />
+    }
+}
+
 @main(s"Robot ${robot.name}", "robot-page", assetsFinder) {
     <h1>Robot @robot.name (@robot.rating)</h1>
     <h3 class="mb-4">@robot.lang robot by <a href="@routes.UserController.profile(user.username)">@user.username</a></h3>
@@ -21,23 +42,30 @@
         }
     </div>
 
+
     <div class="battles">
         <h4 class="mb-3">Battles</h4>
         @if(pagedBattles.nonEmpty) {
-          <table>
-          @for((battle, r2) <- pagedBattles) {
+          <table class="_battles">
+          @for((battle, otherR) <- pagedBattles) {
               <tr>
-                  <td><img src="@{
-                      val imgPath = battle.didRobotWin(robot.id) match {
-                          case Some(won) => if (won) "images/win.svg" else "images/loss.svg"
-                          case None => "images/draw.svg"
-                      }
-                      assetsFinder.path(imgPath)
-                  }"></td>
+                  <td class="text-gray">@battle.formatCreated()</td>
                   <td><a href="@routes.RobotController.viewBattle(battle.id)">battle #@battle.id</a></td>
-                  <td>vs</td>
-                  <td><a href="@routes.RobotController.viewBattle(battle.id)">@r2.name</a> (@r2.rating)</td>
-                  <td>@battle.formatCreated()</td>
+                  <td class="_rating">
+                      @if(robot.id == battle.r1Id) {
+                          @ratingChangeImg(battle.r1RatingChange) @ratingChange(battle.r1RatingChange)
+                      } else {
+                          @ratingChangeImg(battle.r2RatingChange) @ratingChange(battle.r2RatingChange)
+                      }
+                  </td>
+                  <td class="_robot pr-0"><a href="@routes.RobotController.viewBattle(battle.id)">@otherR.name</a></td>
+                  <td class="_robot _rating">
+                      @if(robot.id == battle.r1Id) {
+                          @battle.r2Rating
+                      } else {
+                          @battle.r1Rating
+                      }
+                  </td>
               </tr>
           }
           </table>
