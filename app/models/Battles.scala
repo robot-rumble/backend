@@ -32,19 +32,20 @@ class Battles @Inject()(
     run(battles.insert(lift(battle)).returningGenerated(_.id)).map(battle.copy(_))
   }
 
-  private val involvesR = quote { (b: Battle, rId: Long) =>
-    b.r1Id == rId || b.r2Id == rId
-  }
-
-  private val involvesPr = quote { (b: Battle, prId: Long) =>
-    b.pr1Id == prId || b.pr2Id == prId
-  }
-
   def findAllForRobot_(robotId: Long) = quote {
-    (for {
-      b <- battles if involvesR(b, lift(robotId))
-      opponentR <- robots if involvesR(b, opponentR.id)
-    } yield (b, opponentR)).sortBy(_._1.created)(Ord.desc)
+    val r1Battles =
+      for {
+        b <- battles if b.r1Id == lift(robotId)
+        opponentR <- robots if opponentR.id == b.r2Id
+      } yield (b, opponentR)
+
+    val r2Battles =
+      for {
+        b <- battles if b.r2Id == lift(robotId)
+        opponentR <- robots if opponentR.id == b.r1Id
+      } yield (b, opponentR)
+
+    (r1Battles union r2Battles).sortBy(_._1.created)(Ord.desc)
   }
 
   def findAllForRobot(robotId: Long): Future[Seq[(Battle, Robot)]] =
