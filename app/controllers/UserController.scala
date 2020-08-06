@@ -35,23 +35,33 @@ class UserController @Inject()(
         )
       },
       data => {
-        val username = data.username.trim()
-        (for {
-          usernameUser <- usersRepo.find(username)
-          emailUser <- usersRepo.findByEmail(data.email)
-        } yield (usernameUser, emailUser)) flatMap {
-          case (None, None) =>
-            usersRepo.create(data.email, username, data.password).map { _ =>
-              Redirect(routes.UserController.profile(username))
-                .withSession("USERNAME" -> username)
-            }
-          case _ =>
-            Future.successful(
-              BadRequest(
+        val username = data.username.trim().toLowerCase
+        if (username.matches("^[a-z0-9_-]+$")) {
+          (for {
+            usernameUser <- usersRepo.find(username)
+            emailUser <- usersRepo.findByEmail(data.email)
+          } yield (usernameUser, emailUser)) flatMap {
+            case (None, None) =>
+              usersRepo.create(data.email, username, data.password).map { _ =>
+                Redirect(routes.UserController.profile(username))
+                  .withSession("USERNAME" -> username)
+              }
+            case _ =>
+              Future successful BadRequest(
                 views.html.user.signup(
-                  SignupForm.form.fill(data).withGlobalError("Username or email taken"),
+                  SignupForm.form.fill(data).withError("username", "Username or email taken"),
                   assetsFinder
                 )
+              )
+          }
+        } else {
+          Future successful
+            BadRequest(
+              views.html.user.signup(
+                SignupForm.form
+                  .fill(data)
+                  .withError("username", "Username cannot contain special characters"),
+                assetsFinder
               )
             )
         }
@@ -189,7 +199,7 @@ class UserController @Inject()(
             Future successful Forbidden(
               views.html.user.passwordReset(
                 PasswordResetForm.form
-                  .withGlobalError("User with this email does not exist"),
+                  .withError("email", "User with this email does not exist"),
                 assetsFinder
               )
             )
