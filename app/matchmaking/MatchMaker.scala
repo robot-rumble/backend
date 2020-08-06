@@ -44,6 +44,10 @@ class MatchMaker @Inject()(
     if (USE_MOCK) Duration.ZERO
     else Duration.millis(config.get[FiniteDuration]("queue.cooldown").toMillis)
 
+  logger.debug(
+    s"Starting with TURN_NUM ${TURN_NUM}, USE_MOCK ${USE_MOCK}, RECENT_OPPONENT_LIMIT ${RECENT_OPPONENT_LIMIT}, COOLDOWN ${COOLDOWN}"
+  )
+
   def prepareMatches(): Future[Iterable[MatchInput]] = {
     logger.debug("Preparing matches...")
     robotsRepo.findAllPr() flatMap { allRobots =>
