@@ -25,6 +25,7 @@
   </appender>
 
   <logger name="akka.actor" level="DEBUG" />
+  <logger name="software.amazon.awssdk" level="DEBUG" />
 
   <logger name="play" level="DEBUG" />
   <logger name="application" level="DEBUG" />
