@@ -37,6 +37,10 @@ class AwsQueue @Inject()(
     .build()
   system.registerOnTermination(awsSqsClient.close())
 
+  val minBackoff = 5.seconds
+  val maxBackoff = 30.seconds
+  val randomFactor = 0.2
+
   val sink = Flow[MatchInput]
     .map(matchInput => {
       SendMessageRequest
@@ -44,16 +48,19 @@ class AwsQueue @Inject()(
         .messageBody(Json.toJson(matchInput).toString)
         .build()
     })
-    .to(SqsPublishSink.messageSink(inputQueueUrl))
-
-  val minBackoff = 5.seconds
-  val maxBackoff = 30.seconds
-  val randomFactor = 0.2
+    .to(
+      RestartSink.withBackoff(minBackoff, maxBackoff, randomFactor)(
+        () => {
+          logger.debug("Starting AWS input sink")
+          SqsPublishSink.messageSink(inputQueueUrl)
+        }
+      )
+    )
 
   val source =
     RestartSource
       .withBackoff(minBackoff, maxBackoff, randomFactor)(() => {
-        logger.debug("Starting AWS source...")
+        logger.debug("Starting AWS output source...")
         SqsSource(
           outputQueueUrl,
           SqsSourceSettings().withCloseOnEmptyReceive(false).withWaitTimeSeconds(20)
@@ -63,7 +70,7 @@ class AwsQueue @Inject()(
               .to(
                 RestartSink.withBackoff(minBackoff, maxBackoff, randomFactor)(
                   () => {
-                    logger.debug("Starting AWS sink...")
+                    logger.debug("Starting AWS output sink...")
                     SqsAckSink(outputQueueUrl)
                   }
                 )
