@@ -24,8 +24,10 @@ class Battles @Inject()(
   def findWithRobots(id: Long): Future[Option[(Battle, Robot, Robot)]] =
     run(battles.byId(id).withRobots()).map(_.headOption)
 
-  def findAllPaged(page: Long, numPerPage: Int): Future[Seq[(Battle, Robot, Robot)]] =
-    run(battles.latestFirst().withRobots().paginate(page, numPerPage))
+  def findAllPaged(page: Long, numPerPage: Int): Future[Seq[(Battle, Robot, Robot)]] = {
+    val sortedBattles = quote(battles.withRobots().sortBy(_._1.created)(Ord.desc))
+    run(sortedBattles.paginate(page, numPerPage))
+  }
 
   def create(
       matchOutput: MatchOutput,
