@@ -44,8 +44,15 @@ class MatchMaker @Inject()(
     if (USE_MOCK) Duration.ZERO
     else Duration.millis(config.get[FiniteDuration]("queue.cooldown").toMillis)
 
+  val CHECK_EVERY =
+    if (USE_MOCK) 2.seconds
+    else config.get[FiniteDuration]("queue.checkEvery")
+
+  val INITIAL_OPPONENT_NUM = config.get[Int]("queue.initialOpponentNum")
+  val RECURRENT_OPPONENT_NUM = config.get[Int]("queue.recurrentOpponentNum")
+
   logger.debug(
-    s"Starting with TURN_NUM ${TURN_NUM}, USE_MOCK ${USE_MOCK}, RECENT_OPPONENT_LIMIT ${RECENT_OPPONENT_LIMIT}, COOLDOWN ${COOLDOWN}"
+    s"Starting with USE_MOCK ${USE_MOCK}, RECENT_OPPONENT_LIMIT ${RECENT_OPPONENT_LIMIT}, COOLDOWN ${COOLDOWN}, CHECK_EVERY ${CHECK_EVERY}"
   )
 
   def prepareMatches(): Future[Iterable[MatchInput]] = {
@@ -55,30 +62,35 @@ class MatchMaker @Inject()(
         val recentOpponentsMap = allOpponentsMap.mapValues(_.take(RECENT_OPPONENT_LIMIT))
 
         allRobots
-          .filter {
-            case (r, _) =>
-              recentOpponentsMap.get(r.id) match {
-                case None | Some(Seq()) => true
-                case Some(opponents) =>
-                  opponents
-                    .map(_.created)
-                    .max
-                    .isBefore(LocalDateTime.now().minus(COOLDOWN))
-              }
-          }
           .flatMap {
             case (r, pr) =>
-              allRobots
-                .sortBy {
-                  case (r2, _) => (r2.rating - r.rating).abs
+              val opponentNum = {
+                val publishedWithinWindow =
+                  pr.created.isAfter(LocalDateTime.now().minusSeconds(CHECK_EVERY.toSeconds.toInt))
+                if (publishedWithinWindow) INITIAL_OPPONENT_NUM
+                else {
+                  val cooldownExpired = recentOpponentsMap.get(r.id) match {
+                    case None | Some(Seq()) => true
+                    case Some(opponents) =>
+                      opponents
+                        .map(_.created)
+                        .max
+                        .isBefore(LocalDateTime.now().minus(COOLDOWN))
+                  }
+                  if (cooldownExpired) RECURRENT_OPPONENT_NUM
+                  else 0
                 }
-                .find {
+              }
+              allRobots
+                .filter {
                   case (r2, _) =>
                     r.id != r2.id && (recentOpponentsMap.get(r.id) match {
                       case None | Some(Seq()) => true
                       case Some(opponents)    => opponents.forall(_.rId != r2.id)
                     })
                 }
+                .sortBy { case (r2, _) => (r2.rating - r.rating).abs }
+                .take(opponentNum)
                 .map { o =>
                   ((r, pr), o)
                 }
@@ -100,10 +112,6 @@ class MatchMaker @Inject()(
       }
     }
   }
-
-  val CHECK_EVERY =
-    if (USE_MOCK) 2.seconds
-    else config.get[FiniteDuration]("queue.checkEvery")
 
   Source
     .tick(0.seconds, CHECK_EVERY, "tick")
