@@ -69,37 +69,33 @@ class Battles @Inject()(
   case class Opponent(bId: Long, rId: Long, created: LocalDateTime)
 
   def allOpponents(): Future[Map[Long, Seq[Opponent]]] = {
-    val byP1 = quote {
+    val byR1 = quote {
       battles
-        .join(robots)
-        .on((b, r) => r.prId.contains(b.pr1Id))
-        .groupBy { case (b, r) => (b.r1Id, r.id) }
+        .groupBy(_.r1Id)
         .map {
-          case ((_pr1Id, r1Id), q) =>
+          case (rId, q) =>
             (
-              r1Id,
-              unquote(q.map(_._1.id).arrayAgg),
-              unquote(q.map(_._1.r2Id).arrayAgg),
-              unquote(q.map(_._1.created).arrayAgg),
+              rId,
+              unquote(q.map(_.id).arrayAgg),
+              unquote(q.map(_.r2Id).arrayAgg),
+              unquote(q.map(_.created).arrayAgg),
             )
         }
     }
-    val byP2 = quote {
+    val byR2 = quote {
       battles
-        .join(robots)
-        .on((b, r) => r.prId.contains(b.pr2Id))
-        .groupBy { case (b, r) => (b.r2Id, r.id) }
+        .groupBy(_.r2Id)
         .map {
-          case ((_pr1Id, r1Id), q) =>
+          case (rId, q) =>
             (
-              r1Id,
-              unquote(q.map(_._1.id).arrayAgg),
-              unquote(q.map(_._1.r1Id).arrayAgg),
-              unquote(q.map(_._1.created).arrayAgg),
+              rId,
+              unquote(q.map(_.id).arrayAgg),
+              unquote(q.map(_.r1Id).arrayAgg),
+              unquote(q.map(_.created).arrayAgg),
             )
         }
     }
-    run(byP1 union byP2) map { result =>
+    run(byR1 union byR2) map { result =>
       result
         .foldLeft[Map[Long, List[Opponent]]](Map.empty) {
           case (acc, (rId, bIds, opponentIds, timestamps)) =>
