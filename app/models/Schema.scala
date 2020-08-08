@@ -1,14 +1,14 @@
 package models
 
-import org.joda.time.LocalDateTime
+import org.joda.time.{Duration, LocalDateTime}
 import com.github.t3hnar.bcrypt._
 import enumeratum._
-import io.getquill.{EntityQuery, Ord, Query}
+import io.getquill.{EntityQuery, Query}
 import javax.inject.Inject
 import play.api.libs.json.{Json, Writes}
 import utils.LoadCode
 import matchmaking.BattleQueue.MatchOutput
-import org.joda.time.format.DateTimeFormatterBuilder
+import org.joda.time.format.{DateTimeFormatterBuilder, PeriodFormatterBuilder}
 import services.Database
 
 object Schema {
@@ -65,11 +65,39 @@ object Schema {
       new Robot(userId = userId, name = name, devCode = LoadCode(lang), lang = lang)
   }
 
+  val publishCooldownFormatter = new PeriodFormatterBuilder()
+    .printZeroRarelyFirst()
+    .appendHours()
+    .appendSuffix(" hour", " hours")
+    .appendSeparator(" ")
+    .appendMinutes()
+    .appendSuffix(" minute", " minutes")
+    .toFormatter
+
+  def formatPublishCooldown(publishCooldown: Duration): String = {
+    publishCooldownFormatter.print(publishCooldown.toPeriod())
+  }
+
   case class PublishedRobot(
       id: Long = -1,
       created: LocalDateTime = LocalDateTime.now(),
       code: String
-  )
+  ) {
+    def publishCooldownExpired(publishCooldown: Duration): Boolean =
+      created.isBefore(LocalDateTime.now().minus(publishCooldown))
+
+    val publishTimeFormatter = new DateTimeFormatterBuilder()
+      .appendHourOfDay(1)
+      .appendLiteral(':')
+      .appendMinuteOfHour(1)
+      .appendLiteral(" on ")
+      .appendDayOfWeekText()
+      .toFormatter
+
+    def formatNextPublishTime(publishCooldown: Duration): String = {
+      publishTimeFormatter.print(created.plus(publishCooldown))
+    }
+  }
 
   implicit val robotWrites = new Writes[Robot] {
     def writes(robot: Robot) = Json.obj(
@@ -206,6 +234,9 @@ object Schema {
     implicit class RobotQuery(query: Quoted[EntityQuery[Robot]]) {
       def withPr(): Quoted[Query[(Robot, PublishedRobot)]] =
         query.join(publishedRobots).on { case (r, pr) => r.prId.contains(pr.id) }
+
+      def withPrOption(): Quoted[Query[(Robot, Option[PublishedRobot])]] =
+        query.leftJoin(publishedRobots).on { case (r, pr) => r.prId.contains(pr.id) }
 
       def withUser(): Quoted[Query[(Robot, User)]] =
         query.join(users).on(_.userId == _.id)

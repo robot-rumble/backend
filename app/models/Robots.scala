@@ -6,6 +6,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import Schema._
 import controllers.Auth.{LoggedIn, LoggedOut, Visitor}
 import io.getquill.{EntityQuery, Ord}
+import org.joda.time.Duration
 
 class Robots @Inject()(
     val schema: Schema,
@@ -24,6 +25,9 @@ class Robots @Inject()(
 
   def find(id: Long)(visitor: Visitor): Future[Option[Robot]] =
     run(robotsAuth(visitor).byId(id)).map(_.headOption)
+
+  def findPrOption(id: Long)(visitor: Visitor): Future[Option[(Robot, Option[PublishedRobot])]] =
+    run(robotsAuth(visitor).byId(id).withPrOption()).map(_.headOption)
 
   def find(userId: Long, name: String)(visitor: Visitor): Future[Option[Robot]] =
     run(robotsAuth(visitor).byUserId(userId).filter(_.name == lift(name.toLowerCase)))
@@ -64,14 +68,19 @@ class Robots @Inject()(
   def updateRating(id: Long, rating: Int): Future[Long] =
     run(robots.byId(id).update(_.rating -> lift(rating)))
 
-  def publish(id: Long): Future[Long] =
-    for {
-      code <- run(robots.byId(id).map(_.devCode)).map(_.head)
-      prId <- run(
-        publishedRobots.insert(lift(PublishedRobot(code = code))).returningGenerated(_.id)
-      )
-      _ <- run(robots.byId(id).update(_.prId -> lift(Option(prId))))
-    } yield prId
+  def publish(id: Long, publishCooldown: Duration): Future[Long] = {
+    run(robots.byId(id).withPrOption()).map(_.headOption) flatMap {
+      case Some((r, pr)) if (pr.forall(_.publishCooldownExpired(publishCooldown))) =>
+        for {
+          prId <- run(
+            publishedRobots.insert(lift(PublishedRobot(code = r.devCode))).returningGenerated(_.id)
+          )
+          _ <- run(robots.byId(id).update(_.prId -> lift(Option(prId))))
+        } yield prId
+      case _ =>
+        Future successful 0
+    }
+  }
 
   def getPublishedCode(id: Long): Future[Option[String]] =
     run(robots.byId(id).withPr().map(_._2.code)).map(_.headOption)

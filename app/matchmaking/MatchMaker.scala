@@ -66,7 +66,7 @@ class MatchMaker @Inject()(
             case (r, pr) =>
               val opponentNum = {
                 val publishedWithinWindow =
-                  pr.created.isAfter(LocalDateTime.now().minusSeconds(CHECK_EVERY.toSeconds.toInt))
+                  pr.created.isAfter(LocalDateTime.now().minus(CHECK_EVERY))
                 if (publishedWithinWindow) INITIAL_OPPONENT_NUM
                 else {
                   val cooldownExpired = recentOpponentsMap.get(r.id) match {

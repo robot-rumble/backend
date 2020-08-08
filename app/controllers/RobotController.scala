@@ -9,6 +9,10 @@ import play.api.mvc._
 import forms.{CreateRobotForm, UpdateRobotCodeForm}
 import models._
 import models.Schema._
+import play.api.Configuration
+
+import scala.concurrent.duration.FiniteDuration
+import services.JodaUtils._
 
 @Singleton
 class RobotController @Inject()(
@@ -17,7 +21,8 @@ class RobotController @Inject()(
     auth: Auth.AuthAction,
     robotsRepo: Robots,
     battlesRepo: Battles,
-    usersRepo: Users
+    usersRepo: Users,
+    config: Configuration
 )(implicit ec: ExecutionContext)
     extends MessagesAbstractController(cc) {
 
@@ -200,24 +205,29 @@ class RobotController @Inject()(
 
   def challenge(user: String, robot: String) = TODO
 
+  val PUBLISH_COOLDOWN = config.get[FiniteDuration]("queue.publishCooldown")
+
   def publish(robotId: Long) =
     auth.actionForceLI { user => implicit request =>
-      robotsRepo.find(robotId)(LoggedIn(user)) map {
-        case Some(robot) =>
-          Ok(views.html.robot.publish(robot, assetsFinder))
+      robotsRepo.findPrOption(robotId)(LoggedIn(user)) map {
+        case Some((robot, publishedRobot)) =>
+          Ok(views.html.robot.publish(robot, publishedRobot, PUBLISH_COOLDOWN, assetsFinder))
         case None => NotFound("404")
       }
     }
 
   def postPublish(robotId: Long) =
     auth.actionForceLI { user => implicit request =>
-      robotsRepo.find(robotId)(LoggedIn(user)) map {
+      robotsRepo.find(robotId)(LoggedIn(user)) flatMap {
         case Some(robot) =>
-          robotsRepo.publish(robot.id)
-          Redirect(
-            routes.RobotController.view(user.username, robot.name)
-          )
-        case None => NotFound("404")
+          robotsRepo.publish(robot.id, PUBLISH_COOLDOWN) map { res =>
+            if (res == 0) BadRequest("Cannot publish at this time.")
+            else
+              Redirect(
+                routes.RobotController.view(user.username, robot.name)
+              )
+          }
+        case None => Future successful NotFound("404")
       }
     }
 
