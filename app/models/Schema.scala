@@ -1,6 +1,6 @@
 package models
 
-import org.joda.time.{Duration, LocalDateTime}
+import org.joda.time.{DateTime, DateTimeZone, Duration, LocalDateTime}
 import com.github.t3hnar.bcrypt._
 import enumeratum._
 import io.getquill.{EntityQuery, Query}
@@ -90,12 +90,17 @@ object Schema {
       .appendHourOfDay(1)
       .appendLiteral(':')
       .appendMinuteOfHour(1)
+      .appendLiteral(" ")
+      .appendTimeZoneShortName()
       .appendLiteral(" on ")
       .appendDayOfWeekText()
       .toFormatter
 
     def formatNextPublishTime(publishCooldown: Duration): String = {
-      publishTimeFormatter.print(created.plus(publishCooldown))
+      publishTimeFormatter.print(
+        created.toDateTime(DateTimeZone.forID("US/Eastern")).plus(publishCooldown)
+      )
+
     }
   }
 
