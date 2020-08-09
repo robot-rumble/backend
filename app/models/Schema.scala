@@ -150,6 +150,20 @@ object Schema {
       createdFormatter.print(created)
     }
 
+    val createdTimeFormatter = new DateTimeFormatterBuilder()
+      .appendMonthOfYear(2)
+      .appendLiteral('/')
+      .appendDayOfMonth(2)
+      .appendLiteral(' ')
+      .appendHourOfDay(2)
+      .appendLiteral(':')
+      .appendMinuteOfHour(2)
+      .toFormatter
+
+    def formatCreatedTime(): String = {
+      createdTimeFormatter.print(created)
+    }
+
     def decompressData(): String = {
       utils.Gzip.decompress(data)
     }
