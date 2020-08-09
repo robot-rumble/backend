@@ -58,7 +58,7 @@
                           @ratingChangeImg(battle.r2RatingChange) @ratingChange(battle.r2RatingChange)
                       }
                   </td>
-                  <td class="_robot pr-0"><a href="@routes.RobotController.viewBattle(battle.id)">@otherR.name</a></td>
+                  <td class="_robot pr-0"><a href="@routes.RobotController.viewById(otherR.id)">@otherR.name</a></td>
                   <td class="_robot _rating">
                       @if(robot.id == battle.r1Id) {
                           @battle.r2Rating
