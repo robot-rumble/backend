@@ -53,9 +53,13 @@
                   <td><a href="@routes.RobotController.viewBattle(battle.id)">battle #@battle.id</a></td>
                   <td class="_rating">
                       @if(robot.id == battle.r1Id) {
-                          @ratingChangeImg(battle.r1RatingChange) @ratingChange(battle.r1RatingChange)
+                          v@battle.pr1Id
+                          @ratingChangeImg(battle.r1RatingChange)
+                          @ratingChange(battle.r1RatingChange)
                       } else {
-                          @ratingChangeImg(battle.r2RatingChange) @ratingChange(battle.r2RatingChange)
+                          v@battle.pr2Id
+                          @ratingChangeImg(battle.r2RatingChange)
+                          @ratingChange(battle.r2RatingChange)
                       }
                   </td>
                   <td class="_robot pr-0"><a href="@routes.RobotController.viewById(otherR.id)">@otherR.name</a></td>
