@@ -22,12 +22,12 @@ jobs:
 
       - run: wget https://files.boxfuse.com/com/boxfuse/client/boxfuse-commandline/1.33.0.1460/boxfuse-commandline-1.33.0.1460-linux-x64.tar.gz
       - run: tar xf boxfuse-commandline-1.33.0.1460-linux-x64.tar.gz
-      - run: ./boxfuse/boxfuse run 
-          -user=${{ secrets.BOXFUSE_USER }} 
-          -secret=${{ secrets.BOXFUSE_SECRET }} 
-          -envvars.BATTLE_QUEUE_IN_URL=${{ secrets.BATTLE_QUEUE_IN_URL }} 
+      - run: ./boxfuse/boxfuse run
+          -user=${{ secrets.BOXFUSE_USER }}
+          -secret=${{ secrets.BOXFUSE_SECRET }}
+          -envvars.BATTLE_QUEUE_IN_URL=${{ secrets.BATTLE_QUEUE_IN_URL }}
           -envvars.BATTLE_QUEUE_OUT_URL=${{ secrets.BATTLE_QUEUE_OUT_URL }}
-          -envvars.QUEUE_ENABLED=true
+          -envvars.QUEUE_ENABLED=false
           -envvars.USE_MOCK_QUEUE=false
           -envvars.EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }}
           -envvars.SECRET_KEY='${{ secrets.SECRET_KEY }}'
@@ -35,5 +35,5 @@ jobs:
           -envvars.AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
           -envvars.AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
           -jvm.args=-Ddb.default_.migration.auto=true
-          -ports.http=80 
+          -ports.http=80
           -env=test
