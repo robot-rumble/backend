@@ -12,7 +12,7 @@ class PasswordResets @Inject()(schema: Schema, usersRepo: models.Users)(
   import schema._
   import schema.ctx._
 
-  def create(userId: Long): Future[PasswordReset] = {
+  def create(userId: UserId): Future[PasswordReset] = {
     val data = PasswordReset(userId)
     run(passwordResets.insert(lift(data)).returningGenerated(_.id)).map(data.copy(_))
   }

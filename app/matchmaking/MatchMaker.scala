@@ -12,9 +12,8 @@ import scala.util.{Failure, Success}
 import org.joda.time.{Duration, LocalDateTime}
 import models._
 import services.JodaUtils._
-import models.Schema.Team
+import models.Schema.{BoardId, RobotId, Team}
 import play.api.Configuration
-
 import play.api.Logger
 
 @Singleton
@@ -57,8 +56,8 @@ class MatchMaker @Inject()(
 
   def prepareMatches(): Future[Iterable[MatchInput]] = {
     logger.debug("Preparing matches...")
-    robotsRepo.findAllPr() flatMap { allRobots =>
-      battlesRepo.allOpponents() map { allOpponentsMap =>
+    robotsRepo.findAllWithPr() flatMap { allRobots =>
+      battlesRepo.findOpponents() map { allOpponentsMap =>
         val recentOpponentsMap = allOpponentsMap.mapValues(_.take(RECENT_OPPONENT_LIMIT))
 
         allRobots
@@ -83,13 +82,13 @@ class MatchMaker @Inject()(
               }
               allRobots
                 .filter {
-                  case (r2, _) =>
-                    r.id != r2.id && (recentOpponentsMap.get(r.id) match {
+                  case (r2, pr2) =>
+                    r.id != r2.id && pr.boardId == pr2.boardId && (recentOpponentsMap.get(r.id) match {
                       case None | Some(Seq()) => true
                       case Some(opponents)    => opponents.forall(_.rId != r2.id)
                     })
                 }
-                .sortBy { case (r2, _) => (r2.rating - r.rating).abs }
+                .sortBy { case (_, pr2) => (pr2.rating - pr.rating).abs }
                 .take(opponentNum)
                 .map { o =>
                   ((r, pr), o)
@@ -99,12 +98,13 @@ class MatchMaker @Inject()(
             case ((r1, pr1), (r2, pr2)) =>
               MatchInput(
                 TURN_NUM,
-                r1.id,
-                pr1.id,
+                pr1.boardId.id,
+                r1.id.id,
+                pr1.id.id,
                 pr1.code,
                 r1.lang,
-                r2.id,
-                pr2.id,
+                r2.id.id,
+                pr2.id.id,
                 pr2.code,
                 r2.lang,
               )
@@ -130,23 +130,24 @@ class MatchMaker @Inject()(
   def processMatches(matchOutput: MatchOutput) = {
     logger.debug("Received: " + matchOutput.copy(data = "TRUNCATED").toString)
 
-    val getRobotInfo = (id: Long) => {
+    val getRobotInfo = (id: RobotId) => {
       (for {
-        robot <- robotsRepo.find(id)(controllers.Auth.LoggedOut())
-        games <- battlesRepo.findAllForRobot(robot.get.id)
-      } yield (robot, games)) map {
-        case (robot, games) =>
+        pr <- robotsRepo.findLatestPr(id, BoardId(matchOutput.boardId))
+        games <- battlesRepo.findBoardForRobot(BoardId(matchOutput.boardId), pr.get.rId)
+      } yield (pr, games)) map {
+        case (Some(pr), games) =>
           val rPlayer =
-            new Player(rating = robot.get.rating, startingGameCount = games.length)
-          (robot.get, rPlayer)
+            new Player(rating = pr.rating, startingGameCount = games.length)
+          (pr, rPlayer)
+        case _ => throw new Exception(s"matchOutput robotId $id didn't return a robot")
       }
     }
 
     (for {
-      r1Info <- getRobotInfo(matchOutput.r1Id)
-      r2Info <- getRobotInfo(matchOutput.r2Id)
+      r1Info <- getRobotInfo(RobotId(matchOutput.r1Id))
+      r2Info <- getRobotInfo(RobotId(matchOutput.r2Id))
     } yield (r1Info, r2Info)) map {
-      case ((r1, r1Player), (r2, r2Player)) =>
+      case ((pr1, r1Player), (pr2, r2Player)) =>
         matchOutput.winner match {
           case Some(Team.R1) => r1Player wins r2Player
           case Some(Team.R2) => r2Player wins r1Player
@@ -156,14 +157,14 @@ class MatchMaker @Inject()(
         r1Player.updateRating(KFactor.USCF)
         r2Player.updateRating(KFactor.USCF)
         for {
-          _ <- robotsRepo.updateRating(r1.id, r1Player.rating)
-          _ <- robotsRepo.updateRating(r2.id, r2Player.rating)
+          _ <- robotsRepo.updateRating(pr1.id, r1Player.rating)
+          _ <- robotsRepo.updateRating(pr2.id, r2Player.rating)
           _ <- battlesRepo.create(
             matchOutput,
-            r1.rating,
-            r1Player.rating - r1.rating,
-            r2.rating,
-            r2Player.rating - r2.rating
+            pr1.rating,
+            r1Player.rating - pr1.rating,
+            pr2.rating,
+            r2Player.rating - pr2.rating
           )
         } yield ()
     }

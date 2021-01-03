@@ -2,44 +2,48 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-GET         /                                      controllers.HomeController.index
-GET         /rules                                 controllers.HomeController.rules
-GET         /warehouse                             controllers.RobotController.warehouse(page: Long ?= 0)
-GET         /battles                               controllers.RobotController.battles(page: Long ?= 0)
+GET         /                                          controllers.HomeController.index
+GET         /rules                                     controllers.HomeController.rules
 
-GET         /signup                                controllers.UserController.create
-POST        /signup                                controllers.UserController.postCreate
-GET         /login                                 controllers.UserController.login
-POST        /login                                 controllers.UserController.postLogin
-GET         /password-reset                        controllers.UserController.passwordReset
-POST        /password-reset                        controllers.UserController.postPasswordReset
-GET         /password-reset/complete               controllers.UserController.updatePassword
-POST        /password-reset/complete               controllers.UserController.postUpdatePassword
-GET         /logout                                controllers.UserController.logout
-GET         /p/:username                           controllers.UserController.profile(username)
+GET         /signup                                    controllers.UserController.create
+POST        /signup                                    controllers.UserController.postCreate
+GET         /login                                     controllers.UserController.login
+POST        /login                                     controllers.UserController.postLogin
+GET         /password-reset                            controllers.UserController.passwordReset
+POST        /password-reset                            controllers.UserController.postPasswordReset
+GET         /password-reset/complete                   controllers.UserController.updatePassword
+POST        /password-reset/complete                   controllers.UserController.postUpdatePassword
+GET         /logout                                    controllers.UserController.logout
 
-GET         /create-robot                          controllers.RobotController.create
-POST        /create-robot                          controllers.RobotController.postCreate
-GET         /p/:user/:robot                        controllers.RobotController.view(user, robot, page: Long ?= 0)
-GET         /p/:user/:robot/edit                   controllers.RobotController.edit(user, robot)
-GET         /view-code/:robotId                    controllers.RobotController.viewPublishedCode(robotId: Long)
-GET         /p/:user/:robot/challenge              controllers.RobotController.challenge(user, robot)
-GET         /publish/:robotId                      controllers.RobotController.publish(robotId: Long)
-POST        /publish/:robotId                      controllers.RobotController.postPublish(robotId: Long)
+GET         /create-robot                              controllers.RobotController.create
+POST        /create-robot                              controllers.RobotController.postCreate
+POST        /publish/:robot                            controllers.RobotController.postPublish(robot: Long)
+GET         /r/:robot                                  controllers.RobotController.viewById(robot: Long)
 
-GET         /b/:id                                 controllers.RobotController.viewBattle(id: Long)
-GET         /r/:id                                 controllers.RobotController.viewById(id: Long)
+GET         /battles/:battle                           controllers.BattleController.view(battle: Long)
+GET         /seasons                                   controllers.SeasonController.index
+GET         /seasons/:season                           controllers.SeasonController.view(season)
+
+GET         /boards/:board                             controllers.BoardController.view(board: Long, page: Long ?= 0)
+GET         /boards/:board/robot-battles/:robot        controllers.BoardController.viewRobotBattles(board: Long, robot: Long, page: Long ?= 0)
+
 
 + nocsrf
-POST        /api/login                             controllers.UserController.apiLogin
-GET         /api/whoami                            controllers.UserController.apiWhoami
+POST        /api/login                                 controllers.UserController.apiLogin
+GET         /api/whoami                                controllers.UserController.apiWhoami
 + nocsrf
-POST        /api/create-robot                      controllers.RobotController.apiCreate
+POST        /api/create-robot                          controllers.RobotController.apiCreate
 + nocsrf
-POST        /api/update-robot-code/:robotId        controllers.RobotController.apiUpdate(robotId: Long)
+POST        /api/update-robot-code/:robotId            controllers.RobotController.apiUpdate(robotId: Long)
 
-GET         /api/get-user-robots/:user             controllers.UserController.apiGetUserRobots(user)
-GET         /api/get-robot/:user/:robot            controllers.RobotController.apiGetRobot(user, robot)
-GET         /api/get-robot-code/:robotId           controllers.RobotController.apiGetRobotCode(robotId: Long)
+GET         /api/get-user-robots/:user                 controllers.UserController.apiGetUserRobots(user)
+GET         /api/get-robot/:user/:robot                controllers.RobotController.apiGetRobot(user, robot)
+GET         /api/get-robot-code/:robotId               controllers.RobotController.apiGetRobotCode(robotId: Long)
 
-GET         /assets/*file                          controllers.Assets.at(file)
+GET         /assets/*file                              controllers.Assets.at(file)
+
+GET         /:user                                     controllers.UserController.profile(user)
+GET         /:user/:robot                              controllers.RobotController.view(user, robot)
+GET         /:user/:robot/edit                         controllers.RobotController.edit(user, robot)
+GET         /:user/:robot/publish                      controllers.RobotController.publish(user, robot)
+GET         /:user/:robot/view-code                    controllers.RobotController.viewPublishedCode(user, robot)

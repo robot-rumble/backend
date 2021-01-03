@@ -1,0 +1,22 @@
+@import models.Schema._
+@(seasons: Seq[Season], assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+
+@main("Seasons", "seasons", assetsFinder) {
+    <h1>Seasons</h1>
+
+    <table class="_seasons">
+        @for(season <- seasons) {
+            <tr>
+                <td><a href="@routes.SeasonController.view(season.slug)">
+                  @if(season.isActive()) {
+                    @season.name (open!)
+                  } else {
+                    @season.name
+                  }
+                </a></td>
+                <td>Start: @season.formatStart()</td>
+                <td>End: @season.formatEnd()</td>
+            </tr>
+        }
+    </table>
+}

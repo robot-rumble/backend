@@ -39,7 +39,7 @@ class UserController @Inject()(
         if (username.matches("^[a-zA-Z0-9_-]+$")) {
           (for {
             usernameUser <- usersRepo.find(username)
-            emailUser <- usersRepo.findByEmail(data.email)
+            emailUser <- usersRepo.find(data.email)
           } yield (usernameUser, emailUser)) flatMap {
             case (None, None) =>
               usersRepo.create(data.email, username, data.password).map { user =>
@@ -129,7 +129,7 @@ class UserController @Inject()(
 
   def apiWhoami =
     auth.actionForceLI { user => implicit request =>
-      Future successful Ok(Json.toJson((user.username, user.id)))
+      Future successful Ok(Json.toJson((user.username, user.id.id)))
     }
 
   def logout = Action { implicit request =>
@@ -175,12 +175,12 @@ class UserController @Inject()(
         Future successful Forbidden(views.html.user.passwordReset(formWithErrors, assetsFinder))
       },
       data => {
-        usersRepo.findByEmail(data.email) flatMap {
+        usersRepo.find(data.email) flatMap {
           case Some(user) =>
             passwordResetRepo.create(user.id) flatMap {
               passwordReset =>
                 mail.mail(
-                  user.email,
+                  user.email.email,
                   "Robot Rumble password reset",
                   s"""
                   |Hello ${user.username},

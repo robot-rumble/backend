@@ -1,0 +1,15 @@
+@import models.Schema._
+@(boards: Seq[FullBoard], assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+
+@main("Boards", "boards", assetsFinder) {
+    <h1>Boards</h1>
+
+    <table class="_boards">
+        @for(FullBoard(board, robots) <- boards) {
+            <tr>
+                <td><a href="@routes.BoardController.view(board.id.id)">Board @board.name</a></td>
+                <td>@robots.length robots</td>
+            </tr>
+        }
+    </table>
+}

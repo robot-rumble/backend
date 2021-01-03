@@ -22,7 +22,7 @@ libraryDependencies += "com.github.t3hnar" %% "scala-bcrypt" % "4.1"
 
 libraryDependencies ++= Seq(
   "org.postgresql" % "postgresql" % "42.1.4",
-  "io.getquill" %% "quill-jasync-postgres" % "3.5.3-SNAPSHOT",
+  "io.getquill" %% "quill-jasync-postgres" % "3.6.0-SNAPSHOT",
 )
 
 libraryDependencies ++= Seq(
@@ -64,4 +64,6 @@ initialCommands in console :=
     |val usersRepo = app.injector.instanceOf[Users]
     |val robotsRepo = app.injector.instanceOf[Robots]
     |val battlesRepo = app.injector.instanceOf[Battles]
-  """.trim.stripMargin
+    |val boardsRepo = app.injector.instanceOf[Boards]
+    |val seasonsRepo = app.injector.instanceOf[Seasons]
+    |  """.trim.stripMargin

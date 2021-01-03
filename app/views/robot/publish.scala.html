@@ -1,32 +1,34 @@
 @import models.Schema._
 @import org.joda.time.Duration
-@(robot: Robot, publishedRobot: Option[PublishedRobot], publishCooldown: Duration, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
-
-@canPublishText = {
-    <p>Are you ready?</p>
-    @helper.form(routes.RobotController.postPublish(robot.id)) {
-        @helper.CSRF.formField
-        <button class="button mt-4">Publish</button>
-    }
-}
+@(form: Form[forms.PublishForm.Data], boardOptions: Seq[(String, String)], resultOption: Option[Either[PRobot, PRobotId]], robot: Robot, publishCooldown: Duration, assetsFinder: AssetsFinder)(implicit request: MessagesRequestHeader)
 
 @main(s"Publish ${robot.name}", "publish", assetsFinder) {
     <h1>Publish @robot.name</h1>
 
-    <p class="mb-3">Once you publish, your robot will be seen to every other user on this site, and will be queued for battles that establish your rating. You can only publish once every @models.Schema.formatPublishCooldown(publishCooldown), so make sure to only do so when your robot is ready to meet the competition.
+    <p class="mb-3">Once you publish, your robot will be seen to every other user on this site, and will be queued for robot that establish your rating. You can only publish once every @models.Schema.formatPublishCooldown(publishCooldown), so make sure to only do so when your robot is ready to meet the competition.
         <a href="https://rr-docs.readthedocs.io/en/latest/quickstart.html#publishing-your-robot">Learn more</a>
     </p>
 
-    @publishedRobot match {
-        case Some(pr) => {
-          @if(pr.publishCooldownExpired(publishCooldown)) {
-            @canPublishText
-          } else {
-              <p>Your robot was recently published. You can publish again only after @pr.formatNextPublishTime(publishCooldown). </p>
-          }
+    <p>Are you ready?</p>
+    @helper.form(routes.RobotController.postPublish(robot.id.id)) {
+        @helper.select(form("boardId"), boardOptions, Symbol("_showConstraints") -> false, Symbol("_label") -> "Board name")
+        @helper.CSRF.formField
+        <button class="button mt-4">Publish</button>
+    }
+
+    @resultOption match {
+        case Some(result) => {
+            @result match {
+                case Left(pr) => {
+                    <p>Your robot was recently published. You can publish again only after @pr.formatNextPublishTime(publishCooldown). </p>
+                }
+
+                case Right(prId) => {
+                    Published robot!
+                }
+            }
         }
-        case None => {
-          @canPublishText
-        }
+
+        case None => {}
     }
 }

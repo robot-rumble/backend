@@ -28,6 +28,7 @@ class MockQueue @Inject()(
     val winner = (Json.parse(jsonOutput) \ "winner").get
     val errored = (Json.parse(jsonOutput) \ "errors").get != JsObject(Seq())
     MatchOutput(
+      input.boardId,
       input.r1Id,
       input.pr1Id,
       0,

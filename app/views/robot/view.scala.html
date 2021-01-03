@@ -1,5 +1,5 @@
 @import models.Schema._
-@(user: User, isOwner: Boolean, robot: Robot, pagedBattles: Seq[(Battle, Robot)], page: Long, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+@(fullRobot: FullRobot, boardsWithBattles: Seq[(PRobot, BoardWithBattles)], isOwner: Boolean, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
 @ratingChange(change: Int) = {
     @if(change > 0) {
@@ -22,20 +22,20 @@
     }
 }
 
-@main(s"Robot ${robot.name}", "robot-page", assetsFinder) {
-    <h1>Robot @robot.name (@robot.rating)</h1>
-    <h3 class="mb-4">@robot.lang robot by <a href="@routes.UserController.profile(user.username)">@user.username</a></h3>
+@main(s"Robot ${fullRobot.robot.name}", "robot-page", assetsFinder) {
+    <h1>Robot @fullRobot.robot.name</h1>
+    <h3 class="mb-4">@fullRobot.robot.lang robot by <a href="@routes.UserController.profile(fullRobot.user.username)">@fullRobot.user.username</a></h3>
 
     <div class="d-flex actions mb-5">
-        @if(robot.isPublished) {
-            <a href="@routes.RobotController.viewPublishedCode(robot.id)" class="text-green">
+        @if(fullRobot.robot.published) {
+            <a href="@routes.RobotController.viewPublishedCode(fullRobot.user.username, fullRobot.robot.name)" class="text-green">
                 <img src="@assetsFinder.path("images/open-source.svg")" alt="">
                 view published source
             </a>
         }
 
         @if(isOwner) {
-            <a href="@routes.RobotController.edit(user.username, robot.name)" class="text-yellow">
+            <a href="@routes.RobotController.edit(fullRobot.user.username, fullRobot.robot.name)" class="text-yellow">
                 <img src="@assetsFinder.path("images/edit.svg")" alt="">
                 edit
             </a>
@@ -43,40 +43,44 @@
     </div>
 
 
-    <div class="battles">
-        <h4 class="mb-3">Battles</h4>
-        @if(pagedBattles.nonEmpty) {
-          <table class="_battles">
-          @for((battle, otherR) <- pagedBattles) {
-              <tr>
-                  <td class="text-gray">@battle.formatCreatedTime()</td>
-                  <td><a href="@routes.RobotController.viewBattle(battle.id)">battle #@battle.id</a></td>
-                  <td class="_rating">
-                      @if(robot.id == battle.r1Id) {
-                          v@battle.pr1Id
-                          @ratingChangeImg(battle.r1RatingChange)
-                          @ratingChange(battle.r1RatingChange)
-                      } else {
-                          v@battle.pr2Id
-                          @ratingChangeImg(battle.r2RatingChange)
-                          @ratingChange(battle.r2RatingChange)
-                      }
-                  </td>
-                  <td class="_robot pr-0"><a href="@routes.RobotController.viewById(otherR.id)">@otherR.name</a></td>
-                  <td class="_robot _rating">
-                      @if(robot.id == battle.r1Id) {
-                          @battle.r2Rating
-                      } else {
-                          @battle.r1Rating
-                      }
-                  </td>
-              </tr>
-          }
-          </table>
+    <div class="robot">
+        @if(boardsWithBattles.nonEmpty) {
+            <h4 class="mb-3">Battles</h4>
+            @for((pRobot, boardWithBattles) <- boardsWithBattles) {
+                <h5>Board @boardWithBattles.board.name (rating: @pRobot.rating)</h5>
+                @if(boardWithBattles.battles.nonEmpty) {
+                    <table class="_battles">
+                    @for(FullBattle(battle, _, otherR) <- boardWithBattles.battles) {
+                        <tr>
+                            <td class="text-gray">@battle.formatCreatedTime()</td>
+                            <td><a href="@routes.BattleController.view(battle.id.id)">battle #@battle.id.id</a></td>
+                            <td class="_rating">
+                            @if(fullRobot.robot.id == battle.r1Id) {
+                                @ratingChangeImg(battle.pr1RatingChange)
+                                @ratingChange(battle.pr1RatingChange)
+                            } else {
+                                @ratingChangeImg(battle.pr2RatingChange)
+                                @ratingChange(battle.pr2RatingChange)
+                            }
+                            </td>
+                            <td class="_robot pr-0"><a href="@routes.RobotController.viewById(otherR.id.id)">@otherR.name</a></td>
+                            <td class="_robot _rating">
+                            @if(fullRobot.robot.id == battle.r1Id) {
+                                @battle.pr2Rating
+                            } else {
+                                @battle.pr1Rating
+                            }
+                            </td>
+                        </tr>
+                    }
+                    </table>
 
-          @pageControls(page => routes.RobotController.view(user.username, robot.name, page), page)
-        } else {
-            <p>Nothing here!</p>
+                    <a href="@routes.BoardController.viewRobotBattles(boardWithBattles.board.id.id, fullRobot.robot.id.id)">
+                        View all battles</a>
+                } else {
+                    <p>No battles yet</p>
+                }
+            }
         }
     </div>
 }

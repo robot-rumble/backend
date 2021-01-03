@@ -5,7 +5,7 @@ import matchmaking.BattleQueue.MatchOutput
 
 import scala.concurrent.{ExecutionContext, Future}
 import Schema._
-import io.getquill.Ord
+import io.getquill.{EntityQuery, Ord, Query}
 import org.joda.time.LocalDateTime
 
 class Battles @Inject()(
@@ -18,15 +18,15 @@ class Battles @Inject()(
   import schema.ctx._
   import schema._
 
-  def find(id: Long): Future[Option[Battle]] =
-    run(battles.byId(id)).map(_.headOption)
+  def find(id: BattleId): Future[Option[FullBattle]] =
+    run(battles.by(id).withRobots()).map(_.headOption).map(_.map(FullBattle.tupled))
 
-  def findWithRobots(id: Long): Future[Option[(Battle, Robot, Robot)]] =
-    run(battles.byId(id).withRobots()).map(_.headOption)
+  def findBare(id: BattleId): Future[Option[Battle]] =
+    run(battles.by(id)).map(_.headOption)
 
-  def findAllPaged(page: Long, numPerPage: Int): Future[Seq[(Battle, Robot, Robot)]] = {
+  def findPaged(page: Long, numPerPage: Int): Future[Seq[FullBattle]] = {
     val sortedBattles = quote(battles.withRobots().sortBy(_._1.created)(Ord.desc))
-    run(sortedBattles.paginate(page, numPerPage))
+    run(sortedBattles.paginate(page, numPerPage)).map(_.map(FullBattle.tupled))
   }
 
   def create(
@@ -35,40 +35,47 @@ class Battles @Inject()(
       r1RatingChange: Int,
       r2Rating: Int,
       r2RatingChange: Int
-  ) = {
+  ): Future[Battle] = {
     val battle = Battle(matchOutput, r1Rating, r1RatingChange, r2Rating, r2RatingChange)
     run(battles.insert(lift(battle)).returningGenerated(_.id)).map(battle.copy(_))
   }
 
-  def findAllForRobot_(robotId: Long) = quote {
-    val r1Battles =
-      for {
-        b <- battles if b.r1Id == lift(robotId)
-        opponentR <- robots if opponentR.id == b.r2Id
-      } yield (b, opponentR)
+  implicit class BattleEntityQueryExtras(query: Quoted[EntityQuery[Battle]]) {
+    def findBoardForRobot(
+        boardId: BoardId,
+        rId: RobotId
+    ): schema.ctx.Quoted[Query[(Battle, Robot)]] =
+      quote {
+        val r1Battles =
+          for {
+            b <- query.by(boardId) if b.r1Id == lift(rId)
+            opponentR <- robots if opponentR.id == b.r2Id
+          } yield (b, opponentR)
 
-    val r2Battles =
-      for {
-        b <- battles if b.r2Id == lift(robotId)
-        opponentR <- robots if opponentR.id == b.r1Id
-      } yield (b, opponentR)
+        val r2Battles =
+          for {
+            b <- query.by(boardId) if b.r2Id == lift(rId)
+            opponentR <- robots if opponentR.id == b.r1Id
+          } yield (b, opponentR)
 
-    (r1Battles union r2Battles).sortBy(_._1.created)(Ord.desc)
+        (r1Battles union r2Battles).sortBy(_._1.created)(Ord.desc)
+      }
   }
 
-  def findAllForRobot(robotId: Long): Future[Seq[(Battle, Robot)]] =
-    run(findAllForRobot_(robotId))
+  def findBoardForRobot(boardId: BoardId, robotId: RobotId): Future[Seq[(Battle, Robot)]] =
+    run(battles.findBoardForRobot(boardId, robotId))
 
-  def findAllForRobotPaged(
-      robotId: Long,
+  def findBoardForRobotPaged(
+      boardId: BoardId,
+      robotId: RobotId,
       page: Long,
       numPerPage: Int
   ): Future[Seq[(Battle, Robot)]] =
-    run(findAllForRobot_(robotId).paginate(page, numPerPage))
+    run(battles.findBoardForRobot(boardId, robotId).paginate(page, numPerPage))
 
-  case class Opponent(bId: Long, rId: Long, created: LocalDateTime)
+  case class Opponent(bId: BattleId, rId: RobotId, created: LocalDateTime)
 
-  def allOpponents(): Future[Map[Long, Seq[Opponent]]] = {
+  def findOpponents(): Future[Map[RobotId, Seq[Opponent]]] = {
     val byR1 = quote {
       battles
         .groupBy(_.r1Id)
@@ -97,7 +104,7 @@ class Battles @Inject()(
     }
     run(byR1 union byR2) map { result =>
       result
-        .foldLeft[Map[Long, List[Opponent]]](Map.empty) {
+        .foldLeft[Map[RobotId, List[Opponent]]](Map.empty) {
           case (acc, (rId, bIds, opponentIds, timestamps)) =>
             val opponentList = bIds.zip(opponentIds.zip(timestamps)) map {
               case (bId, (oId, timestamp)) => Opponent(bId, oId, timestamp)

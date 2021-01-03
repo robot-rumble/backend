@@ -1,0 +1,22 @@
+@import models.Schema._
+@(boardWithBattles: BoardWithBattles, robotId: RobotId, page: Long, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+
+@main("Battles", "robot", assetsFinder) {
+    <h1>Battles</h1>
+
+    <table class="_battles">
+    @for(FullBattle(battle, r1, r2) <- boardWithBattles.battles) {
+        <tr>
+            <td class="text-gray">@battle.formatCreated()</td>
+            <td><a href="@routes.BattleController.view(battle.id.id)">battle #@battle.id.id</a></td>
+            <td class="_robot pr-0"><a href="@routes.RobotController.viewById(battle.r1Id.id)">@r1.name</a></td>
+            <td class="_robot _rating">@battle.pr1Rating</td>
+            <td>vs</td>
+            <td class="_robot pr-0"><a href="@routes.RobotController.viewById(battle.r2Id.id)">@r2.name</a></td>
+            <td class="_robot _rating">@battle.pr2Rating</td>
+        </tr>
+    }
+    </table>
+
+    @pageControls(page => routes.BoardController.viewRobotBattles(boardWithBattles.board.id.id, robotId.id, page), page)
+}

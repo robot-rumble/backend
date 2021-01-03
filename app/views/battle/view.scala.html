@@ -1,11 +1,11 @@
 @import models.Schema._
-@(battle: Battle, r1: Robot, r2: Robot, userTeam: Option[String], assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+@(fullBattle: FullBattle, userTeam: Option[String], assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
 @r1Link() = {
-    <a style="color: inherit !important" href="@routes.RobotController.viewById(r1.id)">@r1.name</a>
+    <a style="color: inherit !important" href="@routes.RobotController.viewById(fullBattle.r1.id.id)">@fullBattle.r1.name</a>
 }
 @r2Link() = {
-    <a style="color: inherit !important" href="@routes.RobotController.viewById(r2.id)">@r2.name</a>
+    <a style="color: inherit !important" href="@routes.RobotController.viewById(fullBattle.r2.id.id)">@fullBattle.r2.name</a>
 }
 
 
@@ -18,13 +18,13 @@
     }
 }
 
-@main(s"Battle: ${r1.name} vs ${r2.name}", "battle", assetsFinder) {
+@main(s"Battle: ${fullBattle.r1.name} vs ${fullBattle.r2.name}", "battle", assetsFinder) {
     <link rel="stylesheet" type="text/css" href="@assetsFinder.path("dist/battle_css.css")">
     <script src="@assetsFinder.path("dist/battle_js.js")" type="text/javascript"></script>
 
-    <h4 class="text-center text-gray">battle #@battle.id, @battle.formatCreated()</h4>
+    <h4 class="text-center text-gray">battle #@fullBattle.b.id.id, @fullBattle.b.formatCreated()</h4>
     <h1 class="mt-3 mb-2 text-center">
-        @battle.winner match {
+        @fullBattle.b.winner match {
             case Some(Team.R1) => {
                 <span class="text-blue winner">@r1Link()</span> vs <span class="text-red">@r2Link()</span>
             }
@@ -37,12 +37,12 @@
         }
     </h1>
     <h3 class="text-center">
-        @battle.winner match {
+        @fullBattle.b.winner match {
             case Some(Team.R1) => {
-                @battle.r1Rating @ratingChange(battle.r1RatingChange) <span style="color: var(--grey-2)">/</span> @battle.r2Rating @ratingChange(battle.r2RatingChange)
+                @fullBattle.b.pr1Rating @ratingChange(fullBattle.b.pr1RatingChange) <span style="color: var(--grey-2)">/</span> @fullBattle.b.pr2Rating @ratingChange(fullBattle.b.pr2RatingChange)
             }
             case Some(Team.R2) => {
-                @battle.r2Rating @ratingChange(battle.r2RatingChange) <span style="color: var(--grey-2)">/</span> @battle.r1Rating @ratingChange(battle.r1RatingChange)
+                @fullBattle.b.pr2Rating @ratingChange(fullBattle.b.pr2RatingChange) <span style="color: var(--grey-2)">/</span> @fullBattle.b.pr1Rating @ratingChange(fullBattle.b.pr1RatingChange)
             }
             case None => {
             }
@@ -56,7 +56,7 @@
     }
 
     <div class="mt-5">
-        <battle-el data="@battle.decompressData()" team="@userTeam"></battle-el>
+        <battle-el data="@fullBattle.b.decompressData()" team="@userTeam"></battle-el>
     </div>
 }
 
