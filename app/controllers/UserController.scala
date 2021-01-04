@@ -43,7 +43,7 @@ class UserController @Inject()(
           } yield (usernameUser, emailUser)) flatMap {
             case (None, None) =>
               usersRepo.create(data.email, username, data.password).map { user =>
-                Auth.login(user.username)(Redirect(routes.UserController.profile(user.username)))
+                Auth.login(user.username)(Redirect(routes.UserController.view(user.username)))
               }
             case _ =>
               Future successful BadRequest(
@@ -93,7 +93,7 @@ class UserController @Inject()(
       data => {
         loginOnSuccess(data) map {
           case Left(user) =>
-            Auth.login(user.username)(Redirect(routes.UserController.profile(user.username)))
+            Auth.login(user.username)(Redirect(routes.UserController.view(user.username)))
           case Right(error) =>
             Forbidden(
               views.html.user.login(
@@ -136,13 +136,13 @@ class UserController @Inject()(
     Auth.logout(Redirect(routes.HomeController.index()))
   }
 
-  def profile(username: String) =
+  def view(username: String) =
     auth.action { visitor => implicit request =>
       usersRepo.find(username) flatMap {
         case Some(user) =>
           robotRepo.findAll(user.id)(visitor) map { robots =>
             Ok(
-              views.html.user.profile(
+              views.html.user.view(
                 user,
                 Visitor.isLIAsUser(visitor, user),
                 robots,

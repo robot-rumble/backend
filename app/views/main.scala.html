@@ -11,7 +11,7 @@
                 <a href="@routes.HomeController.rules" target="_blank">docs</a>
                 @request.session.get("USERNAME") match {
                     case Some(username) => {
-                        <a href="@routes.UserController.profile(username)">profile</a>
+                        <a href="@routes.UserController.view(username)">profile</a>
                         <a href="@routes.UserController.logout">logout</a>
                     }
 

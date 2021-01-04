@@ -1,8 +1,8 @@
 @import models.Schema._
-@(boardWithBattles: BoardWithBattles, robotId: RobotId, page: Long, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+@(boardWithBattles: BoardWithBattles, robot: Robot, page: Long, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
-@main("Battles", "robot", assetsFinder) {
-    <h1>Battles</h1>
+@main(f"${boardWithBattles.board.name} Battles Involving ${robot.name}", "robot", assetsFinder) {
+    <h1><a href="@routes.BoardController.view(boardWithBattles.board.id.id)">@boardWithBattles.board.name</a> Battles Involving <a href="@routes.RobotController.viewById(robot.id.id)">@robot.name</a> </h1>
 
     <table class="_battles">
     @for(FullBattle(battle, r1, r2) <- boardWithBattles.battles) {
@@ -18,5 +18,5 @@
     }
     </table>
 
-    @pageControls(page => routes.BoardController.viewRobotBattles(boardWithBattles.board.id.id, robotId.id, page), page)
+    @pageControls(page => routes.BoardController.viewRobotBattles(boardWithBattles.board.id.id, robot.id.id, page), page)
 }

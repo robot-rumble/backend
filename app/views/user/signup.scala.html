@@ -6,7 +6,7 @@
         @helper.inputText(form("username"), Symbol("_showConstraints") -> false)
         @helper.inputPassword(form("password"), Symbol("_showConstraints") -> false)
         @helper.CSRF.formField
-        <button>Signup</button>
+        <button class="button">signup</button>
     }
 
     @if(form.hasGlobalErrors) {

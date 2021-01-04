@@ -43,7 +43,7 @@ GET         /api/get-robot-code/:robotId               controllers.RobotControll
 
 GET         /assets/*file                              controllers.Assets.at(file)
 
-GET         /:user                                     controllers.UserController.profile(user)
+GET         /:user                                     controllers.UserController.view(user)
 GET         /:user/:robot                              controllers.RobotController.view(user, robot)
 GET         /:user/:robot/edit                         controllers.RobotController.edit(user, robot)
 GET         /:user/:robot/view-code                    controllers.RobotController.viewPublishedCode(user, robot)

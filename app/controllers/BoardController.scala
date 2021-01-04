@@ -37,11 +37,11 @@ class BoardController @Inject()(
   def viewRobotBattles(id: Long, robotId: Long, page: Long = 0) =
     Action.async { implicit request =>
       boardsRepo.findWithBattlesForRobot(BoardId(id), RobotId(robotId), page, 30) map {
-        case Some(boardWithBattles) =>
+        case Some((robot, boardWithBattles)) =>
           Ok(
             views.html.board.robot(
               boardWithBattles,
-              RobotId(robotId),
+              robot,
               page,
               assetsFinder
             )

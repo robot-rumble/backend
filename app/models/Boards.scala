@@ -64,12 +64,14 @@ class Boards @Inject()(schema: Schema, robotsRepo: Robots, battlesRepo: Battles)
       robotId: RobotId,
       page: Long,
       numPerBoard: Index
-  ): Future[Option[BoardWithBattles]] = {
+  ): Future[Option[(Robot, BoardWithBattles)]] = {
     robotsRepo
       .findBare(robotId)(Auth.LoggedOut())
       .flatMap {
         case Some(robot) =>
-          findWithBattlesForRobot_(boardId, robot, page, numPerBoard)
+          findWithBattlesForRobot_(boardId, robot, page, numPerBoard).map(
+            _.map(boardWithBattles => (robot, boardWithBattles))
+          )
         case None => Future successful None
       }
   }

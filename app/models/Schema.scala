@@ -230,7 +230,7 @@ object Schema {
     val publishTimeFormatter = new DateTimeFormatterBuilder()
       .appendHourOfDay(1)
       .appendLiteral(':')
-      .appendMinuteOfHour(1)
+      .appendMinuteOfHour(2)
       .appendLiteral(" ")
       .appendTimeZoneShortName()
       .appendLiteral(" on ")

@@ -4,25 +4,32 @@
 @main(user.username, "view", assetsFinder) {
     <h1>@user.username</h1>
 
-    @if(robots.nonEmpty) {
-        <table class="mb-3">
-        @for(robot <- robots) {
-            <tr>
-                <td><a href="@routes.RobotController.view(user.username, robot.name)">@robot.name</a></td>
-                <td>@robot.lang</td>
-                <td>
+    <div class="_table">
+        @if(robots.nonEmpty) {
+            <table class="_body">
+            @for(robot <- robots) {
+                <tr>
+                    <td><a href="@routes.RobotController.view(user.username, robot.name)">@robot.name</a></td>
+                    <td>@robot.lang</td>
+                    <td>
                     @if(robot.published) {
-                      Published
+                        Published
                     } else {
-                      Draft
+                        Draft
                     }
-                </td>
-            </tr>
+                    </td>
+                </tr>
+            }
+            </table>
         }
-        </table>
-    }
+        @if(isAuthenticated) {
+            <div class="_footer">
+                <a href="@routes.RobotController.create()">
+                    <img src="@assetsFinder.path("images/add-circle.svg")" alt="">
+                    create robot
+                </a>
+            </div>
+        }
+    </div>
 
-    @if(isAuthenticated) {
-        <a href="@routes.RobotController.create()">create robot</a>
-    }
 }
