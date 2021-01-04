@@ -60,7 +60,7 @@ class MatchMaker @Inject()(
             .flatMap {
               case (r, pr) =>
                 val board = boardsMap(pr.boardId)
-                val recurrentCooldown = if (USE_MOCK) Duration.ZERO else board.recurrentCooldown
+                val battleCooldown = if (USE_MOCK) Duration.ZERO else board.battleCooldown
                 val opponentNum = {
                   val publishedWithinWindow =
                     pr.created.isAfter(LocalDateTime.now().minus(CHECK_EVERY))
@@ -72,7 +72,8 @@ class MatchMaker @Inject()(
                         opponents
                           .map(_.created)
                           .max
-                          .isBefore(LocalDateTime.now().minus(recurrentCooldown))
+                          .plus(battleCooldown)
+                          .isBefore(LocalDateTime.now())
                     }
                     if (cooldownExpired) board.recurrentBattleNum
                     else 0

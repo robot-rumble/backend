@@ -110,7 +110,7 @@ class Boards @Inject()(schema: Schema, robotsRepo: Robots, battlesRepo: Battles)
       matchmakingEnabled = true,
       publishCooldown = Duration.standardHours(6),
       publishBattleNum = 1,
-      recurrentCooldown = Duration.standardHours(12),
+      battleCooldown = Duration.standardHours(12),
       recurrentBattleNum = 1
     )
     run(boards.insert(lift(board)).returningGenerated(_.id)).map(board.copy(_))

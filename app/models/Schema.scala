@@ -208,7 +208,7 @@ object Schema {
       matchmakingEnabled: Boolean,
       publishCooldown: Duration,
       publishBattleNum: Int,
-      recurrentCooldown: Duration,
+      battleCooldown: Duration,
       recurrentBattleNum: Int
   ) {
     val publishCooldownFormatter = new PeriodFormatterBuilder()

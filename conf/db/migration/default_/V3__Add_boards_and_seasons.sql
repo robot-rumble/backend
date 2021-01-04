@@ -1,11 +1,11 @@
 CREATE TABLE seasons
 (
-    id     BIGSERIAL PRIMARY KEY,
-    name   VARCHAR(30) NOT NULL,
-    slug   VARCHAR(30) NOT NULL,
-    bio    TEXT        NOT NULL,
-    start  TIMESTAMP   NOT NULL,
-    end_ TIMESTAMP   NOT NULL
+    id    BIGSERIAL PRIMARY KEY,
+    name  VARCHAR(30) NOT NULL,
+    slug  VARCHAR(30) NOT NULL,
+    bio   TEXT        NOT NULL,
+    start TIMESTAMP   NOT NULL,
+    end_  TIMESTAMP   NOT NULL
 );
 
 CREATE TABLE boards
@@ -20,7 +20,7 @@ CREATE TABLE boards
     matchmaking_enabled  BOOL        NOT NULL,
     publish_cooldown     INT         NOT NULL,
     publish_battle_num   INT         NOT NULL,
-    recurrent_cooldown   INT         NOT NULL,
+    battle_cooldown      INT         NOT NULL,
     recurrent_battle_num INT         NOT NULL
 );
 
