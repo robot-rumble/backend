@@ -3,6 +3,7 @@ package models
 import controllers.Auth
 import javax.inject.Inject
 import models.Schema._
+import org.joda.time.Duration
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -27,7 +28,7 @@ class Boards @Inject()(schema: Schema, robotsRepo: Robots, battlesRepo: Battles)
   def findAll(seasonId: SeasonId, numPerBoard: Int): Future[Seq[FullBoard]] =
     run(boards.by(seasonId)) flatMap (attachRobots(_, numPerBoard))
 
-  def findAllBare: Future[Seq[Board]] =
+  def findAllBare(): Future[Seq[Board]] =
     run(boards)
 
   def find(id: BoardId, page: Long, numPerPage: Int): Future[Option[FullBoard]] =
@@ -107,9 +108,9 @@ class Boards @Inject()(schema: Schema, robotsRepo: Robots, battlesRepo: Battles)
       password = None,
       publishingEnabled = true,
       matchmakingEnabled = true,
-      publishCooldown = 100,
-      recurrentCooldown = 100,
+      publishCooldown = Duration.standardHours(6),
       publishBattleNum = 1,
+      recurrentCooldown = Duration.standardHours(12),
       recurrentBattleNum = 1
     )
     run(boards.insert(lift(board)).returningGenerated(_.id)).map(board.copy(_))

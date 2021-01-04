@@ -8,10 +8,10 @@ object PublishForm {
 
   val form: Form[Data] = Form(
     mapping(
-      "boardId" -> longNumber,
+      "robotId" -> longNumber,
     )(Data.apply)(Data.unapply)
   )
 
-  case class Data(boardId: Long)
+  case class Data(robotId: Long)
 
 }

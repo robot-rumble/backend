@@ -1,6 +1,7 @@
 package controllers
 
-import controllers.Auth.LoggedOut
+import controllers.Auth.{LoggedIn, LoggedOut}
+import forms.PublishForm
 import javax.inject._
 import play.api.mvc._
 
@@ -8,11 +9,15 @@ import scala.concurrent.{ExecutionContext, Future}
 import models._
 import models.Schema._
 
+import scala.concurrent.duration.FiniteDuration
+
 @Singleton
 class BoardController @Inject()(
     cc: ControllerComponents,
     assetsFinder: AssetsFinder,
     boardsRepo: Boards,
+    robotsRepo: Robots,
+    auth: Auth.AuthAction,
 )(implicit ec: ExecutionContext)
     extends AbstractController(cc) {
 
@@ -43,5 +48,60 @@ class BoardController @Inject()(
           )
         case None => NotFound("404")
       }
+    }
+
+  private def getRobotOptions(user: User): Future[Seq[(String, String)]] =
+    robotsRepo
+      .findAll(user.id)(LoggedIn(user))
+      .map(_.map(robot => (robot.id.id.toString, robot.name)))
+
+  def publish(id: Long) =
+    auth.actionForceLI { user => implicit request =>
+      boardsRepo.findBare(BoardId(id)) flatMap {
+        case Some(board) =>
+          getRobotOptions(user) map { robotOptions =>
+            Ok(
+              views.html.board
+                .publish(
+                  PublishForm.form,
+                  board,
+                  robotOptions,
+                  None,
+                  assetsFinder
+                )
+            )
+          }
+        case None => Future successful NotFound("404")
+      }
+    }
+
+  def postPublish(id: Long) =
+    auth.actionForceLI { user => implicit request =>
+      PublishForm.form.bindFromRequest.fold(
+        _formWithErrors => {
+          Future.successful(InternalServerError("Unexpected form input"))
+        },
+        data => {
+          boardsRepo.findBare(BoardId(id)) flatMap {
+            case Some(board) =>
+              robotsRepo.publish(RobotId(data.robotId), board) flatMap {
+                case None => Future successful NotFound("404")
+                case Some(result) =>
+                  getRobotOptions(user) map { robotOptions =>
+                    Ok(
+                      views.html.board.publish(
+                        PublishForm.form,
+                        board,
+                        robotOptions,
+                        Some(result),
+                        assetsFinder
+                      )
+                    )
+                  }
+              }
+            case None => Future successful NotFound("404")
+          }
+        }
+      )
     }
 }

@@ -1,0 +1,34 @@
+@import models.Schema._
+@import org.joda.time.Duration
+@(form: Form[forms.PublishForm.Data], board: Board, robotOptions: Seq[(String, String)], resultOption: Option[Either[PRobot, PRobotId]], assetsFinder: AssetsFinder)(implicit request: MessagesRequestHeader)
+
+@main(s"Publish to ${board.name}", "publish", assetsFinder) {
+    <h1>Publish to @board.name</h1>
+
+    <p class="mb-3">Once you publish, your robot will be seen to every other user on this site, and will be queued for battles to establish your rating. You can only publish once every @board.formatPublishCooldown(), so make sure to only do so when your robot is ready to meet the competition.
+        <a href="https://rr-docs.readthedocs.io/en/latest/quickstart.html#publishing-your-robot">Learn more</a>
+    </p>
+
+    <p>Are you ready?</p>
+    @helper.form(routes.BoardController.postPublish(board.id.id)) {
+        @helper.select(form("robotId"), robotOptions, Symbol("_showConstraints") -> false, Symbol("_label") -> "Robot name")
+        @helper.CSRF.formField
+        <button class="button mt-4">Publish</button>
+    }
+
+    @resultOption match {
+        case Some(result) => {
+            @result match {
+                case Left(pr) => {
+                    <p>Your robot was recently published. You can publish again only after @board.formatNextPublishTime(pr.created). </p>
+                }
+
+                case Right(prId) => {
+                    Published robot!
+                }
+            }
+        }
+
+        case None => {}
+    }
+}

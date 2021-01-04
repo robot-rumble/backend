@@ -85,19 +85,6 @@ object Schema {
       )
   }
 
-  val publishCooldownFormatter = new PeriodFormatterBuilder()
-    .printZeroRarelyFirst()
-    .appendHours()
-    .appendSuffix(" hour", " hours")
-    .appendSeparator(" ")
-    .appendMinutes()
-    .appendSuffix(" minute", " minutes")
-    .toFormatter
-
-  def formatPublishCooldown(publishCooldown: Duration): String = {
-    publishCooldownFormatter.print(publishCooldown.toPeriod())
-  }
-
   case class PRobotId(id: Long)
 
   case class PRobot(
@@ -107,26 +94,7 @@ object Schema {
       created: LocalDateTime = LocalDateTime.now(),
       code: String,
       rating: Int = 1000,
-  ) {
-    def publishCooldownExpired(publishCooldown: Duration): Boolean =
-      created.isBefore(LocalDateTime.now().minus(publishCooldown))
-
-    val publishTimeFormatter = new DateTimeFormatterBuilder()
-      .appendHourOfDay(1)
-      .appendLiteral(':')
-      .appendMinuteOfHour(1)
-      .appendLiteral(" ")
-      .appendTimeZoneShortName()
-      .appendLiteral(" on ")
-      .appendDayOfWeekText()
-      .toFormatter
-
-    def formatNextPublishTime(publishCooldown: Duration): String = {
-      publishTimeFormatter.print(
-        created.toDateTime(DateTimeZone.forID("US/Eastern")).plus(publishCooldown)
-      )
-    }
-  }
+  )
 
   implicit val robotWrites = new Writes[Robot] {
     def writes(robot: Robot) = Json.obj(
@@ -238,11 +206,43 @@ object Schema {
       password: Option[String],
       publishingEnabled: Boolean,
       matchmakingEnabled: Boolean,
-      publishCooldown: Int,
+      publishCooldown: Duration,
       publishBattleNum: Int,
-      recurrentCooldown: Int,
+      recurrentCooldown: Duration,
       recurrentBattleNum: Int
-  )
+  ) {
+    val publishCooldownFormatter = new PeriodFormatterBuilder()
+      .printZeroRarelyFirst()
+      .appendHours()
+      .appendSuffix(" hour", " hours")
+      .appendSeparator(" ")
+      .appendMinutes()
+      .appendSuffix(" minute", " minutes")
+      .toFormatter
+
+    def formatPublishCooldown(): String = {
+      publishCooldownFormatter.print(publishCooldown.toPeriod())
+    }
+
+    def publishCooldownExpired(time: LocalDateTime): Boolean =
+      time.plus(publishCooldown).isBefore(LocalDateTime.now())
+
+    val publishTimeFormatter = new DateTimeFormatterBuilder()
+      .appendHourOfDay(1)
+      .appendLiteral(':')
+      .appendMinuteOfHour(1)
+      .appendLiteral(" ")
+      .appendTimeZoneShortName()
+      .appendLiteral(" on ")
+      .appendDayOfWeekText()
+      .toFormatter
+
+    def formatNextPublishTime(time: LocalDateTime): String = {
+      publishTimeFormatter.print(
+        time.toDateTime(DateTimeZone.forID("US/Eastern")).plus(publishCooldown)
+      )
+    }
+  }
 
   case class FullBoard(board: Board, robots: Seq[FullBoardRobot])
 
@@ -308,6 +308,8 @@ object Schema {
     implicit val decodeSeasonId = MappedEncoding[Long, SeasonId](SeasonId.apply)
     implicit val encodeEmail = MappedEncoding[Email, String](_.email)
     implicit val decodeEmail = MappedEncoding[String, Email](Email.apply)
+    implicit val encodeDuration = MappedEncoding[Duration, Int](_.getStandardMinutes.toInt)
+    implicit val decodeDuration = MappedEncoding[Int, Duration](Duration.standardSeconds(_))
 
     val users = quote(querySchema[User]("users"))
     // column renaming fixes a really weird issue:

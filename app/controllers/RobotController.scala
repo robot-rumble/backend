@@ -166,64 +166,6 @@ class RobotController @Inject()(
     }
   }
 
-  val PUBLISH_COOLDOWN = config.get[FiniteDuration]("queue.publishCooldown")
-
-  private def getBoardOptions: Future[Seq[(String, String)]] =
-    boardsRepo.findAllBare.map(_.map(board => (board.id.id.toString, board.name)))
-
-  def publish(_username: String, name: String) =
-    auth.actionForceLI { user => implicit request =>
-      robotsRepo.findBare(user.id, name)(LoggedIn(user)) flatMap {
-        case Some(robot) =>
-          getBoardOptions map { boardOptions =>
-            Ok(
-              views.html.robot
-                .publish(
-                  PublishForm.form,
-                  boardOptions,
-                  None,
-                  robot,
-                  PUBLISH_COOLDOWN,
-                  assetsFinder
-                )
-            )
-          }
-        case None => Future successful NotFound("404")
-      }
-    }
-
-  def postPublish(robotId: Long) =
-    auth.actionForceLI { user => implicit request =>
-      PublishForm.form.bindFromRequest.fold(
-        _formWithErrors => {
-          Future.successful(InternalServerError("Unexpected form input"))
-        },
-        data => {
-          robotsRepo.findBare(RobotId(robotId))(LoggedIn(user)) flatMap {
-            case Some(robot) =>
-              robotsRepo.publish(robot.id, BoardId(data.boardId), PUBLISH_COOLDOWN) flatMap {
-                case None => Future successful NotFound("404")
-                case Some(result) =>
-                  getBoardOptions map { boardOptions =>
-                    Ok(
-                      views.html.robot
-                        .publish(
-                          PublishForm.form,
-                          boardOptions,
-                          Some(result),
-                          robot,
-                          PUBLISH_COOLDOWN,
-                          assetsFinder
-                        )
-                    )
-                  }
-              }
-            case None => Future successful NotFound("404")
-          }
-        }
-      )
-    }
-
   def apiGetRobotCode(robotId: Long) =
     Action.async { implicit request =>
       robotsRepo.getLatestPublishedCode(RobotId(robotId)) map {

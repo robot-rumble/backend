@@ -1,6 +1,7 @@
 @import models.Schema._
 @(fullSeason: FullSeason, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
+
 @main(fullSeason.season.name, "season", assetsFinder) {
     <h1>@fullSeason.season.name</h1>
     <div>

@@ -105,20 +105,19 @@ class Robots @Inject()(
 
   def publish(
       id: RobotId,
-      boardId: BoardId,
-      publishCooldown: Duration
+      board: Board,
   ): Future[Option[PublishResult]] = {
-    run(robots.by(id).leftJoin(publishedRobots.by(boardId).latest).on((r, pr) => r.id == pr.rId))
+    run(robots.by(id).leftJoin(publishedRobots.by(board.id).latest).on((r, pr) => r.id == pr.rId))
       .map(_.headOption) flatMap {
       case Some((r, prOption)) =>
         prOption match {
-          case Some(pr) if !pr.publishCooldownExpired(publishCooldown) =>
+          case Some(pr) if !board.publishCooldownExpired(pr.created) =>
             Future successful Some(Left(pr))
           case _ =>
             for {
               prId <- run(
                 publishedRobots
-                  .insert(lift(PRobot(code = r.devCode, rId = r.id, boardId = boardId)))
+                  .insert(lift(PRobot(code = r.devCode, rId = r.id, boardId = board.id)))
                   .returningGenerated(_.id)
               )
               _ <- run(robots.by(id).update(_.published -> true))

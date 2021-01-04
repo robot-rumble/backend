@@ -17,7 +17,6 @@ GET         /logout                                    controllers.UserControlle
 
 GET         /create-robot                              controllers.RobotController.create
 POST        /create-robot                              controllers.RobotController.postCreate
-POST        /publish/:robot                            controllers.RobotController.postPublish(robot: Long)
 GET         /r/:robot                                  controllers.RobotController.viewById(robot: Long)
 
 GET         /battles/:battle                           controllers.BattleController.view(battle: Long)
@@ -25,6 +24,8 @@ GET         /seasons                                   controllers.SeasonControl
 GET         /seasons/:season                           controllers.SeasonController.view(season)
 
 GET         /boards/:board                             controllers.BoardController.view(board: Long, page: Long ?= 0)
+GET         /boards/:board/publish                     controllers.BoardController.publish(board: Long)
+POST        /boards/:board/publish                     controllers.BoardController.postPublish(board: Long)
 GET         /boards/:board/robot-battles/:robot        controllers.BoardController.viewRobotBattles(board: Long, robot: Long, page: Long ?= 0)
 
 
@@ -45,5 +46,4 @@ GET         /assets/*file                              controllers.Assets.at(fil
 GET         /:user                                     controllers.UserController.profile(user)
 GET         /:user/:robot                              controllers.RobotController.view(user, robot)
 GET         /:user/:robot/edit                         controllers.RobotController.edit(user, robot)
-GET         /:user/:robot/publish                      controllers.RobotController.publish(user, robot)
 GET         /:user/:robot/view-code                    controllers.RobotController.viewPublishedCode(user, robot)
