@@ -1,25 +1,18 @@
 package controllers
 
-import controllers.Auth.{LoggedIn, LoggedOut, Visitor}
-import javax.inject._
-
-import scala.concurrent.{ExecutionContext, Future}
-import play.api.libs.json.Json
-import play.api.mvc._
-import forms.{CreateRobotForm, UpdateRobotCodeForm}
-import models._
+import controllers.Auth.{LoggedIn, LoggedOut}
 import models.Schema._
-import play.api.Configuration
+import models._
+import play.api.mvc._
 
-import scala.concurrent.duration.FiniteDuration
-import services.JodaUtils._
+import javax.inject._
+import scala.concurrent.ExecutionContext
 
 class BattleController @Inject()(
     cc: ControllerComponents,
     assetsFinder: AssetsFinder,
     auth: Auth.AuthAction,
     battlesRepo: Battles,
-    robotsRepo: Robots
 )(implicit ec: ExecutionContext)
     extends AbstractController(cc) {
   def view(battleId: Long) = auth.action { visitor => implicit request =>

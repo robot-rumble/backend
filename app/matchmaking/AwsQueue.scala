@@ -5,20 +5,18 @@ import akka.stream.alpakka.sqs.scaladsl.{SqsAckSink, SqsPublishSink, SqsSource}
 import akka.stream.alpakka.sqs.{MessageAction, SqsSourceSettings}
 import akka.stream.scaladsl.{Flow, RestartSink, RestartSource}
 import com.github.matsluni.akkahttpspi.AkkaHttpClient
-import javax.inject._
-import play.api.Configuration
-import play.api.libs.json.Json
 import matchmaking.BattleQueue.{MatchInput, MatchOutput}
+import play.api.libs.json.Json
+import play.api.{Configuration, Logger}
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import software.amazon.awssdk.services.sqs.model.{Message, SendMessageRequest}
-import java.util.Base64
-import java.nio.charset.StandardCharsets
 
-import scala.util.Try
+import java.nio.charset.StandardCharsets
+import java.util.Base64
+import javax.inject._
 import scala.concurrent.duration._
-import play.api.Logger
 
 class AwsQueue @Inject()(
     implicit system: ActorSystem,

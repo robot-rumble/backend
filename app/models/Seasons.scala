@@ -1,10 +1,10 @@
 package models
 
 import io.getquill.Ord
-import javax.inject.Inject
 import models.Schema._
 import org.joda.time.LocalDateTime
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class Seasons @Inject()(schema: Schema, boardsRepo: Boards)(

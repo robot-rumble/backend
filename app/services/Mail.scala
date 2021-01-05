@@ -1,10 +1,10 @@
 package services
 
-import javax.inject.Inject
-import play.api.Configuration
 import courier._
-import javax.mail.internet.InternetAddress
+import play.api.Configuration
 
+import javax.inject.Inject
+import javax.mail.internet.InternetAddress
 import scala.concurrent.{ExecutionContext, Future}
 
 trait Mail {

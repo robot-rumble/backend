@@ -1,15 +1,16 @@
 package models
 
-import org.joda.time.{DateTime, DateTimeZone, Duration, LocalDateTime}
 import com.github.t3hnar.bcrypt._
 import enumeratum._
 import io.getquill.{EntityQuery, Query}
-import javax.inject.Inject
-import play.api.libs.json.{Json, Writes}
-import utils.LoadCode
 import matchmaking.BattleQueue.MatchOutput
 import org.joda.time.format.{DateTimeFormatterBuilder, PeriodFormatterBuilder}
+import org.joda.time.{DateTimeZone, Duration, LocalDateTime}
+import play.api.libs.json.{Json, Writes}
 import services.Database
+import utils.LoadCode
+
+import javax.inject.Inject
 
 object Schema {
   sealed trait Lang extends EnumEntry

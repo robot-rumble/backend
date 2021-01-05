@@ -1,5 +1,4 @@
 @import models.Schema._
-@import org.joda.time.Duration
 @(form: Form[forms.PublishForm.Data], board: Board, robotOptions: Seq[(String, String)], resultOption: Option[Either[PRobot, PRobotId]], assetsFinder: AssetsFinder)(implicit request: MessagesRequestHeader)
 
 @main(s"Publish to ${board.name}", "publish", assetsFinder) {

@@ -1,10 +1,10 @@
 package models
 
 import controllers.Auth
-import javax.inject.Inject
 import models.Schema._
 import org.joda.time.Duration
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class Boards @Inject()(schema: Schema, robotsRepo: Robots, battlesRepo: Battles)(

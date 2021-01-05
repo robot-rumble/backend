@@ -4,17 +4,16 @@ import akka.actor._
 import akka.stream.Materializer
 import akka.stream.scaladsl.{Sink, Source}
 import com.github.esap120.scala_elo._
-import javax.inject._
+import models.Schema.{BoardId, RobotId, Team}
+import models._
+import org.joda.time.{Duration, LocalDateTime}
+import play.api.{Configuration, Logger}
+import services.JodaUtils._
 
+import javax.inject._
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
-import org.joda.time.{Duration, LocalDateTime}
-import models._
-import services.JodaUtils._
-import models.Schema.{BoardId, RobotId, Team}
-import play.api.Configuration
-import play.api.Logger
 
 @Singleton
 class MatchMaker @Inject()(

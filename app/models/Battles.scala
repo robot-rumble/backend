@@ -1,12 +1,12 @@
 package models
 
-import javax.inject.Inject
-import matchmaking.BattleQueue.MatchOutput
-
-import scala.concurrent.{ExecutionContext, Future}
-import Schema._
 import io.getquill.{EntityQuery, Ord, Query}
+import matchmaking.BattleQueue.MatchOutput
+import models.Schema._
 import org.joda.time.LocalDateTime
+
+import javax.inject.Inject
+import scala.concurrent.{ExecutionContext, Future}
 
 class Battles @Inject()(
     val schema: Schema,
@@ -15,8 +15,8 @@ class Battles @Inject()(
 )(
     implicit ec: ExecutionContext
 ) {
-  import schema.ctx._
   import schema._
+  import schema.ctx._
 
   def find(id: BattleId): Future[Option[FullBattle]] =
     run(battles.by(id).withRobots()).map(_.headOption).map(_.map(FullBattle.tupled))

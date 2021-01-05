@@ -1,9 +1,8 @@
 package forms
 
+import models.Schema.Lang
 import play.api.data.Form
 import play.api.data.Forms._
-
-import models.Schema.Lang
 
 object CreateRobotForm {
 

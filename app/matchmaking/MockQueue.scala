@@ -1,14 +1,13 @@
 package matchmaking
 
-import javax.inject.Inject
 import akka.stream.Materializer
 import akka.stream.scaladsl.{Flow, Keep, Sink, Source}
-import play.api.libs.json.{JsString, Json, JsObject}
 import matchmaking.BattleQueue.{MatchInput, MatchOutput}
-
-import sys.process._
-
 import models.Schema.Team
+import play.api.libs.json.{JsObject, JsString, Json}
+
+import javax.inject.Inject
+import scala.sys.process._
 
 class MockQueue @Inject()(
     implicit materializer: Materializer

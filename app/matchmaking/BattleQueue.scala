@@ -2,9 +2,8 @@ package matchmaking
 
 import akka.NotUsed
 import akka.stream.scaladsl.{Sink, Source}
+import models.Schema.{Lang, Team}
 import play.api.libs.functional.syntax._
-
-import models.Schema.{Team, Lang}
 
 trait BattleQueue {
   val sink: Sink[BattleQueue.MatchInput, NotUsed]

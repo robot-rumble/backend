@@ -1,18 +1,14 @@
 package controllers
 
 import controllers.Auth.{LoggedIn, LoggedOut, Visitor}
-import javax.inject._
-
-import scala.concurrent.{ExecutionContext, Future}
+import forms.{CreateRobotForm, UpdateRobotCodeForm}
+import models.Schema._
+import models._
 import play.api.libs.json.Json
 import play.api.mvc._
-import forms.{CreateRobotForm, PublishForm, UpdateRobotCodeForm}
-import models._
-import models.Schema._
-import play.api.Configuration
 
-import scala.concurrent.duration.FiniteDuration
-import services.JodaUtils._
+import javax.inject._
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class RobotController @Inject()(
@@ -21,7 +17,6 @@ class RobotController @Inject()(
     auth: Auth.AuthAction,
     robotsRepo: Robots,
     boardsRepo: Boards,
-    config: Configuration
 )(implicit ec: ExecutionContext)
     extends MessagesAbstractController(cc) {
 

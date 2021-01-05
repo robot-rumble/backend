@@ -1,15 +1,13 @@
 package controllers
 
-import controllers.Auth.{LoggedIn, LoggedOut}
+import controllers.Auth.LoggedIn
 import forms.PublishForm
-import javax.inject._
+import models.Schema._
+import models._
 import play.api.mvc._
 
+import javax.inject._
 import scala.concurrent.{ExecutionContext, Future}
-import models._
-import models.Schema._
-
-import scala.concurrent.duration.FiniteDuration
 
 @Singleton
 class BoardController @Inject()(

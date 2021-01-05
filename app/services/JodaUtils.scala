@@ -1,6 +1,6 @@
 package services
 
-import org.joda.time.{LocalDateTime, Duration}
+import org.joda.time.{Duration, LocalDateTime}
 
 import scala.concurrent.duration.FiniteDuration
 import scala.language.implicitConversions

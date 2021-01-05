@@ -1,20 +1,19 @@
 package models
 
-import javax.inject.Inject
-
-import scala.concurrent.{ExecutionContext, Future}
-import Schema._
 import controllers.Auth.{LoggedIn, LoggedOut, Visitor}
 import io.getquill.{EntityQuery, Ord}
-import org.joda.time.Duration
+import models.Schema._
+
+import javax.inject.Inject
+import scala.concurrent.{ExecutionContext, Future}
 
 class Robots @Inject()(
     val schema: Schema,
 )(
     implicit ec: ExecutionContext
 ) {
-  import schema.ctx._
   import schema._
+  import schema.ctx._
 
   def robotsAuth(visitor: Visitor): Quoted[EntityQuery[Robot]] = {
     visitor match {
@@ -96,7 +95,7 @@ class Robots @Inject()(
   }
 
   def updateDevCode(id: RobotId, devCode: String): Future[Long] =
-    if (!devCode.isEmpty)
+    if (devCode.nonEmpty)
       run(robots.by(id).update(_.devCode -> lift(devCode)))
     else throw new Exception("Updating robot with empty code.")
 

@@ -1,10 +1,10 @@
 package controllers
 
-import javax.inject._
 import models.Schema._
 import models.Users
 import play.api.mvc._
 
+import javax.inject._
 import scala.concurrent.{ExecutionContext, Future}
 
 object Auth {

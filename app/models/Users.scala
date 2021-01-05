@@ -1,14 +1,14 @@
 package models
 
+import com.github.t3hnar.bcrypt._
+import models.Schema._
+
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
-import com.github.t3hnar.bcrypt._
-
-import Schema._
 
 class Users @Inject()(schema: Schema)(implicit ec: ExecutionContext) {
-  import schema.ctx._
   import schema._
+  import schema.ctx._
 
   def find(username: String): Future[Option[User]] =
     run(users.by(username)).map(_.headOption)

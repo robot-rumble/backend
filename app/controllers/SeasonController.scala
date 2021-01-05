@@ -1,12 +1,10 @@
 package controllers
 
-import javax.inject._
+import models._
 import play.api.mvc._
 
-import scala.concurrent.{ExecutionContext, Future}
-
-import models._
-import models.Schema._
+import javax.inject._
+import scala.concurrent.ExecutionContext
 
 @Singleton
 class SeasonController @Inject()(
