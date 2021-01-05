@@ -20,9 +20,9 @@ POST        /create-robot                              controllers.RobotControll
 GET         /r/:robot                                  controllers.RobotController.viewById(robot: Long)
 
 GET         /battles/:battle                           controllers.BattleController.view(battle: Long)
-GET         /seasons                                   controllers.SeasonController.index
 GET         /seasons/:season                           controllers.SeasonController.view(season)
 
+GET         /boards                                    controllers.BoardController.index
 GET         /boards/:board                             controllers.BoardController.view(board: Long, page: Long ?= 0)
 GET         /boards/:board/publish                     controllers.BoardController.publish(board: Long)
 POST        /boards/:board/publish                     controllers.BoardController.postPublish(board: Long)

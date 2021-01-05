@@ -1,15 +1,46 @@
 @import models.Schema._
-@(boards: Seq[FullBoard], assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+@(seasons: Seq[Season], boards: Seq[Board], assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+
+@boardRows(boards: Seq[Board]) = {
+    @for(board <- boards) {
+        <tr>
+            <td><a href="@routes.BoardController.view(board.id.id)">@board.name</a></td>
+        </tr>
+    }
+}
 
 @main("Boards", "boards", assetsFinder) {
     <h1>Boards</h1>
 
-    <table class="_boards">
-        @for(FullBoard(board, robots) <- boards) {
-            <tr>
-                <td><a href="@routes.BoardController.view(board.id.id)">Board @board.name</a></td>
-                <td>@robots.length robots</td>
-            </tr>
-        }
+    <h2>Seasons</h2>
+
+    <table class="_seasons">
+    @for(season <- seasons) {
+        <div class="_table">
+            <div class="_header d-flex">
+                <p>@season.name</p>
+                <p>@season.formatStart() - @season.formatEnd()</p>
+            </div>
+            @if(season.isActive()) {
+                <table class="_body">
+                    @boardRows(boards.filter(_.seasonId.contains(season.id)))
+                </table>
+            }
+        </div>
+    }
+    @if(seasons.isEmpty) {
+      <p>No seasons yet</p>
+    }
     </table>
+
+    <h2 class="mt-5">Other Boards</h2>
+
+    @defining(boards.filter(_.seasonId.isEmpty)) { otherBoards =>
+        <table class="_boards">
+            @boardRows(otherBoards)
+        </table>
+        @if(otherBoards.isEmpty) {
+            <p>No boards yet</p>
+        }
+    }
 }

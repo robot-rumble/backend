@@ -4,6 +4,8 @@
 
 @main(fullSeason.season.name, "season", assetsFinder) {
     <h1>@fullSeason.season.name</h1>
+    <p>@fullSeason.season.formatStart() - @fullSeason.season.formatEnd()</p>
+
     <div class="mb-3">
         @Html(fullSeason.season.bio)
     </div>

@@ -7,7 +7,7 @@
         <section class="header d-flex justify-content-between">
             <a class="text-black" href="@routes.HomeController.index">Robot Rumble ALPHA</a>
             <div class="d-flex links">
-                <a href="@routes.SeasonController.index()">seasons</a>
+                <a href="@routes.BoardController.index()">boards</a>
                 <a href="@routes.HomeController.rules" target="_blank">docs</a>
                 @request.session.get("USERNAME") match {
                     case Some(username) => {

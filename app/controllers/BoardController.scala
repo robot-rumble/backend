@@ -17,13 +17,16 @@ class BoardController @Inject()(
     assetsFinder: AssetsFinder,
     boardsRepo: Boards,
     robotsRepo: Robots,
+    seasonsRepo: Seasons,
     auth: Auth.AuthAction,
 )(implicit ec: ExecutionContext)
     extends AbstractController(cc) {
 
-  def index = Action.async { implicit request =>
-    boardsRepo.findAll(10) map { boards =>
-      Ok(views.html.board.index(boards, assetsFinder))
+  def index() = Action.async { implicit request =>
+    seasonsRepo.findAll() flatMap { seasons =>
+      boardsRepo.findAllBare map { boards =>
+        Ok(views.html.board.index(seasons, boards, assetsFinder))
+      }
     }
   }
 

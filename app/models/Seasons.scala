@@ -13,7 +13,7 @@ class Seasons @Inject()(schema: Schema, boardsRepo: Boards)(
   import schema._
   import schema.ctx._
 
-  def find: Future[Seq[Season]] =
+  def findAll(): Future[Seq[Season]] =
     run(seasons.sortBy(_.start)(Ord.asc))
 
   def find(slug: String, numPerBoard: Int): Future[Option[FullSeason]] =

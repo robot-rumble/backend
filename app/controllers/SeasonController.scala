@@ -16,12 +16,6 @@ class SeasonController @Inject()(
 )(implicit ec: ExecutionContext)
     extends AbstractController(cc) {
 
-  def index = Action.async { implicit request =>
-    seasonsRepo.find map { seasons =>
-      Ok(views.html.season.index(seasons, assetsFinder))
-    }
-  }
-
   def view(slug: String) = Action.async { implicit request =>
     seasonsRepo.find(slug, 10) map {
       case Some(season) => Ok(views.html.season.view(season, assetsFinder))
