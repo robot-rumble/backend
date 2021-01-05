@@ -64,4 +64,6 @@ initialCommands in console :=
     |val usersRepo = app.injector.instanceOf[Users]
     |val robotsRepo = app.injector.instanceOf[Robots]
     |val battlesRepo = app.injector.instanceOf[Battles]
-  """.trim.stripMargin
+    |val boardsRepo = app.injector.instanceOf[Boards]
+    |val seasonsRepo = app.injector.instanceOf[Seasons]
+    |  """.trim.stripMargin

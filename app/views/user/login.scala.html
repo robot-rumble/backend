@@ -5,7 +5,7 @@
         @helper.inputText(form("username"), Symbol("_showConstraints") -> false)
         @helper.inputPassword(form("password"), Symbol("_showConstraints") -> false)
         @helper.CSRF.formField
-        <button>Login</button>
+        <button class="button">login</button>
     }
 
     @if(form.hasGlobalErrors) {
@@ -16,5 +16,5 @@
         </ul>
     }
 
-    <div class="mt-3"><a href="@routes.UserController.passwordReset">Reset password</a></div>
+    <div class="mt-3"><a href="@routes.UserController.passwordReset">reset password</a></div>
 }

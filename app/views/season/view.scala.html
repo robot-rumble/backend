@@ -1,0 +1,51 @@
+@import models.Schema._
+@(fullSeason: FullSeason, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+
+
+@main(fullSeason.season.name, "season", assetsFinder) {
+    <h1>@fullSeason.season.name</h1>
+    <p>@fullSeason.season.formatStart() - @fullSeason.season.formatEnd()</p>
+
+    <div class="mb-3">
+        @Html(fullSeason.season.bio)
+    </div>
+
+    <div>
+        <h2>Boards</h2>
+    @for(FullBoard(board, robots) <- fullSeason.boards) {
+        <div>
+        <div class="_table mb-3">
+            <div class="_header">
+                <p class="mr-3">@board.name</p>
+                <p class="text-grey">publish cooldown: @board.formatPublishCooldown()</p>
+            </div>
+            <table class="_body">
+            @if(robots.nonEmpty) {
+                @for(FullBoardRobot(robot, pRobot, user) <- robots) {
+                    <tr>
+                        <td><a href="@routes.RobotController.view(user.username, robot.name)">@robot.name</a></td>
+                        <td>by <a href="@routes.UserController.view(user.username)">@user.username</a></td>
+                        <td>@robot.lang</td>
+                        <td>@pRobot.rating</td>
+                        <td><a href="@routes.BoardController.viewRobotBattles(board.id.id, robot.id.id)">view battles</a></td>
+                    </tr>
+                }
+            } else {
+              <tr><td>No robots yet</td></tr>
+            }
+            </table>
+            <div class="_footer">
+                <a href="@routes.BoardController.publish(board.id.id)">
+                    <img src="@assetsFinder.path("images/publish.svg")" alt="">
+                    publish to board
+                </a>
+                <a href="@routes.BoardController.view(board.id.id)">
+                    <img src="@assetsFinder.path("images/launch.svg")" alt="">
+                    view full board
+                </a>
+            </div>
+        </div>
+        </div>
+    }
+    </div>
+}

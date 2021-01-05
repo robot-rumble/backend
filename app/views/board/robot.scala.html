@@ -1,0 +1,39 @@
+@import models.Schema._
+@(boardWithBattles: BoardWithBattles, robot: Robot, page: Long, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+
+@main(f"${boardWithBattles.board.name} Battles Involving ${robot.name}", "robot", assetsFinder) {
+    <h1><a href="@routes.BoardController.view(boardWithBattles.board.id.id)">@boardWithBattles.board.name</a> Battles Involving <a href="@routes.RobotController.viewById(robot.id.id)">@robot.name</a> </h1>
+
+    <table class="_battles">
+    @for(FullBattle(battle, r1, r2) <- boardWithBattles.battles) {
+        <tr>
+            <td class="text-gray">@battle.formatCreated()</td>
+            <td><a href="@routes.BattleController.view(battle.id.id)">battle #@battle.id.id</a></td>
+            <td class="_robot pr-0
+                @{if (battle.didRobotWin(r1.id).contains(true)) " _winner" else ""}
+            "><a href="@routes.RobotController.viewById(battle.r1Id.id)">
+                @r1.name
+            </a></td>
+            <td class="_robot _rating
+                @{if (battle.didRobotWin(r1.id).contains(true)) " _winner" else ""}
+            ">@battle.pr1Rating</td>
+            <td>vs</td>
+            <td class="_robot pr-0
+                @{if (battle.didRobotWin(r2.id).contains(true)) "_winner" else ""}
+            "><a href="@routes.RobotController.viewById(battle.r2Id.id)">
+                @r2.name
+            </a></td>
+            <td class="_robot _rating
+                @{if (battle.didRobotWin(r2.id).contains(true)) " _winner" else ""}
+            ">@battle.pr2Rating</td>
+        </tr>
+    }
+    </table>
+
+
+    @if(boardWithBattles.battles.nonEmpty) {
+        @pageControls(page => routes.BoardController.viewRobotBattles(boardWithBattles.board.id.id, robot.id.id, page), page)
+    } else {
+        <p>No battles yet</p>
+    }
+}

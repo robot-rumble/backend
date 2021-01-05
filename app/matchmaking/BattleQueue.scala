@@ -17,6 +17,7 @@ object BattleQueue {
   implicit val matchInputWrites = new Writes[MatchInput] {
     def writes(matchInput: MatchInput) = Json.obj(
       "turn_num" -> matchInput.turnNum,
+      "board_id" -> matchInput.boardId,
       "r1_id" -> matchInput.r1Id,
       "pr1_id" -> matchInput.pr1Id,
       "r1_code" -> matchInput.r1Code,
@@ -29,7 +30,8 @@ object BattleQueue {
   }
 
   implicit val matchOutputReads: Reads[MatchOutput] = (
-    (JsPath \ "r1_id").read[Long] and
+    (JsPath \ "board_id").read[Long] and
+      (JsPath \ "r1_id").read[Long] and
       (JsPath \ "pr1_id").read[Long] and
       (JsPath \ "r1_time").read[Float] and
       (JsPath \ "r2_id").read[Long] and
@@ -42,6 +44,7 @@ object BattleQueue {
 
   case class MatchInput(
       turnNum: Long,
+      boardId: Long,
       r1Id: Long,
       pr1Id: Long,
       r1Code: String,
@@ -53,6 +56,7 @@ object BattleQueue {
   )
 
   case class MatchOutput(
+      boardId: Long,
       r1Id: Long,
       pr1Id: Long,
       r1Time: Float,
