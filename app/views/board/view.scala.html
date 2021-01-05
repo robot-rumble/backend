@@ -4,6 +4,15 @@
 @main(fullBoard.board.name, "board", assetsFinder) {
     <h1>@fullBoard.board.name</h1>
 
+    @fullBoard.board.bio match {
+        case Some(bio) => {
+            <div class="mb-3">
+                @Html(bio)
+            </div>
+        }
+        case None => {}
+    }
+
     <div class="_table">
         <table class="_body _robots">
         @for(FullBoardRobot(robot, pRobot, user) <- fullBoard.robots) {
