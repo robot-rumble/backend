@@ -50,7 +50,7 @@ class MatchMaker @Inject()(
 
   def prepareMatches(): Future[Iterable[MatchInput]] = {
     boardsRepo.findAllBare() flatMap { allBoards =>
-      val boardsMap = allBoards.map(board => (board.id, board)).toMap
+      val boardsMap = allBoards.filter(_.matchmakingEnabled).map(board => (board.id, board)).toMap
 
       robotsRepo.findAllWithPr() flatMap { allRobots =>
         battlesRepo.findOpponents() map { allOpponentsMap =>
@@ -59,39 +59,44 @@ class MatchMaker @Inject()(
           allRobots
             .flatMap {
               case (r, pr) =>
-                val board = boardsMap(pr.boardId)
-                val battleCooldown = if (USE_MOCK) Duration.ZERO else board.battleCooldown
-                val opponentNum = {
-                  val publishedWithinWindow =
-                    pr.created.isAfter(LocalDateTime.now().minus(CHECK_EVERY))
-                  if (publishedWithinWindow) board.publishBattleNum
-                  else {
-                    val cooldownExpired = recentOpponentsMap.get(r.id) match {
-                      case None | Some(Seq()) => true
-                      case Some(opponents) =>
-                        opponents
-                          .map(_.created)
-                          .max
-                          .plus(battleCooldown)
-                          .isBefore(LocalDateTime.now())
+                boardsMap.get(pr.boardId) match {
+                  case Some(board) =>
+                    val battleCooldown = if (USE_MOCK) Duration.ZERO else board.battleCooldown
+                    val opponentNum = {
+                      val publishedWithinWindow =
+                        pr.created.isAfter(LocalDateTime.now().minus(CHECK_EVERY))
+                      if (publishedWithinWindow) board.publishBattleNum
+                      else {
+                        val cooldownExpired = recentOpponentsMap.get(r.id) match {
+                          case None | Some(Seq()) => true
+                          case Some(opponents) =>
+                            opponents
+                              .map(_.created)
+                              .max
+                              .plus(battleCooldown)
+                              .isBefore(LocalDateTime.now())
+                        }
+                        if (cooldownExpired) board.recurrentBattleNum
+                        else 0
+                      }
                     }
-                    if (cooldownExpired) board.recurrentBattleNum
-                    else 0
-                  }
+                    allRobots
+                      .filter {
+                        case (r2, pr2) =>
+                          r.id != r2.id && pr.boardId == pr2.boardId && (recentOpponentsMap.get(
+                            r.id
+                          ) match {
+                            case None | Some(Seq()) => true
+                            case Some(opponents)    => opponents.forall(_.rId != r2.id)
+                          })
+                      }
+                      .sortBy { case (_, pr2) => (pr2.rating - pr.rating).abs }
+                      .take(opponentNum)
+                      .map { o =>
+                        ((r, pr), o)
+                      }
+                  case None => Seq()
                 }
-                allRobots
-                  .filter {
-                    case (r2, pr2) =>
-                      r.id != r2.id && pr.boardId == pr2.boardId && (recentOpponentsMap.get(r.id) match {
-                        case None | Some(Seq()) => true
-                        case Some(opponents)    => opponents.forall(_.rId != r2.id)
-                      })
-                  }
-                  .sortBy { case (_, pr2) => (pr2.rating - pr.rating).abs }
-                  .take(opponentNum)
-                  .map { o =>
-                    ((r, pr), o)
-                  }
             }
             .map {
               case ((r1, pr1), (r2, pr2)) =>
