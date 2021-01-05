@@ -30,5 +30,10 @@
     }
     </table>
 
-    @pageControls(page => routes.BoardController.viewRobotBattles(boardWithBattles.board.id.id, robot.id.id, page), page)
+
+    @if(boardWithBattles.battles.nonEmpty) {
+        @pageControls(page => routes.BoardController.viewRobotBattles(boardWithBattles.board.id.id, robot.id.id, page), page)
+    } else {
+        <p>No battles yet</p>
+    }
 }
