@@ -1,5 +1,5 @@
 @import models.Schema._
-@(fullBoard: FullBoard, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+@(fullBoard: FullBoard, page: Long, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
 @main(fullBoard.board.name, "board", assetsFinder) {
     <h1>@fullBoard.board.name</h1>
@@ -34,4 +34,8 @@
             </div>
         }
     </div>
+
+    @if(fullBoard.robots.nonEmpty) {
+        @pageControls(page => routes.BoardController.view(fullBoard.board.id.id, page), page)
+    }
 }
