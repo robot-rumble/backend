@@ -24,9 +24,6 @@ CREATE TABLE boards
     recurrent_battle_num INT         NOT NULL
 );
 
-INSERT INTO boards(name, publishing_enabled, matchmaking_enabled, publish_cooldown,
-                   publish_battle_num, battle_cooldown, recurrent_battle_num)
-VALUES ('Playground Board', FALSE, FALSE, 86400, 2, 86400, 1);
 
 ALTER TABLE published_robots
     ADD COLUMN r_id BIGINT NOT NULL REFERENCES robots (id) DEFAULT 1;
@@ -41,18 +38,41 @@ WHERE r.pr_id = pr.id;
 ALTER TABLE robots
     DROP COLUMN pr_id;
 
-ALTER TABLE published_robots
-    ADD COLUMN board_id BIGINT NOT NULL REFERENCES boards (id) DEFAULT 1;
-ALTER TABLE published_robots
-    ADD COLUMN rating INT NOT NULL DEFAULT 1000;
 
 ALTER TABLE robots
     ADD COLUMN published BOOLEAN NOT NULL DEFAULT false;
+
+UPDATE
+    robots
+SET
+    published = pr.id IS NOT NULL
+FROM robots r LEFT JOIN published_robots pr ON pr.r_id = r.id;
+
+
+ALTER TABLE published_robots
+    ADD COLUMN rating INT NOT NULL DEFAULT 1000;
+
+UPDATE
+    published_robots pr
+SET
+    r_id = r.rating
+FROM robots r
+WHERE pr.r_id = r.id;
+
 ALTER TABLE robots
     DROP COLUMN rating;
 
+
+INSERT INTO boards(name, publishing_enabled, matchmaking_enabled, publish_cooldown,
+                   publish_battle_num, battle_cooldown, recurrent_battle_num)
+VALUES ('Playground Board', FALSE, FALSE, 86400, 2, 86400, 1);
+
 ALTER TABLE battles
     ADD COLUMN board_id BIGINT NOT NULL REFERENCES boards (id) DEFAULT 1;
+ALTER TABLE published_robots
+    ADD COLUMN board_id BIGINT NOT NULL REFERENCES boards (id) DEFAULT 1;
+
+
 ALTER TABLE battles
     RENAME COLUMN r1_rating to pr1_rating;
 ALTER TABLE battles
@@ -61,4 +81,3 @@ ALTER TABLE battles
     RENAME COLUMN r1_rating_change to pr1_rating_change;
 ALTER TABLE battles
     RENAME COLUMN r2_rating_change to pr2_rating_change;
-
