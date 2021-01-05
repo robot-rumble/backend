@@ -35,10 +35,12 @@
             }
             </table>
             <div class="_footer">
-                <a href="@routes.BoardController.publish(board.id.id)">
-                    <img src="@assetsFinder.path("images/publish.svg")" alt="">
-                    publish to board
-                </a>
+                @if(board.publishingEnabled) {
+                    <a href="@routes.BoardController.publish(board.id.id)">
+                        <img src="@assetsFinder.path("images/publish.svg")" alt="">
+                        publish to board
+                    </a>
+                }
                 <a href="@routes.BoardController.view(board.id.id)">
                     <img src="@assetsFinder.path("images/launch.svg")" alt="">
                     view full board

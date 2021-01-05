@@ -16,11 +16,13 @@
             </tr>
         }
         </table>
-        <div class="_footer">
-            <a href="@routes.BoardController.publish(fullBoard.board.id.id)">
-                <img src="@assetsFinder.path("images/publish.svg")" alt="">
-                publish to this board
-            </a>
-        </div>
+        @if(fullBoard.board.publishingEnabled) {
+            <div class="_footer">
+                <a href="@routes.BoardController.publish(fullBoard.board.id.id)">
+                    <img src="@assetsFinder.path("images/publish.svg")" alt="">
+                    publish to this board
+                </a>
+            </div>
+        }
     </div>
 }
