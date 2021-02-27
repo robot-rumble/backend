@@ -18,13 +18,11 @@
     @for(season <- seasons) {
         <div class="_table">
             <div class="_header d-flex">
-                <p>@season.name</p>
+                <a href="@routes.SeasonController.view(season.slug)">@season.name</a>
                 <p>@season.formatStart() - @season.formatEnd()</p>
             </div>
             @if(season.isActive()) {
-                <table class="_body">
-                    @boardRows(boards.filter(_.seasonId.contains(season.id)))
-                </table>
+                @boardRows(boards.filter(_.seasonId.contains(season.id)))
             }
         </div>
     }
