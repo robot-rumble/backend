@@ -29,7 +29,7 @@ class BoardController @Inject()(
   }
 
   def view(id: Long, page: Long = 0) = Action.async { implicit request =>
-    boardsRepo.find(BoardId(id), page, 10) map {
+    boardsRepo.find(BoardId(id), page, 20) map {
       case Some(board) => Ok(views.html.board.view(board, page, assetsFinder))
       case None        => NotFound("404")
     }
