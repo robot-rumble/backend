@@ -22,7 +22,7 @@ libraryDependencies += "com.github.t3hnar" %% "scala-bcrypt" % "4.1"
 
 libraryDependencies ++= Seq(
   "org.postgresql" % "postgresql" % "42.1.4",
-  "io.getquill" %% "quill-jasync-postgres" % "3.6.0-SNAPSHOT",
+  "io.getquill" %% "quill-jasync-postgres" % "3.6.1",
 )
 
 libraryDependencies ++= Seq(
