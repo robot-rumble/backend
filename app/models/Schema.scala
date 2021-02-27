@@ -309,7 +309,7 @@ object Schema {
     implicit val decodeSeasonId = MappedEncoding[Long, SeasonId](SeasonId.apply)
     implicit val encodeEmail = MappedEncoding[Email, String](_.email)
     implicit val decodeEmail = MappedEncoding[String, Email](Email.apply)
-    implicit val encodeDuration = MappedEncoding[Duration, Int](_.getStandardMinutes.toInt)
+    implicit val encodeDuration = MappedEncoding[Duration, Int](_.getStandardSeconds.toInt)
     implicit val decodeDuration = MappedEncoding[Int, Duration](Duration.standardSeconds(_))
 
     val users = quote(querySchema[User]("users"))
