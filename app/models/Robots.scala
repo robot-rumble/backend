@@ -72,7 +72,7 @@ class Robots @Inject()(
   ): Future[Seq[FullBoardRobot]] = {
     val query = quote {
       for {
-        pr <- publishedRobots.by(boardId).latest
+        pr <- publishedRobots.by(boardId).latest.sortBy(_.rating)(Ord.desc)
         (r, u) <- robots.withUser().filter(_._1.id == pr.rId)
       } yield (r, pr, u)
     }
