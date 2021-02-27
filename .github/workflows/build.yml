@@ -27,7 +27,7 @@ jobs:
           -secret=${{ secrets.BOXFUSE_SECRET }}
           -envvars.BATTLE_QUEUE_IN_URL=${{ secrets.BATTLE_QUEUE_IN_URL }}
           -envvars.BATTLE_QUEUE_OUT_URL=${{ secrets.BATTLE_QUEUE_OUT_URL }}
-          -envvars.QUEUE_ENABLED=false
+          -envvars.QUEUE_ENABLED=true
           -envvars.USE_MOCK_QUEUE=false
           -envvars.EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }}
           -envvars.SECRET_KEY='${{ secrets.SECRET_KEY }}'
