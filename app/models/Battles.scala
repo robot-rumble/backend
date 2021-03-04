@@ -24,11 +24,6 @@ class Battles @Inject()(
   def findBare(id: BattleId): Future[Option[Battle]] =
     run(battles.by(id)).map(_.headOption)
 
-  def findPaged(page: Long, numPerPage: Int): Future[Seq[FullBattle]] = {
-    val sortedBattles = quote(battles.withRobots().sortBy(_._1.created)(Ord.desc))
-    run(sortedBattles.paginate(page, numPerPage)).map(_.map(FullBattle.tupled))
-  }
-
   def create(
       matchOutput: MatchOutput,
       r1Rating: Int,
@@ -40,8 +35,24 @@ class Battles @Inject()(
     run(battles.insert(lift(battle)).returningGenerated(_.id)).map(battle.copy(_))
   }
 
+  def findByBoardPaged(
+      boardId: BoardId,
+      page: Long,
+      numPerPage: Int
+  ): Future[Seq[(Battle, Robot, Robot)]] = {
+    val query = quote {
+      (for {
+        b <- battles.by(boardId)
+        r1 <- robots if r1.id == b.r1Id
+        r2 <- robots if r2.id == b.r2Id
+      } yield (b, r1, r2)).sortBy(_._1.created)(Ord.desc)
+    }
+
+    run(query.paginate(page, numPerPage))
+  }
+
   implicit class BattleEntityQueryExtras(query: Quoted[EntityQuery[Battle]]) {
-    def findBoardForRobot(
+    def findByBoardForRobot(
         boardId: BoardId,
         rId: RobotId
     ): schema.ctx.Quoted[Query[(Battle, Robot)]] =
@@ -62,16 +73,16 @@ class Battles @Inject()(
       }
   }
 
-  def findBoardForRobot(boardId: BoardId, robotId: RobotId): Future[Seq[(Battle, Robot)]] =
-    run(battles.findBoardForRobot(boardId, robotId))
+  def findByBoardForRobot(boardId: BoardId, robotId: RobotId): Future[Seq[(Battle, Robot)]] =
+    run(battles.findByBoardForRobot(boardId, robotId))
 
-  def findBoardForRobotPaged(
+  def findByBoardForRobotPaged(
       boardId: BoardId,
       robotId: RobotId,
       page: Long,
       numPerPage: Int
   ): Future[Seq[(Battle, Robot)]] =
-    run(battles.findBoardForRobot(boardId, robotId).paginate(page, numPerPage))
+    run(battles.findByBoardForRobot(boardId, robotId).paginate(page, numPerPage))
 
   case class Opponent(bId: BattleId, rId: RobotId, created: LocalDateTime)
 

@@ -35,6 +35,16 @@ class BoardController @Inject()(
     }
   }
 
+  def viewBattles(id: Long, page: Long = 0) = Action.async { implicit request =>
+    boardsRepo.findWithBattles(BoardId(id), page, 30) map {
+      case Some(boardWithBattles) =>
+        Ok(
+          views.html.board.battles(boardWithBattles, page, assetsFinder)
+        )
+      case None => NotFound("404")
+    }
+  }
+
   def viewRobotBattles(id: Long, robotId: Long, page: Long = 0) =
     Action.async { implicit request =>
       boardsRepo.findWithBattlesForRobot(BoardId(id), RobotId(robotId), page, 30) map {

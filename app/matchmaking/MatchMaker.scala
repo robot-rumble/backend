@@ -136,7 +136,7 @@ class MatchMaker @Inject()(
     val getRobotInfo = (id: RobotId) => {
       (for {
         pr <- robotsRepo.findLatestPr(id, BoardId(matchOutput.boardId))
-        games <- battlesRepo.findBoardForRobot(BoardId(matchOutput.boardId), pr.get.rId)
+        games <- battlesRepo.findByBoardForRobot(BoardId(matchOutput.boardId), pr.get.rId)
       } yield (pr, games)) map {
         case (Some(pr), games) =>
           val rPlayer =
