@@ -82,12 +82,11 @@ class MatchMaker @Inject()(
                     allRobots
                       .filter {
                         case (r2, pr2) =>
-                          r.id != r2.id && pr.boardId == pr2.boardId && (recentOpponentsMap.get(
-                            r.id
-                          ) match {
+                          val isNotRecentOpponent = recentOpponentsMap.get(r.id) match {
                             case None | Some(Seq()) => true
                             case Some(opponents)    => opponents.forall(_.rId != r2.id)
-                          })
+                          }
+                          r.id != r2.id && pr.boardId == pr2.boardId && isNotRecentOpponent
                       }
                       .sortBy { case (_, pr2) => (pr2.rating - pr.rating).abs }
                       .take(opponentNum)
