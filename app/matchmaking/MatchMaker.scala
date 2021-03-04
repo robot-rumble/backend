@@ -53,7 +53,13 @@ class MatchMaker @Inject()(
 
       robotsRepo.findAllLatestWithPr() flatMap { allRobots =>
         battlesRepo.findOpponents() map { allOpponentsMap =>
-          val recentOpponentsMap = allOpponentsMap.mapValues(_.take(RECENT_OPPONENT_LIMIT))
+          val recentOpponentsMap =
+            allOpponentsMap.mapValues(
+              opponents =>
+                opponents
+                  .sortBy(_.created)(localDateTimeOrdering.reverse)
+                  .take(RECENT_OPPONENT_LIMIT)
+            )
 
           allRobots
             .flatMap {
