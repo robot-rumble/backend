@@ -65,7 +65,7 @@ class Robots @Inject()(
   def findAll(userId: UserId)(visitor: Visitor): Future[Seq[Robot]] =
     run(robotsAuth(visitor).by(userId))
 
-  def findAllByBoardPaged(
+  def findAllLatestByBoardPaged(
       boardId: BoardId,
       page: Long,
       numPerPage: Int
@@ -82,9 +82,9 @@ class Robots @Inject()(
     ).map(_.map(FullBoardRobot.tupled))
   }
 
-  def findAllWithPr(): Future[Seq[(Robot, PRobot)]] = {
+  def findAllLatestWithPr(): Future[Seq[(Robot, PRobot)]] = {
     run(for {
-      pr <- publishedRobots
+      pr <- publishedRobots.latest
       r <- robots.filter(_.id == pr.rId)
     } yield (r, pr))
   }

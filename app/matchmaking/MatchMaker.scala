@@ -51,7 +51,7 @@ class MatchMaker @Inject()(
     boardsRepo.findAllBare() flatMap { allBoards =>
       val boardsMap = allBoards.filter(_.matchmakingEnabled).map(board => (board.id, board)).toMap
 
-      robotsRepo.findAllWithPr() flatMap { allRobots =>
+      robotsRepo.findAllLatestWithPr() flatMap { allRobots =>
         battlesRepo.findOpponents() map { allOpponentsMap =>
           val recentOpponentsMap = allOpponentsMap.mapValues(_.take(RECENT_OPPONENT_LIMIT))
 

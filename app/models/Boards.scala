@@ -15,7 +15,7 @@ class Boards @Inject()(schema: Schema, robotsRepo: Robots, battlesRepo: Battles)
   import schema.ctx._
 
   private def attachRobot(board: Board, page: Long, numPerBoard: Int): Future[FullBoard] =
-    robotsRepo.findAllByBoardPaged(board.id, page, numPerBoard) map { robots =>
+    robotsRepo.findAllLatestByBoardPaged(board.id, page, numPerBoard) map { robots =>
       FullBoard(board, robots)
     }
 
