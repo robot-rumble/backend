@@ -43,6 +43,8 @@ libraryDependencies ++= Seq(
 
 libraryDependencies += "com.github.daddykotex" %% "courier" % "2.0.0"
 
+libraryDependencies += "io.sentry" % "sentry-logback" % "4.3.0"
+
 scalacOptions ++= Seq(
   "-feature",
   "-deprecation",

@@ -24,6 +24,12 @@
     <appender-ref ref="STDOUT" />
   </appender>
 
+  <appender name="Sentry" class="io.sentry.logback.SentryAppender">
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>ERROR</level>
+    </filter>
+  </appender>
+
   <logger name="akka.actor" level="DEBUG" />
   <logger name="software.amazon.awssdk" level="DEBUG" />
 
@@ -36,14 +42,18 @@
   <logger name="com.avaje.ebeaninternal.server.lib.BackgroundThread" level="OFF" />
   <logger name="com.gargoylesoftware.htmlunit.javascript" level="OFF" />
 
-  <root level="WARN">
-    <appender-ref ref="ASYNCFILE" />
-    <appender-ref ref="ASYNCSTDOUT" />
-  </root>
-
   <logger name="play.mvc.Action" level="DEBUG" />
 
   <logger name="matchmaking.MatchMaker" level="DEBUG" />
   <logger name="matchmaking.AwsQueue" level="DEBUG" />
   <logger name="Module" level="DEBUG" />
+
+  <root level="WARN">
+    <appender-ref ref="ASYNCFILE" />
+    <appender-ref ref="ASYNCSTDOUT" />
+  </root>
+
+  <root level="ERROR">
+    <appender-ref ref="Sentry" />
+  </root>
 </configuration>

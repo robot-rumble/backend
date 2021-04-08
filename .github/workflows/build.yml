@@ -34,6 +34,7 @@ jobs:
           -envvars.ASSETS_PATH=${{ secrets.CLOUDFRONT_URL }}
           -envvars.AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
           -envvars.AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          -envvars.SENTRY_DSN=${{ secrets.SENTRY_DSN }}
           -jvm.args=-Ddb.default_.migration.auto=true
           -ports.http=80
           -env=test
