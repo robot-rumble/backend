@@ -34,6 +34,7 @@ jobs:
           -envvars.ASSETS_PATH=${{ secrets.CLOUDFRONT_URL }}
           -envvars.AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
           -envvars.AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          -jvm.args=-Ddb.default_.migration.auto=true -Dsentry.dsn=${{ secrets.SENTRY_DSN }}
+          -jvm.args="-Ddb.default_.migration.auto=true -Dsentry.dsn=${{ secrets.SENTRY_DSN }}"
           -ports.http=80
           -env=test
+          # https://github.com/boxfuse/boxfuse-issues/issues/180
