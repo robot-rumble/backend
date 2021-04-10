@@ -51,7 +51,7 @@
             <img src="@assetsFinder.path("images/error.svg")" alt="">
             Your robot errored @fullRobot.robot.errorCount time@{if (fullRobot.robot.errorCount > 1) "s"} in recent battles.
             @if(!fullRobot.robot.active) {
-                It has been automatically deactivated. Matchmaking will resume once you re-publish with corrected code.
+                It has been automatically deactivated. Matchmaking will resume once you re-publish with corrected code. <a href="https://rr-docs.readthedocs.io/en/latest/publishing.html#deactivation">Learn more</a>
             }
         </p>
     }
