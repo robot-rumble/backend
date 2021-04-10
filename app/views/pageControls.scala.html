@@ -1,7 +1,14 @@
-@(template: Long => Call, page: Long)(implicit request: Request[AnyContent])
-<div class="flex">
+@(template: Long => Call, page: Long, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+
+<div class="inline-flex">
     @if(page > 0) {
-        <a href="@template(page - 1)" class="mr-3">previous page</a>
+        <a class="mr-3" href="@template(page - 1)">
+            previous page
+        </a>
     }
-    <a href="@template(page + 1)">next page</a>
+  <div>
+      <a href="@template(page + 1)">
+          next page
+      </a>
+  </div>
 </div>

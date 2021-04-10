@@ -33,7 +33,7 @@
         </table>
         <div class="_footer">
             @if(board.robots.nonEmpty) {
-                @pageControls(page => routes.BoardController.view(board.board.id.id, page), page)
+                @pageControls(page => routes.BoardController.view(board.board.id.id, page), page, assetsFinder)
             }
 
             @if(board.board.publishingEnabled) {
