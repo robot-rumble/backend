@@ -1,19 +1,25 @@
 package controllers
 
+import models._
 import play.api.Configuration
 import play.api.mvc._
 
 import javax.inject._
+import scala.concurrent.ExecutionContext
 
 @Singleton
 class HomeController @Inject()(
     cc: ControllerComponents,
     assetsFinder: AssetsFinder,
     config: Configuration,
-) extends AbstractController(cc) {
+    boardsRepo: Boards,
+)(implicit ec: ExecutionContext)
+    extends AbstractController(cc) {
 
-  def index = Action { implicit request =>
-    Ok(views.html.index(assetsFinder))
+  def index = Action.async { implicit request =>
+    boardsRepo.findAllBare map { boards =>
+      Ok(views.html.index(boards, assetsFinder))
+    }
   }
 
   def rules = Action { implicit request =>

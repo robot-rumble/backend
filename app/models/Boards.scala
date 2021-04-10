@@ -39,10 +39,31 @@ class Boards @Inject()(schema: Schema, robotsRepo: Robots, battlesRepo: Battles)
         case None        => Future successful None
       }
 
+  def findWithBattles(
+      id: BoardId,
+      page: Long,
+      numRobotsPerPage: Int,
+      numBattlesPerPage: Int
+  ): Future[Option[FullBoardWithBattles]] = {
+    run(boards.by(id)).map(_.headOption) flatMap {
+      case Some(board) =>
+        attachRobot(board, page, numRobotsPerPage) flatMap {
+          case FullBoard(board, robots) =>
+            battlesRepo.findByBoardPaged(id, page, numBattlesPerPage) map { battles =>
+              val boardBattles = battles map {
+                case (battle, r1, r2) => FullBattle(battle, r1, r2)
+              }
+              Some(FullBoardWithBattles(board, robots, boardBattles))
+            }
+        }
+      case None => Future successful None
+    }
+  }
+
   def findBare(id: BoardId): Future[Option[Board]] =
     run(boards.by(id)).map(_.headOption)
 
-  def findWithBattles(
+  def findBareWithBattles(
       id: BoardId,
       page: Long,
       numPerPage: Int
@@ -58,7 +79,7 @@ class Boards @Inject()(schema: Schema, robotsRepo: Robots, battlesRepo: Battles)
     }
   }
 
-  private def findWithBattlesForRobot_(
+  private def findBareWithBattlesForRobot_(
       id: BoardId,
       robot: Robot,
       page: Long,
@@ -75,7 +96,7 @@ class Boards @Inject()(schema: Schema, robotsRepo: Robots, battlesRepo: Battles)
     }
   }
 
-  def findWithBattlesForRobot(
+  def findBareWithBattlesForRobot(
       id: BoardId,
       robotId: RobotId,
       page: Long,
@@ -85,14 +106,14 @@ class Boards @Inject()(schema: Schema, robotsRepo: Robots, battlesRepo: Battles)
       .findBare(robotId)(Auth.LoggedOut())
       .flatMap {
         case Some(robot) =>
-          findWithBattlesForRobot_(id, robot, page, numPerBoard).map(
+          findBareWithBattlesForRobot_(id, robot, page, numPerBoard).map(
             _.map(boardWithBattles => (robot, boardWithBattles))
           )
         case None => Future successful None
       }
   }
 
-  def findAllWithBattlesForRobot(
+  def findAllBareWithBattlesForRobot(
       robotId: RobotId,
       page: Long,
       numPerBoard: Int
@@ -103,7 +124,7 @@ class Boards @Inject()(schema: Schema, robotsRepo: Robots, battlesRepo: Battles)
         case Some((robot, boardIds)) =>
           Future
             .sequence(boardIds.map { boardId =>
-              findWithBattlesForRobot_(boardId, robot, page, numPerBoard) flatMap {
+              findBareWithBattlesForRobot_(boardId, robot, page, numPerBoard) flatMap {
                 case Some(board) =>
                   robotsRepo.findLatestPr(robotId, boardId) map {
                     case Some(pr) => Some(pr, board)

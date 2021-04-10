@@ -1,7 +1,10 @@
-@(assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+@import models.Schema._
+@(boards: Seq[Board], assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
 @main("Robot Rumble ALPHA", "index", assetsFinder) {
     <h1>Code robots, win matches, rank up.</h1>
+
+    <img class="mt-3 mb-5" src="@assetsFinder.path("images/demo.gif")" alt="">
 
     <div class="overview">
         <p>The rules are simple:</p>
@@ -13,6 +16,20 @@
             <p>* the player with more robots after 100 turns wins</p>
         </div>
         <p>To get started, sign up, make a robot, and then publish it to one of the active boards. You can also read more about the rules <a href="@routes.HomeController.rules">here</a>.</p>
-        <p class="mt-4"><a target="_blank" href="https://forms.gle/LcGFBiQkgAJyDhWR6">Stay informed about new features and announcements.</a></p>
     </div>
+
+    @if(boards.nonEmpty) {
+        <div class="mt-5">
+            <h2 class="mb-3">Active robot boards</h2>
+            <table class="_boards">
+                @for(board <- boards.filter(bo => bo.publishingEnabled && bo.matchmakingEnabled)) {
+                    <tr>
+                        <td><a href="@routes.BoardController.view(board.id.id)">@board.name</a></td>
+                    </tr>
+                }
+            </table>
+        </div>
+    }
+
+    <p class="mt-5"><a target="_blank" href="https://forms.gle/LcGFBiQkgAJyDhWR6">Stay informed about new features and announcements.</a></p>
 }

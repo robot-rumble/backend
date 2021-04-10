@@ -1,0 +1,33 @@
+@import models.Schema._
+@(battles: Seq[FullBattle], assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+
+@for(FullBattle(battle, r1, r2) <- battles) {
+    <tr>
+        <td class="text-gray">@battle.formatCreated()</td>
+        <td><a href="@routes.BattleController.view(battle.id.id)">battle #@battle.id.id</a></td>
+        <td class="_robot pr-0
+            @{if (battle.didRobotWin(r1.id).contains(true)) " _winner" else ""}
+        "><a href="@routes.RobotController.viewById(battle.r1Id.id)">
+        @r1.name
+        </a></td>
+        <td class="_robot _rating
+            @{if (battle.didRobotWin(r1.id).contains(true)) " _winner" else ""}
+        ">@battle.pr1Rating</td>
+        <td>vs</td>
+        <td class="_robot pr-0
+            @{if (battle.didRobotWin(r2.id).contains(true)) "_winner" else ""}
+        "><a href="@routes.RobotController.viewById(battle.r2Id.id)">
+        @r2.name
+        </a></td>
+        <td class="_robot _rating
+            @{if (battle.didRobotWin(r2.id).contains(true)) " _winner" else ""}
+        ">@battle.pr2Rating</td>
+        @if(battles.exists(_.b.errored)) {
+            <td class="_errored">
+            @if(battle.errored) {
+                <img src="@assetsFinder.path("images/error.svg")" alt="">
+            }
+            </td>
+        }
+    </tr>
+}

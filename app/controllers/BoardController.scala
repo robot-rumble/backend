@@ -29,14 +29,16 @@ class BoardController @Inject()(
   }
 
   def view(id: Long, page: Long = 0) = Action.async { implicit request =>
-    boardsRepo.find(BoardId(id), page, 20) map {
-      case Some(board) => Ok(views.html.board.view(board, page, assetsFinder))
-      case None        => NotFound("404")
+    val (numRobotsPerPage, numBattlesPerPage) = if (page == 0) (10, 10) else (20, 0)
+    boardsRepo.findWithBattles(BoardId(id), page, numRobotsPerPage, numBattlesPerPage) map {
+      case Some(fullBoardWithBattles) =>
+        Ok(views.html.board.view(fullBoardWithBattles, page, assetsFinder))
+      case None => NotFound("404")
     }
   }
 
   def viewBattles(id: Long, page: Long = 0) = Action.async { implicit request =>
-    boardsRepo.findWithBattles(BoardId(id), page, 30) map {
+    boardsRepo.findBareWithBattles(BoardId(id), page, 30) map {
       case Some(boardWithBattles) =>
         Ok(
           views.html.board.battles(boardWithBattles, page, assetsFinder)
@@ -47,7 +49,7 @@ class BoardController @Inject()(
 
   def viewRobotBattles(id: Long, robotId: Long, page: Long = 0) =
     Action.async { implicit request =>
-      boardsRepo.findWithBattlesForRobot(BoardId(id), RobotId(robotId), page, 30) map {
+      boardsRepo.findBareWithBattlesForRobot(BoardId(id), RobotId(robotId), page, 30) map {
         case Some((robot, boardWithBattles)) =>
           Ok(
             views.html.board.robot(

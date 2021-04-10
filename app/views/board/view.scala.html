@@ -1,10 +1,10 @@
 @import models.Schema._
-@(fullBoard: FullBoard, page: Long, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+@(board: FullBoardWithBattles, page: Long, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
-@main(fullBoard.board.name, "board", assetsFinder) {
-    <h1>@fullBoard.board.name</h1>
+@main(board.board.name, "board", assetsFinder) {
+    <h1>@board.board.name</h1>
 
-    @fullBoard.board.bio match {
+    @board.board.bio match {
         case Some(bio) => {
             <div class="mb-3">
                 @Html(bio)
@@ -13,33 +13,46 @@
         case None => {}
     }
 
+    <h3>Published Robots</h3>
     <div class="_table">
         <table class="_body _robots">
-        @for(FullBoardRobot(robot, pRobot, user) <- fullBoard.robots) {
+        @for(FullBoardRobot(robot, pRobot, user) <- board.robots) {
             <tr>
                 <td><a href="@routes.RobotController.view(user.username, robot.name)">@robot.name</a></td>
                 <td>by <a href="@routes.UserController.view(user.username)">@user.username</a></td>
                 <td>@robot.lang</td>
                 <td>@pRobot.rating</td>
-                <td><a href="@routes.BoardController.viewRobotBattles(fullBoard.board.id.id, robot.id.id)">view battles</a></td>
+                <td><a href="@routes.BoardController.viewRobotBattles(board.board.id.id, robot.id.id)">view battles</a></td>
             </tr>
         }
         </table>
-        @if(fullBoard.board.publishingEnabled) {
-            <div class="_footer">
-                <a href="@routes.BoardController.publish(fullBoard.board.id.id)">
+        <div class="_footer">
+            @if(board.robots.nonEmpty) {
+                @pageControls(page => routes.BoardController.view(board.board.id.id, page), page)
+            }
+
+            @if(board.board.publishingEnabled) {
+                <a href="@routes.BoardController.publish(board.board.id.id)">
                     <img src="@assetsFinder.path("images/publish.svg")" alt="">
                     publish to this board
                 </a>
-                <a href="@routes.BoardController.viewBattles(fullBoard.board.id.id)">
+            }
+        </div>
+    </div>
+
+    @if(board.battles.nonEmpty) {
+        <h3 class="mt-5">Recent Battles</h3>
+
+        <div class="_table">
+            <table class="_battles">
+                @battleRows(board.battles, assetsFinder)
+            </table>
+            <div class="_footer">
+                <a href="@routes.BoardController.viewBattles(board.board.id.id)">
                     <img src="@assetsFinder.path("images/launch.svg")" alt="">
                     view all battles
                 </a>
             </div>
-        }
-    </div>
-
-    @if(fullBoard.robots.nonEmpty) {
-        @pageControls(page => routes.BoardController.view(fullBoard.board.id.id, page), page)
+        </div>
     }
 }

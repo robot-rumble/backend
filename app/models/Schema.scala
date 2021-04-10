@@ -251,6 +251,12 @@ object Schema {
 
   case class BoardWithBattles(board: Board, battles: Seq[FullBattle])
 
+  case class FullBoardWithBattles(
+      board: Board,
+      robots: Seq[FullBoardRobot],
+      battles: Seq[FullBattle]
+  )
+
   case class SeasonId(id: Long)
 
   case class Season(

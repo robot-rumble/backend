@@ -4,40 +4,16 @@
 @main(f"${boardWithBattles.board.name} Battles", "robot", assetsFinder) {
     <h1><a href="@routes.BoardController.view(boardWithBattles.board.id.id)">@boardWithBattles.board.name</a> Battles</h1>
 
-    <table class="_battles">
-    @for(FullBattle(battle, r1, r2) <- boardWithBattles.battles) {
-        <tr>
-            <td class="text-gray">@battle.formatCreated()</td>
-            <td><a href="@routes.BattleController.view(battle.id.id)">battle #@battle.id.id</a></td>
-            <td class="_robot pr-0
-                @{if (battle.didRobotWin(r1.id).contains(true)) " _winner" else ""}
-            "><a href="@routes.RobotController.viewById(battle.r1Id.id)">
-            @r1.name
-            </a></td>
-            <td class="_robot _rating
-                @{if (battle.didRobotWin(r1.id).contains(true)) " _winner" else ""}
-            ">@battle.pr1Rating</td>
-            <td>vs</td>
-            <td class="_robot pr-0
-                @{if (battle.didRobotWin(r2.id).contains(true)) "_winner" else ""}
-            "><a href="@routes.RobotController.viewById(battle.r2Id.id)">
-            @r2.name
-            </a></td>
-            <td class="_robot _rating
-                @{if (battle.didRobotWin(r2.id).contains(true)) " _winner" else ""}
-            ">@battle.pr2Rating</td>
-            <td class="_errored">
-                @if(battle.errored) {
-                    <img src="@assetsFinder.path("images/error.svg")" alt="">
-                }
-            </td>
-        </tr>
-    }
-    </table>
+    <div class="_table">
+        <table class="_battles">
+            @battleRows(boardWithBattles.battles, assetsFinder)
+        </table>
+        <div class="_footer">
+            @pageControls(page => routes.BoardController.viewBattles(boardWithBattles.board.id.id, page), page)
+        </div>
+    </div>
 
-    @if(boardWithBattles.battles.nonEmpty) {
-        @pageControls(page => routes.BoardController.viewBattles(boardWithBattles.board.id.id, page), page)
-    } else {
+    @if(boardWithBattles.battles.isEmpty) {
         <p>No battles yet</p>
     }
 }
