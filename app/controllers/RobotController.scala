@@ -4,6 +4,7 @@ import controllers.Auth.{LoggedIn, LoggedOut, Visitor}
 import forms.{CreateRobotForm, UpdateRobotCodeForm}
 import models.Schema._
 import models._
+import play.api.Configuration
 import play.api.libs.json.Json
 import play.api.mvc._
 
@@ -17,8 +18,11 @@ class RobotController @Inject()(
     auth: Auth.AuthAction,
     robotsRepo: Robots,
     boardsRepo: Boards,
+    config: Configuration,
 )(implicit ec: ExecutionContext)
     extends MessagesAbstractController(cc) {
+
+  val BUILTIN_USER = config.get[String]("site.builtinUser")
 
   def create =
     auth.actionForceLI { _ => implicit request =>
@@ -158,11 +162,15 @@ class RobotController @Inject()(
 
   def viewPublishedCode(username: String, name: String) = Action.async { implicit request =>
     robotsRepo.find(username, name)(LoggedOut()) flatMap {
-      case Some(FullRobot(robot, _user)) =>
-        robotsRepo.getLatestPublishedCode(robot.id) map {
-          case Some(code) =>
-            Ok(views.html.robot.viewCode(code, assetsFinder))
-          case None => NotFound("404")
+      case Some(FullRobot(robot, user)) =>
+        if (user.username == BUILTIN_USER) {
+          Future successful Ok(views.html.robot.viewCode(robot.devCode, assetsFinder))
+        } else {
+          robotsRepo.getLatestPublishedCode(robot.id) map {
+            case Some(code) =>
+              Ok(views.html.robot.viewCode(code, assetsFinder))
+            case None => NotFound("404")
+          }
         }
       case None =>
         Future successful NotFound("404")
@@ -172,14 +180,14 @@ class RobotController @Inject()(
   def apiGetRobotCode(robotId: Long) =
     auth.action { visitor => implicit request =>
       robotsRepo.find(RobotId(robotId))(visitor) flatMap {
-        case Some(fullRobot) =>
+        case Some(FullRobot(robot, user)) =>
           // if the logged in user owns this robot, return the robot's development code
           // otherwise return its most recent published code
           // I don't like that this behaviour is 'hidden under the hood', but it's what's most intuitive
           // someone working in the Garage should be able to instantly see dev code changes reflected
           // in battles against their own bots
-          if (Visitor.isLIAsUser(visitor, fullRobot.user)) {
-            Future successful Ok(Json.toJson(fullRobot.robot.devCode))
+          if (user.username == BUILTIN_USER || Visitor.isLIAsUser(visitor, user)) {
+            Future successful Ok(Json.toJson(robot.devCode))
           } else {
             robotsRepo.getLatestPublishedCode(RobotId(robotId)) map {
               case Some(code) => Ok(Json.toJson(code))
