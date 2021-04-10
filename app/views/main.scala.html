@@ -1,8 +1,10 @@
-@(title: String, className: String, assetsFinder: AssetsFinder)(content: Html)(implicit request: RequestHeader)
+@(title: String, className: String, assetsFinder: AssetsFinder, loadScript: Boolean = true)(content: Html)(implicit request: RequestHeader)
 
 @basic(title, assetsFinder) {
     <link rel="stylesheet" type="text/css" href="@assetsFinder.path("dist/site_css.css")">
-    <script src="@assetsFinder.path("dist/site_js.js")" type="text/javascript"></script>
+    @if(loadScript) {
+        <script src="@assetsFinder.path("dist/site_js.js")" type="text/javascript"></script>
+    }
 } {
     <div class="content">
         <section class="header d-flex justify-content-between">

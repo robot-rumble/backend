@@ -29,6 +29,8 @@
 @main("Boards", "boards", assetsFinder) {
     <h1>Boards</h1>
 
+    <p>When you publish one of your draft robots, it begins to live on one of these boards, where it is matched with competitors to give you a rating. Some boards stand by themselves, while others belong to a specific Season. Learn more about publishing <a href="https://rr-docs.readthedocs.io/en/latest/publishing.html">here</a>.</p>
+
     @defining(seasons.filter(_.isActive())) { seasons =>
         @if(seasons.nonEmpty) {
             <h2>Active Seasons</h2>

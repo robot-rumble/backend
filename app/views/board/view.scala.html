@@ -4,9 +4,6 @@
 @main(board.board.name, "board", assetsFinder) {
     <h1>@board.board.name</h1>
 
-    @if(board.board.seasonId.nonEmpty) {
-        <p>Season board</p>
-    }
     <p>Publish cooldown: @board.board.formatPublishCooldown()</p>
 
     @board.board.bio match {
