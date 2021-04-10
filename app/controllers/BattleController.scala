@@ -18,16 +18,22 @@ class BattleController @Inject()(
   def view(battleId: Long) = auth.action { visitor => implicit request =>
     battlesRepo.find(BattleId(battleId)) map {
       case Some(fullBattle @ FullBattle(b, r1, r2)) =>
-        val userTeam = visitor match {
+        val (userTeam, userOwnsOpponent) = visitor match {
           case LoggedIn(user) =>
-            if (r1.userId == user.id) {
-              Some("Blue")
+            if (user.id == r1.userId && user.id == r2.userId) {
+              (Some("Blue"), true)
+            } else if (r1.userId == user.id) {
+              (Some("Blue"), false)
             } else if (r2.userId == user.id) {
-              Some("Red")
-            } else { None }
-          case LoggedOut() => None
+              (Some("Red"), false)
+            } else {
+              (None, false)
+            }
+          case LoggedOut() =>
+            (None, false)
+
         }
-        Ok(views.html.battle.view(fullBattle, userTeam, assetsFinder))
+        Ok(views.html.battle.view(fullBattle, userTeam, userOwnsOpponent, assetsFinder))
       case None => NotFound("404")
     }
   }

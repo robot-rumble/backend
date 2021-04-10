@@ -17,7 +17,6 @@ GET         /logout                                controllers.UserController.lo
 
 GET         /create-robot                          controllers.RobotController.create
 POST        /create-robot                          controllers.RobotController.postCreate
-GET         /r/:robot                              controllers.RobotController.viewById(robot: Long)
 
 GET         /battles/:battle                       controllers.BattleController.view(battle: Long)
 GET         /seasons/:season                       controllers.SeasonController.view(season)
@@ -41,6 +40,8 @@ POST        /api/update-robot-code/:robotId        controllers.RobotController.a
 GET         /api/get-user-robots/:user             controllers.UserController.apiGetUserRobots(user)
 GET         /api/get-robot/:user/:robot            controllers.RobotController.apiGetRobot(user, robot)
 GET         /api/get-robot-code/:robotId           controllers.RobotController.apiGetRobotCode(robotId: Long)
+GET         /api/view-robot-by-id/:robotId         controllers.RobotController.viewById(robotId: Long)
+GET         /api/edit-robot-by-id/:robotId         controllers.RobotController.editById(robotId: Long)
 
 GET         /assets/*file                          controllers.Assets.at(file)
 

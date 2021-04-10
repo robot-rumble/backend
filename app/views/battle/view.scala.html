@@ -1,5 +1,5 @@
 @import models.Schema._
-@(fullBattle: FullBattle, userTeam: Option[String], assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+@(fullBattle: FullBattle, userTeam: Option[String], userOwnsOpponent: Boolean, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
 @r1Link() = {
     <a style="color: inherit !important" href="@routes.RobotController.viewById(fullBattle.r1.id.id)">@fullBattle.r1.name</a>
@@ -67,7 +67,7 @@
     }
 
     <div class="mt-5">
-        <battle-el data="@fullBattle.b.decompressData()" team="@userTeam"></battle-el>
+        <battle-el data="@fullBattle.b.decompressData()" team="@userTeam" userOwnsOpponent="@userOwnsOpponent"></battle-el>
     </div>
 }
 
