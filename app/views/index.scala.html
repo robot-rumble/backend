@@ -4,7 +4,7 @@
 @main("Robot Rumble ALPHA", "index", assetsFinder) {
     <h1>Code robots, win matches, rank up.</h1>
 
-    <img class="mt-3 mb-5" src="@assetsFinder.path("images/demo.gif")" alt="">
+    <img class="mt-3 mb-5 _demo" src="@assetsFinder.path("images/demo.gif")" alt="">
 
     <div class="overview">
         <p>The rules are simple:</p>
@@ -19,15 +19,22 @@
     </div>
 
     @if(boards.nonEmpty) {
-        <div class="mt-5">
+        <div class="mt-5 _table">
             <h2 class="mb-3">Active robot boards</h2>
-            <table class="_boards">
-                @for(board <- boards.filter(bo => bo.publishingEnabled && bo.matchmakingEnabled)) {
+            <table class="_body">
+                @for(board <- boards.filter(_.matchmakingEnabled)) {
                     <tr>
                         <td><a href="@routes.BoardController.view(board.id.id)">@board.name</a></td>
+                        <td class="text-grey">publish cooldown: @board.formatPublishCooldown()</td>
                     </tr>
                 }
             </table>
+            <div class="_footer">
+                <a href="@routes.BoardController.index()">
+                    <img src="@assetsFinder.path("images/launch.svg")" alt="">
+                    view all boards
+                </a>
+            </div>
         </div>
     }
 

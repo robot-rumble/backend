@@ -4,16 +4,21 @@
 @main(board.board.name, "board", assetsFinder) {
     <h1>@board.board.name</h1>
 
+    @if(board.board.seasonId.nonEmpty) {
+        <p>Season board</p>
+    }
+    <p>Publish cooldown: @board.board.formatPublishCooldown()</p>
+
     @board.board.bio match {
         case Some(bio) => {
-            <div class="mb-3">
+            <div class="mt-2">
                 @Html(bio)
             </div>
         }
         case None => {}
     }
 
-    <h3>Published Robots</h3>
+    <h2 class="mt-4">Published Robots</h2>
     <div class="_table">
         <table class="_body _robots">
         @for(FullBoardRobot(robot, pRobot, user) <- board.robots) {
@@ -41,7 +46,7 @@
     </div>
 
     @if(board.battles.nonEmpty) {
-        <h3 class="mt-5">Recent Battles</h3>
+        <h2 class="mt-5">Recent Battles</h2>
 
         <div class="_table">
             <table class="_battles">

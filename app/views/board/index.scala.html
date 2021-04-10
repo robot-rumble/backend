@@ -1,44 +1,61 @@
 @import models.Schema._
 @(seasons: Seq[Season], boards: Seq[Board], assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
-@boardRows(boards: Seq[Board]) = {
-    @for(board <- boards) {
-        <tr>
-            <td><a href="@routes.BoardController.view(board.id.id)">@board.name</a></td>
-        </tr>
-    }
+@displayBoards(boards: Seq[Board]) = {
+  <table class="_body">
+  <tbody>
+  @for(board <- boards) {
+      <tr>
+          <td><a href="@routes.BoardController.view(board.id.id)">@board.name</a></td>
+          <td class="text-grey">publish cooldown: @board.formatPublishCooldown()</td>
+      </tr>
+  }
+  </tbody>
+  </table>
 }
 
-@main("Boards", "boards", assetsFinder) {
-    <h1>Boards</h1>
-
-    <h2>Seasons</h2>
-
-    <table class="_seasons">
+@displaySeasons(seasons: Seq[Season]) = {
     @for(season <- seasons) {
         <div class="_table">
             <div class="_header d-flex">
                 <a href="@routes.SeasonController.view(season.slug)">@season.name</a>
                 <p>@season.formatStart() - @season.formatEnd()</p>
             </div>
-            @if(season.isActive()) {
-                @boardRows(boards.filter(_.seasonId.contains(season.id)))
-            }
+            @displayBoards(boards.filter(_.seasonId.contains(season.id)))
         </div>
     }
-    @if(seasons.isEmpty) {
-      <p>No seasons yet</p>
+}
+
+@main("Boards", "boards", assetsFinder) {
+    <h1>Boards</h1>
+
+    @defining(seasons.filter(_.isActive())) { seasons =>
+        @if(seasons.nonEmpty) {
+            <h2>Active Seasons</h2>
+            @displaySeasons(seasons)
+        }
     }
-    </table>
 
-    <h2 class="mt-5">Other Boards</h2>
+    @defining(boards.filter(bo => bo.seasonId.isEmpty && bo.matchmakingEnabled)) { boards =>
+        <h2>Active Boards</h2>
+        @if(boards.nonEmpty) {
+            @displayBoards(boards)
+        } else {
+          <p>No boards yet</p>
+        }
+    }
 
-    @defining(boards.filter(_.seasonId.isEmpty)) { otherBoards =>
-        <table class="_boards">
-            @boardRows(otherBoards)
-        </table>
-        @if(otherBoards.isEmpty) {
-            <p>No boards yet</p>
+    @defining(seasons.filter(!_.isActive())) { seasons =>
+        @if(seasons.nonEmpty) {
+            <h2>Archived Seasons</h2>
+            @displaySeasons(seasons)
+        }
+    }
+
+    @defining(boards.filter(bo => bo.seasonId.isEmpty)) { boards =>
+        @if(boards.isEmpty) {
+            <h2>Archived Boards</h2>
+            @displayBoards(boards)
         }
     }
 }
