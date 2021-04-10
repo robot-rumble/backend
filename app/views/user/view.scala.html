@@ -8,7 +8,7 @@
         @if(robots.nonEmpty) {
             <table class="_body">
             @for(robot <- robots) {
-                <tr>
+                <tr class="@{if (!robot.active) "inactive"}">
                     <td><a href="@routes.RobotController.view(user.username, robot.name)">@robot.name</a></td>
                     <td>@robot.lang</td>
                     <td>

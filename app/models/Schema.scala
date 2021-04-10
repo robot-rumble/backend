@@ -67,6 +67,8 @@ object Schema {
       lang: Lang,
       created: LocalDateTime = LocalDateTime.now(),
       published: Boolean = false,
+      active: Boolean = true,
+      errorCount: Int = 0,
   )
 
   case class FullRobot(robot: Robot, user: User)
@@ -377,6 +379,9 @@ object Schema {
 
       def by(id: UserId): Quoted[EntityQuery[Robot]] =
         query.filter(_.userId == lift(id))
+
+      def active(): Quoted[EntityQuery[Robot]] =
+        query.filter(_.active)
 
       def withUser(): Quoted[Query[(Robot, User)]] =
         for {

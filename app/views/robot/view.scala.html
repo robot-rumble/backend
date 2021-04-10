@@ -23,10 +23,14 @@
 }
 
 @main(s"Robot ${fullRobot.robot.name}", "robot-page", assetsFinder) {
-    <h1>Robot @fullRobot.robot.name</h1>
+    @if(fullRobot.robot.active) {
+        <h1>Robot @fullRobot.robot.name</h1>
+    } else {
+        <h1 class="inactive">Robot @fullRobot.robot.name (inactive)</h1>
+    }
     <h3 class="mb-4">@fullRobot.robot.lang robot by <a href="@routes.UserController.view(fullRobot.user.username)">@fullRobot.user.username</a></h3>
 
-    <div class="d-flex actions mb-5">
+    <div class="d-flex actions">
         @if(fullRobot.robot.published) {
             <a href="@routes.RobotController.viewPublishedCode(fullRobot.user.username, fullRobot.robot.name)">
                 <img src="@assetsFinder.path("images/code.svg")" alt="">
@@ -42,8 +46,17 @@
         }
     </div>
 
+    @if(isOwner && fullRobot.robot.errorCount > 0) {
+        <p class="mt-3 error">
+            <img src="@assetsFinder.path("images/error.svg")" alt="">
+            Your robot errored @fullRobot.robot.errorCount time@{if (fullRobot.robot.errorCount > 1) "s"} in recent battles.
+            @if(!fullRobot.robot.active) {
+                It has been automatically deactivated. Matchmaking will resume once you re-publish with corrected code.
+            }
+        </p>
+    }
 
-    <div>
+    <div class="mt-5">
         @if(boardsWithBattles.nonEmpty) {
             <h2>Battles</h2>
             @for((pRobot, BoardWithBattles(board, battles)) <- boardsWithBattles) {
@@ -74,6 +87,11 @@
                                 } else {
                                     @battle.pr1Rating
                                 }
+                                </td>
+                                <td class="_errored">
+                                    @if(battle.errored) {
+                                        <img src="@assetsFinder.path("images/error.svg")" alt="">
+                                    }
                                 </td>
                             </tr>
                         }

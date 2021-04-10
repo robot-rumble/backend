@@ -51,7 +51,7 @@ class MatchMaker @Inject()(
     boardsRepo.findAllBare() flatMap { allBoards =>
       val boardsMap = allBoards.filter(_.matchmakingEnabled).map(board => (board.id, board)).toMap
 
-      robotsRepo.findAllLatestWithPr() flatMap { allRobots =>
+      robotsRepo.findAllLatestActiveWithPr() flatMap { allRobots =>
         battlesRepo.findOpponents() map { allOpponentsMap =>
           val recentOpponentsMap =
             allOpponentsMap.mapValues(
@@ -88,11 +88,15 @@ class MatchMaker @Inject()(
                     allRobots
                       .filter {
                         case (r2, pr2) =>
-                          val isNotRecentOpponent = recentOpponentsMap.get(r.id) match {
+                          r.id != r2.id && pr.boardId == pr2.boardId
+                      }
+                      .filter {
+                        case (r2, _) =>
+                          recentOpponentsMap.get(r.id) match {
                             case None | Some(Seq()) => true
-                            case Some(opponents)    => opponents.forall(_.rId != r2.id)
+                            // check that is not recent opponent
+                            case Some(opponents) => opponents.forall(_.rId != r2.id)
                           }
-                          r.id != r2.id && pr.boardId == pr2.boardId && isNotRecentOpponent
                       }
                       .sortBy { case (_, pr2) => (pr2.rating - pr.rating).abs }
                       .take(opponentNum)
@@ -163,11 +167,17 @@ class MatchMaker @Inject()(
           case None          => r1Player draws r2Player
         }
 
+        val (r1Errored, r2Errored) = matchOutput.winner match {
+          case Some(Team.R1) => (false, true)
+          case Some(Team.R2) => (true, false)
+          case None          => (true, true)
+        }
+
         r1Player.updateRating(KFactor.USCF)
         r2Player.updateRating(KFactor.USCF)
         for {
-          _ <- robotsRepo.updateRating(pr1.id, r1Player.rating)
-          _ <- robotsRepo.updateRating(pr2.id, r2Player.rating)
+          _ <- robotsRepo.updateAfterBattle(pr1.rId, pr1.id, r1Player.rating, r1Errored)
+          _ <- robotsRepo.updateAfterBattle(pr2.rId, pr2.id, r2Player.rating, r2Errored)
           _ <- battlesRepo.create(
             matchOutput,
             pr1.rating,

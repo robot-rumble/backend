@@ -54,6 +54,17 @@
         }
         case None => {}
     }
+    @if(fullBattle.b.errored) {
+        <p class="mt-5 error text-center">
+            <img src="@assetsFinder.path("images/error.svg")" alt="">
+            Limited battle output,
+        @{fullBattle.b.winner match {
+            case Some(Team.R1) => fullBattle.r2.name
+            case Some(Team.R2) => fullBattle.r1.name
+            case None => "both robots"
+        }} errored
+        </p>
+    }
 
     <div class="mt-5">
         <battle-el data="@fullBattle.b.decompressData()" team="@userTeam"></battle-el>

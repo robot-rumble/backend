@@ -3,15 +3,23 @@ package models
 import controllers.Auth.{LoggedIn, LoggedOut, Visitor}
 import io.getquill.{EntityQuery, Ord}
 import models.Schema._
+import org.joda.time.LocalDateTime
+import play.api.Configuration
+import services.JodaUtils._
 
 import javax.inject.Inject
+import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
 
 class Robots @Inject()(
+    val config: Configuration,
     val schema: Schema,
 )(
     implicit ec: ExecutionContext
 ) {
+  val ERROR_LIMIT = config.get[Long]("queue.errorLimit")
+  val INACTIVITY_TIMEOUT = config.get[FiniteDuration]("queue.inactivityTimeout")
+
   import schema._
   import schema.ctx._
 
@@ -82,10 +90,10 @@ class Robots @Inject()(
     ).map(_.map(FullBoardRobot.tupled))
   }
 
-  def findAllLatestWithPr(): Future[Seq[(Robot, PRobot)]] = {
+  def findAllLatestActiveWithPr(): Future[Seq[(Robot, PRobot)]] = {
     run(for {
       pr <- publishedRobots.latest
-      r <- robots.filter(_.id == pr.rId)
+      r <- robots.active().filter(_.id == pr.rId)
     } yield (r, pr))
   }
 
@@ -99,8 +107,30 @@ class Robots @Inject()(
       run(robots.by(id).update(_.devCode -> lift(devCode)))
     else throw new Exception("Updating robot with empty code.")
 
-  def updateRating(id: PRobotId, rating: Int): Future[Long] =
-    run(publishedRobots.by(id).update(_.rating -> lift(rating)))
+  def updateAfterBattle(id: RobotId, prId: PRobotId, rating: Int, errored: Boolean): Future[Long] =
+    run(publishedRobots.by(prId).update(_.rating -> lift(rating)).returning(_.created)) flatMap {
+      created =>
+        if (created.plus(INACTIVITY_TIMEOUT).isBefore(LocalDateTime.now()))
+          run(robots.by(id).update(_.active -> false))
+        else if (errored)
+          run(
+            robots
+              .by(id)
+              .update(r => (r.errorCount -> (r.errorCount + 1)))
+              .returning(_.errorCount)
+          ) flatMap { errorCount =>
+            if (errorCount >= ERROR_LIMIT) {
+              run(
+                robots
+                  .by(id)
+                  .update(_.active -> false)
+              )
+            } else {
+              Future successful 1L
+            }
+          } else run(robots.by(id).update(_.errorCount -> 0))
+
+    }
 
   def publish(
       id: RobotId,
@@ -120,7 +150,10 @@ class Robots @Inject()(
                     .insert(lift(PRobot(code = r.devCode, rId = r.id, boardId = board.id)))
                     .returningGenerated(_.id)
                 )
-                _ <- run(robots.by(id).update(_.published -> true))
+                _ <- run(
+                  robots.by(id).update(_.published -> true, _.active -> true, _.errorCount -> 0)
+                )
+                // a robot's active status is reset on every publish
               } yield Some(Right(prId))
           }
         case _ =>
