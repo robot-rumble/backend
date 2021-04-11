@@ -33,36 +33,23 @@ class UserController @Inject()(
           BadRequest(views.html.user.signup(formWithErrors, assetsFinder))
         )
       },
-      data => {
-        val username = data.username.trim()
-        if (username.matches("^[a-zA-Z0-9_-]+$")) {
-          (for {
-            usernameUser <- usersRepo.find(username)
-            emailUser <- usersRepo.find(data.email)
-          } yield (usernameUser, emailUser)) flatMap {
-            case (None, None) =>
-              usersRepo.create(data.email, username, data.password).map { user =>
-                Auth.login(user.username)(Redirect(routes.UserController.view(user.username)))
-              }
-            case _ =>
-              Future successful BadRequest(
-                views.html.user.signup(
-                  SignupForm.form.fill(data).withGlobalError("Username or email taken"),
-                  assetsFinder
+      data =>
+        usersRepo.find(data.username) flatMap { usernameUser =>
+          usersRepo.findByEmail(data.email) flatMap { passwordUser =>
+            (usernameUser, passwordUser) match {
+              case (None, None) =>
+                usersRepo.create(data.email, data.username, data.password).map { user =>
+                  Auth.login(user.username)(Redirect(routes.UserController.view(user.username)))
+                }
+              case _ =>
+                Future successful BadRequest(
+                  views.html.user.signup(
+                    SignupForm.form.fill(data).withGlobalError("Username or email taken"),
+                    assetsFinder
+                  )
                 )
-              )
+            }
           }
-        } else {
-          Future successful
-            BadRequest(
-              views.html.user.signup(
-                SignupForm.form
-                  .fill(data)
-                  .withError("username", "Username cannot contain special characters"),
-                assetsFinder
-              )
-            )
-        }
       }
     )
   }

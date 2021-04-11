@@ -1,5 +1,6 @@
 package forms
 
+import forms.Validators._
 import play.api.data.Form
 import play.api.data.Forms._
 
@@ -7,7 +8,7 @@ object UpdatePasswordForm {
 
   val form: Form[Data] = Form(
     mapping(
-      "password" -> nonEmptyText(10, 60),
+      "password" -> password,
       "token" -> nonEmptyText,
     )(Data.apply)(Data.unapply)
   )

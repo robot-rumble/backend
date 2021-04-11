@@ -47,14 +47,14 @@ class Robots @Inject()(
     run(publishedRobots.by(id).latest)
 
   def findBare(userId: UserId, name: String)(visitor: Visitor): Future[Option[Robot]] =
-    run(robotsAuth(visitor).by(userId).filter(_.name == lift(name.toLowerCase)))
+    run(robotsAuth(visitor).by(userId).filter(_.name == lift(name)))
       .map(_.headOption)
 
   def find(username: String, name: String)(visitor: Visitor): Future[Option[FullRobot]] = {
     val query = quote {
       robotsAuth(visitor).withUser().filter {
         case (r, u) =>
-          u.username == lift(username.toLowerCase) && r.name == lift(name.toLowerCase)
+          u.username == lift(username) && r.name == lift(name)
       }
     }
     run(query).map(_.headOption).map(_.map(FullRobot.tupled))
@@ -98,7 +98,7 @@ class Robots @Inject()(
   }
 
   def create(userId: UserId, name: String, lang: Lang): Future[Robot] = {
-    val robot = Robot(userId, name.toLowerCase, lang)
+    val robot = Robot(userId, name, lang)
     run(robots.insert(lift(robot)).returningGenerated(_.id)).map(robot.copy(_))
   }
 

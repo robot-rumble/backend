@@ -36,16 +36,11 @@ class RobotController @Inject()(
       user: Schema.User,
       data: CreateRobotForm.Data
   ): Future[Either[Robot, String]] = {
-    val name = data.name.trim()
-    if (name.matches("^[a-zA-Z0-9_-]+$")) {
-      robotsRepo.findBare(user.id, name)(LoggedIn(user)) flatMap {
-        case Some(_) =>
-          Future successful Right("Robot with this name already exists")
-        case None =>
-          robotsRepo.create(user.id, name, data.lang).map(Left.apply)
-      }
-    } else {
-      Future successful Right("Name cannot contain special characters")
+    robotsRepo.findBare(user.id, data.name)(LoggedIn(user)) flatMap {
+      case Some(_) =>
+        Future successful Right("Robot with this name already exists")
+      case None =>
+        robotsRepo.create(user.id, data.name, data.lang).map(Left.apply)
     }
   }
 

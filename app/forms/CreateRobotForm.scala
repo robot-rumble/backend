@@ -1,5 +1,6 @@
 package forms
 
+import forms.Validators._
 import models.Schema.Lang
 import play.api.data.Form
 import play.api.data.Forms._
@@ -8,7 +9,7 @@ object CreateRobotForm {
 
   val form: Form[Data] = Form(
     mapping(
-      "name" -> nonEmptyText(1, 15),
+      "name" -> name,
       "lang" -> Lang.formField
     )(Data.apply)(Data.unapply)
   )

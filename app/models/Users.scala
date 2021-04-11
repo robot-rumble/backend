@@ -20,7 +20,7 @@ class Users @Inject()(schema: Schema)(implicit ec: ExecutionContext) {
     run(users.filter(_.email == lift(email))).map(_.headOption)
 
   def create(email: String, username: String, password: String): Future[User] = {
-    val data = User(email, username.toLowerCase, password)
+    val data = User(email, username, password)
     run(users.insert(lift(data)).returningGenerated(_.id)).map(data.copy(_))
   }
 

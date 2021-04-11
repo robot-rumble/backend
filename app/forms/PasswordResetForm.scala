@@ -1,5 +1,6 @@
 package forms
 
+import forms.Validators.email
 import play.api.data.Form
 import play.api.data.Forms._
 
@@ -7,7 +8,7 @@ object PasswordResetForm {
 
   val form: Form[Data] = Form(
     mapping(
-      "email" -> email,
+      "email" -> email
     )(Data.apply)(Data.unapply)
   )
 

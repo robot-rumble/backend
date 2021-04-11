@@ -1,5 +1,6 @@
 package forms
 
+import forms.Validators.{email, _}
 import play.api.data.Form
 import play.api.data.Forms._
 
@@ -8,8 +9,8 @@ object SignupForm {
   val form: Form[Data] = Form(
     mapping(
       "email" -> email,
-      "username" -> nonEmptyText(1, 15),
-      "password" -> nonEmptyText(10, 60)
+      "username" -> username,
+      "password" -> password
     )(Data.apply)(Data.unapply)
   )
 
