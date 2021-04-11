@@ -87,7 +87,7 @@ class Boards @Inject()(schema: Schema, robotsRepo: Robots, battlesRepo: Battles)
   ): Future[Option[BoardWithBattles]] = {
     findBare(id).flatMap {
       case Some(board) =>
-        battlesRepo.findByBoardForRobot(id, robot.id) map { robots =>
+        battlesRepo.findByBoardForRobotPaged(id, robot.id, page, numPerBoard) map { robots =>
           Some(BoardWithBattles(board, robots map {
             case (battle, opponent) => FullBattle(battle, robot, opponent)
           }))
@@ -100,7 +100,7 @@ class Boards @Inject()(schema: Schema, robotsRepo: Robots, battlesRepo: Battles)
       id: BoardId,
       robotId: RobotId,
       page: Long,
-      numPerBoard: Index
+      numPerBoard: Int
   ): Future[Option[(Robot, BoardWithBattles)]] = {
     robotsRepo
       .findBare(robotId)(Auth.LoggedOut())
