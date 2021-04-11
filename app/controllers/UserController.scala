@@ -174,12 +174,12 @@ class UserController @Inject()(
         Future successful Forbidden(views.html.user.passwordReset(formWithErrors, assetsFinder))
       },
       data => {
-        usersRepo.find(data.email) flatMap {
+        usersRepo.findByEmail(data.email) flatMap {
           case Some(user) =>
             passwordResetRepo.create(user.id) flatMap {
               passwordReset =>
                 mail.mail(
-                  user.email.email,
+                  user.email,
                   "Robot Rumble password reset",
                   s"""
                   |Hello ${user.username},

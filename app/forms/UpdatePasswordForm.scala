@@ -7,7 +7,7 @@ object UpdatePasswordForm {
 
   val form: Form[Data] = Form(
     mapping(
-      "password" -> nonEmptyText,
+      "password" -> nonEmptyText(10, 60),
       "token" -> nonEmptyText,
     )(Data.apply)(Data.unapply)
   )

@@ -1,7 +1,7 @@
 import com.google.inject.AbstractModule
 import matchmaking._
 import play.api.{Configuration, Environment, Logger}
-import services.{Database, GMail, Mail, Postgres}
+import services.{Database, Mail, Postgres, SES}
 
 /**
   * This class is a Guice module that tells Guice how to bind several
@@ -18,7 +18,7 @@ class Module(_env: Environment, config: Configuration) extends AbstractModule {
   override def configure(): Unit = {
     logger.debug("Starting Dependency Injection...")
     bind(classOf[Database]).to(classOf[Postgres]).asEagerSingleton()
-    bind(classOf[Mail]).to(classOf[GMail])
+    bind(classOf[Mail]).to(classOf[SES])
     if (config.get[Boolean]("queue.enabled")) {
       if (config.get[Boolean]("queue.useMock")) {
         logger.debug("Launching Mock Queue...")

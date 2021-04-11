@@ -17,7 +17,9 @@ class PasswordResets @Inject()(schema: Schema, usersRepo: models.Users)(
     run(passwordResets.insert(lift(data)).returningGenerated(_.id)).map(data.copy(_))
   }
 
-  def complete(token: String, newPassword: String): Future[Option[Long]] =
+  def complete(token: String, newPassword: String): Future[Option[Long]] = {
+    println(token, newPassword)
+
     run(
       passwordResets
         .filter(
@@ -27,4 +29,5 @@ class PasswordResets @Inject()(schema: Schema, usersRepo: models.Users)(
       case Some(v) => usersRepo.updatePassword(v.userId, newPassword).map(Some(_))
       case None    => Future.successful(None)
     }
+  }
 }

@@ -31,23 +31,16 @@ object Schema {
 
   case class UserId(id: Long)
 
-  case class Email(email: String)
-
-  object Email {
-    def apply(email: String) =
-      new Email(email.toLowerCase)
-  }
-
   case class User(
       id: UserId = UserId(-1),
-      email: Email,
+      email: String,
       username: String,
       password: String,
       created: LocalDateTime
   )
 
   object User {
-    def apply(email: Email, username: String, password: String) =
+    def apply(email: String, username: String, password: String) =
       new User(
         email = email,
         username = username,
@@ -299,6 +292,7 @@ object Schema {
     def apply(userId: UserId) =
       new PasswordReset(userId = userId)
   }
+
   class Schema @Inject()(db: Database)(implicit ec: scala.concurrent.ExecutionContext) {
     val ctx = db.ctx
     import ctx._
@@ -315,8 +309,6 @@ object Schema {
     implicit val decodeBoardId = MappedEncoding[Long, BoardId](BoardId.apply)
     implicit val encodeSeasonId = MappedEncoding[SeasonId, Long](_.id)
     implicit val decodeSeasonId = MappedEncoding[Long, SeasonId](SeasonId.apply)
-    implicit val encodeEmail = MappedEncoding[Email, String](_.email)
-    implicit val decodeEmail = MappedEncoding[String, Email](Email.apply)
     implicit val encodeDuration = MappedEncoding[Duration, Int](_.getStandardSeconds.toInt)
     implicit val decodeDuration = MappedEncoding[Int, Duration](Duration.standardSeconds(_))
 
@@ -374,9 +366,6 @@ object Schema {
 
       def by(username: String): Quoted[EntityQuery[User]] =
         query.filter(_.username == lift(username))
-
-      def by(email: Email): Quoted[EntityQuery[User]] =
-        query.filter(_.email == lift(email))
     }
 
     implicit class RobotEntityQuery(query: Quoted[EntityQuery[Robot]]) {

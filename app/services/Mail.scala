@@ -11,10 +11,10 @@ trait Mail {
   def mail(to: String, subject: String, body: String): Future[Unit]
 }
 
-class GMail @Inject()(config: Configuration)(implicit ec: ExecutionContext) extends Mail {
-  val mailer = Mailer("mail.gmx.com", 587)
+class SES @Inject()(config: Configuration)(implicit ec: ExecutionContext) extends Mail {
+  private val mailer = Mailer(config.get[String]("email.host"), config.get[Int]("email.port"))
     .auth(true)
-    .as(config.get[String]("email.email"), config.get[String]("email.password"))
+    .as(config.get[String]("email.smtpUsername"), config.get[String]("email.smtpPassword"))
     .startTls(true)()
 
   def mail(to: String, subject: String, body: String): Future[Unit] = {
