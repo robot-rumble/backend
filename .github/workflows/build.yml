@@ -38,5 +38,5 @@ jobs:
           -envvars.SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}
           -jvm.args="-Ddb.default_.migration.auto=true -Dsentry.dsn=${{ secrets.SENTRY_DSN }}"
           -ports.http=80
-          -env=test
+          -env=prod
           # https://github.com/boxfuse/boxfuse-issues/issues/180
