@@ -2,7 +2,7 @@
 
 @main("Login", "login", assetsFinder) {
     @helper.form(routes.UserController.postLogin()) {
-        @helper.inputText(form("username"), Symbol("_showConstraints") -> false)
+        @helper.inputText(form("username"), Symbol("_label") -> "username/email", Symbol("_showConstraints") -> false)
         @helper.inputPassword(form("password"), Symbol("_showConstraints") -> false)
         @helper.CSRF.formField
         <button class="button">login</button>

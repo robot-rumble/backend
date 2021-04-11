@@ -57,11 +57,11 @@ class UserController @Inject()(
   private def loginOnSuccess(
       data: LoginForm.Data
   ): Future[Either[Schema.User, String]] = {
-    usersRepo.find(data.username) map {
+    usersRepo.findByEmailOrUsername(data.username) map {
       case Some(user) if data.password.isBcrypted(user.password) =>
         Left(user)
       case _ =>
-        Right("Incorrect username or password.")
+        Right("Incorrect email/username or password.")
     }
   }
 
