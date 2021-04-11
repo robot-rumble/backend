@@ -14,6 +14,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class Robots @Inject()(
     val config: Configuration,
     val schema: Schema,
+    val usersRepo: Users,
 )(
     implicit ec: ExecutionContext
 ) {
@@ -97,9 +98,13 @@ class Robots @Inject()(
     } yield (r, pr))
   }
 
-  def create(userId: UserId, name: String, lang: Lang): Future[Robot] = {
-    val robot = Robot(userId, name, lang)
-    run(robots.insert(lift(robot)).returningGenerated(_.id)).map(robot.copy(_))
+  def create(userId: UserId, name: String, lang: Lang): Future[Option[Robot]] = {
+    usersRepo.find(userId) flatMap {
+      case Some(user) if user.verified =>
+        val robot = Robot(userId, name, lang)
+        run(robots.insert(lift(robot)).returningGenerated(_.id)).map(robot.copy(_)).map(Some(_))
+      case _ => Future successful None
+    }
   }
 
   def updateDevCode(id: RobotId, devCode: String): Future[Long] =

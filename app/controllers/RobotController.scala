@@ -40,7 +40,10 @@ class RobotController @Inject()(
       case Some(_) =>
         Future successful Right("Robot with this name already exists")
       case None =>
-        robotsRepo.create(user.id, data.name, data.lang).map(Left.apply)
+        robotsRepo.create(user.id, data.name, data.lang) map {
+          case Some(robot) => Left(robot)
+          case None        => Right("You must be verified to create a robot")
+        }
     }
   }
 

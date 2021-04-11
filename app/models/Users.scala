@@ -23,11 +23,31 @@ class Users @Inject()(schema: Schema)(implicit ec: ExecutionContext) {
     run(users.filter(u => u.username == lift(username) || u.email == lift(username)))
       .map(_.headOption)
 
-  def create(email: String, username: String, password: String): Future[User] = {
+  def create(
+      email: String,
+      username: String,
+      password: String
+  ): Future[(User, AccountVerification)] = {
     val data = User(email, username, password)
-    run(users.insert(lift(data)).returningGenerated(_.id)).map(data.copy(_))
+    run(users.insert(lift(data)).returningGenerated(_.id)).map(data.copy(_)) flatMap { user =>
+      createAccountVerification(user.id) map { accountVerification =>
+        (user, accountVerification)
+      }
+    }
+  }
+
+  def createAccountVerification(id: UserId): Future[AccountVerification] = {
+    val data = AccountVerification(id)
+    run(accountVerifications.insert(lift(data)).returningGenerated(_.id)).map(data.copy(_))
   }
 
   def updatePassword(id: UserId, password: String): Future[Long] =
-    run(users.filter(_.id == lift(id)).update(_.password -> lift(password.bcrypt)))
+    run(users.by(id).update(_.password -> lift(password.bcrypt)))
+
+  def verify(id: UserId, token: String): Future[Option[User]] =
+    run(accountVerifications.filter(v => v.userId == lift(id) && v.token == lift(token)))
+      .map(_.headOption) flatMap {
+      case Some(_) => run(users.by(id).update(_.verified -> true).returning(u => u)).map(Some(_))
+      case None    => Future successful None
+    }
 }

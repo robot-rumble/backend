@@ -15,7 +15,7 @@
             <p>* each robot has 5 health</p>
             <p>* the player with more robots after 100 turns wins</p>
         </div>
-        <p>To get started, sign up, make a robot, and then publish it to one of the active boards. You can also read more about the rules <a href="@routes.HomeController.rules">here</a>.</p>
+        <p>To get started, <a href="@routes.UserController.create()">sign up</a> and make a robot. You can also read more about the game rules <a href="@routes.HomeController.rules">here</a>.</p>
     </div>
 
     @if(boards.nonEmpty) {

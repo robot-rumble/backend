@@ -12,6 +12,7 @@
         <button class="button">create</button>
     }
 
+    <div class="mt-3">
     @if(form.hasGlobalErrors) {
         <ul class="error">
         @for(error <- form.globalErrors) {
@@ -19,4 +20,5 @@
         }
         </ul>
     }
+    </div>
 }

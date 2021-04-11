@@ -43,6 +43,8 @@ GET         /api/get-robot-code/:robotId           controllers.RobotController.a
 GET         /api/view-robot-by-id/:robotId         controllers.RobotController.viewById(robotId: Long)
 GET         /api/edit-robot-by-id/:robotId         controllers.RobotController.editById(robotId: Long)
 
+GET         /api/verify-user/:userId/:token        controllers.UserController.verify(userId: Long, token)
+
 GET         /assets/*file                          controllers.Assets.at(file)
 
 GET         /:user                                 controllers.UserController.view(user)

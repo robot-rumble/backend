@@ -3,6 +3,7 @@ package controllers
 import com.github.t3hnar.bcrypt._
 import controllers.Auth.Visitor
 import forms.{LoginForm, PasswordResetForm, SignupForm, UpdatePasswordForm}
+import models.Schema._
 import models._
 import play.api.libs.json.Json
 import play.api.mvc._
@@ -35,20 +36,42 @@ class UserController @Inject()(
       },
       data =>
         usersRepo.find(data.username) flatMap { usernameUser =>
-          usersRepo.findByEmail(data.email) flatMap { passwordUser =>
-            (usernameUser, passwordUser) match {
-              case (None, None) =>
-                usersRepo.create(data.email, data.username, data.password).map { user =>
-                  Auth.login(user.username)(Redirect(routes.UserController.view(user.username)))
-                }
-              case _ =>
-                Future successful BadRequest(
-                  views.html.user.signup(
-                    SignupForm.form.fill(data).withGlobalError("Username or email taken"),
-                    assetsFinder
+          usersRepo.findByEmail(data.email) flatMap {
+            passwordUser =>
+              (usernameUser, passwordUser) match {
+                case (None, None) =>
+                  usersRepo.create(data.email, data.username, data.password) flatMap {
+                    case (user, accountVerification) =>
+                      val link =
+                        s"https://robotrumble.org${routes.UserController.verify(user.id.id, accountVerification.token)}"
+                      mail.mail(
+                        user.email,
+                        "Robot Rumble account verification",
+                        s"""
+                         |Hello ${user.username},
+                         |
+                         |Welcome to Robot Rumble! Please go to the following link to verify your account:
+                         |
+                         |$link
+                         |
+                         |Thank you,
+                         |The Robot Rumble team
+                         """.stripMargin
+                      ) map { _ =>
+                        Redirect(routes.UserController.create())
+                          .flashing(
+                            "success" -> "Your account has been created! Before competing, you need to verify your account by following the link sent to your inbox."
+                          )
+                      }
+                  }
+                case _ =>
+                  Future successful BadRequest(
+                    views.html.user.signup(
+                      SignupForm.form.fill(data).withGlobalError("Username or email taken"),
+                      assetsFinder
+                    )
                   )
-                )
-            }
+              }
           }
       }
     )
@@ -174,7 +197,12 @@ class UserController @Inject()(
                   |You requested a robotrumble.org password reset. Please go to
                   |https://robotrumble.org${routes.UserController
                        .updatePassword()} and input this token exactly:
-                  |${passwordReset.token}""".stripMargin
+                  |
+                  |${passwordReset.token}
+                  |
+                  |Thank you,
+                  |The Robot Rumble team
+                  |""".stripMargin
                 )
             } map { _ =>
               Redirect(routes.UserController.passwordReset())
@@ -218,5 +246,15 @@ class UserController @Inject()(
         }
       }
     )
+  }
+
+  def verify(id: Long, token: String) = Action.async { implicit request =>
+    usersRepo.verify(UserId(id), token) map {
+      case Some(user) => Ok(views.html.user.verified(user, assetsFinder))
+      case None =>
+        NotFound(
+          "Incorrect token! This shouldn't happen. Please reach out to antonoutkine At gmail Dot com."
+        )
+    }
   }
 }

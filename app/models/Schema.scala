@@ -36,7 +36,8 @@ object Schema {
       email: String,
       username: String,
       password: String,
-      created: LocalDateTime
+      created: LocalDateTime,
+      verified: Boolean,
   )
 
   object User {
@@ -45,7 +46,8 @@ object Schema {
         email = email,
         username = username,
         password = password.bcrypt,
-        created = LocalDateTime.now()
+        created = LocalDateTime.now(),
+        verified = false,
       )
   }
 
@@ -293,6 +295,17 @@ object Schema {
       new PasswordReset(userId = userId)
   }
 
+  case class AccountVerification(
+      id: Long = -1,
+      token: String = scala.util.Random.alphanumeric.take(15).mkString(""),
+      userId: UserId
+  )
+
+  object AccountVerification {
+    def apply(userId: UserId) =
+      new AccountVerification(userId = userId)
+  }
+
   class Schema @Inject()(db: Database)(implicit ec: scala.concurrent.ExecutionContext) {
     val ctx = db.ctx
     import ctx._
@@ -347,6 +360,9 @@ object Schema {
     )
     val passwordResets = quote(
       querySchema[PasswordReset]("password_reset_tokens", _.userId -> "user_id")
+    )
+    val accountVerifications = quote(
+      querySchema[AccountVerification]("account_verifications", _.userId -> "user_id")
     )
 
     implicit class RichQuotedQuery[T](query: Quoted[Query[T]]) {

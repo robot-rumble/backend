@@ -4,32 +4,36 @@
 @main(user.username, "view", assetsFinder) {
     <h1>@user.username</h1>
 
-    <div class="_table">
-        @if(robots.nonEmpty) {
-            <table class="_body">
-            @for(robot <- robots) {
-                <tr class="@{if (!robot.active) "inactive"}">
-                    <td><a href="@routes.RobotController.view(user.username, robot.name)">@robot.name</a></td>
-                    <td>@robot.lang</td>
-                    <td>
-                    @if(robot.published) {
-                        Published
-                    } else {
-                        Draft
-                    }
-                    </td>
-                </tr>
+    @if(isAuthenticated && !user.verified) {
+      <p class="error">Account not verified. Please follow the link sent to @user.email before creating any robots</p>
+    } else {
+        <div class="_table">
+            @if(robots.nonEmpty) {
+                <table class="_body">
+                @for(robot <- robots) {
+                    <tr class="@{if (!robot.active) "inactive"}">
+                        <td><a href="@routes.RobotController.view(user.username, robot.name)">@robot.name</a></td>
+                        <td>@robot.lang</td>
+                        <td>
+                        @if(robot.published) {
+                            Published
+                        } else {
+                            Draft
+                        }
+                        </td>
+                    </tr>
+                }
+                </table>
             }
-            </table>
-        }
-        @if(isAuthenticated) {
-            <div class="_footer">
-                <a href="@routes.RobotController.create()">
-                    <img src="@assetsFinder.path("images/add-circle.svg")" alt="">
-                    create robot
-                </a>
-            </div>
-        }
-    </div>
+            @if(isAuthenticated) {
+                <div class="_footer">
+                    <a href="@routes.RobotController.create()">
+                        <img src="@assetsFinder.path("images/add-circle.svg")" alt="">
+                        create robot
+                    </a>
+                </div>
+            }
+        </div>
+    }
 
 }
