@@ -5,8 +5,10 @@
     <h1>@user.username</h1>
 
     @if(isAuthenticated && !user.verified) {
-      <p class="error">Account not verified. Please follow the link sent to @user.email before creating any robots</p>
+        <p class="error">Account not verified. Please follow the link sent to @user.email before creating any robots</p>
     } else {
+        <p class="mb-5">Thank you for being an alpha user! We greatly appreciate any and all thoughts, suggestions, or comments. You can send them anonymously through <a href="https://forms.gle/5F6T5tptGV5rTjgd9">this Google form</a>. If you would be open to giving more in-depth feedback, please antonoutkine At gmail Dot com. Happy coding!</p>
+
         <div class="_table">
             @if(robots.nonEmpty) {
                 <table class="_body">
