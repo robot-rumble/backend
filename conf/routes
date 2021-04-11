@@ -4,6 +4,7 @@
 
 GET         /                                      controllers.HomeController.index
 GET         /rules                                 controllers.HomeController.rules
+GET         /demo                                  controllers.HomeController.demo
 
 GET         /signup                                controllers.UserController.create
 POST        /signup                                controllers.UserController.postCreate

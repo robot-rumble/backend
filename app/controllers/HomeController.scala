@@ -25,4 +25,8 @@ class HomeController @Inject()(
   def rules = Action { implicit request =>
     Redirect(config.get[String]("site.docsUrl"))
   }
+
+  def demo = Action { implicit request =>
+    Ok(views.html.robot.demo(assetsFinder))
+  }
 }
