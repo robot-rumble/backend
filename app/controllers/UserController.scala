@@ -60,7 +60,7 @@ class UserController @Inject()(
                       ) map { _ =>
                         Redirect(routes.UserController.create())
                           .flashing(
-                            "success" -> "Your account has been created! Before competing, you need to verify your account by following the link sent to your inbox."
+                            "success" -> "Your account has been created! Please verify it by clicking the link sent to your inbox."
                           )
                       }
                   }

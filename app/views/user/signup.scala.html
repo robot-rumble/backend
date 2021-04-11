@@ -1,6 +1,8 @@
 @(form: Form[forms.SignupForm.Data], assetsFinder: AssetsFinder)(implicit request: MessagesRequestHeader, flash: Flash)
 
 @main("Signup", "signup", assetsFinder) {
+    <p class="mb-4">Sign up to start competing! Note that you will not be able to create any robots until you verify your email.</p>
+
     @helper.form(routes.UserController.postCreate()) {
         @helper.inputText(form("email"), Symbol("_showConstraints") -> false)
         @helper.inputText(form("username"), Symbol("_showConstraints") -> false)
