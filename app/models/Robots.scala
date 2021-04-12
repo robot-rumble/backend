@@ -91,11 +91,12 @@ class Robots @Inject()(
     ).map(_.map(FullBoardRobot.tupled))
   }
 
-  def findAllLatestActiveWithPr(): Future[Seq[(Robot, PRobot)]] = {
-    run(for {
-      pr <- publishedRobots.latest
-      r <- robots.active().filter(_.id == pr.rId)
-    } yield (r, pr))
+  def findAllLatestPrForActive(): Future[Seq[(Robot, PRobot)]] = {
+    run(publishedRobots.latest) flatMap { latestPrs =>
+      run(robots.active()) map { latestRs =>
+        latestRs.flatMap(r => latestPrs.filter(_.rId == r.id).map(pr => (r, pr)))
+      }
+    }
   }
 
   def create(userId: UserId, name: String, lang: Lang): Future[Option[Robot]] = {
