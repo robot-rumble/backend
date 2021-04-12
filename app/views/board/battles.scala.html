@@ -12,8 +12,4 @@
             @pageControls(page => routes.BoardController.viewBattles(boardWithBattles.board.id.id, page), page, assetsFinder)
         </div>
     </div>
-
-    @if(boardWithBattles.battles.isEmpty) {
-        <p>No battles yet</p>
-    }
 }

@@ -30,10 +30,12 @@
                 </a></td>
                 <td>@robot.lang</td>
                 <td>@pRobot.rating</td>
-                <td><a href="@routes.BoardController.viewRobotBattles(board.board.id.id, robot.id.id)">
-                    <img src="@assetsFinder.path("images/battle.svg")">
-                    view battles
-                </a></td>
+                @if(board.battles.nonEmpty) {
+                    <td><a href="@routes.BoardController.viewRobotBattles(board.board.id.id, robot.id.id)">
+                        <img src="@assetsFinder.path("images/battle.svg")">
+                        view battles
+                    </a></td>
+                }
             </tr>
         }
         </table>
@@ -65,5 +67,10 @@
                 </a>
             </div>
         </div>
+    } else {
+      @if(page == 0) {
+        <h2 class="mt-5">Recent Battles</h2>
+        None yet
+      }
     }
 }
