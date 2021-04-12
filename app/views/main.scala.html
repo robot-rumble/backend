@@ -10,20 +10,35 @@
         <section class="header d-flex justify-content-between">
             <a class="text-black" href="@routes.HomeController.index">Robot Rumble ALPHA</a>
             <div class="d-flex links">
-                <a href="@routes.HomeController.demo()">try it!</a>
-                <a href="@routes.BoardController.index()">boards</a>
-                <a href="@routes.HomeController.rules" target="_blank">docs</a>
+                <a href="@routes.HomeController.demo()">
+                    <img src="@assetsFinder.path("images/star.svg")">
+                    try it!
+                </a>
+                <a href="@routes.BoardController.index()">
+                    <img src="@assetsFinder.path("images/ranking.svg")">
+                    boards
+                </a>
+                <a href="@routes.HomeController.rules()" target="_blank">
+                    <img src="@assetsFinder.path("images/bookmark.svg")">
+                    docs
+                </a>
                 @request.session.get("USERNAME") match {
                     case Some(username) => {
-                        <a href="@routes.UserController.view(username)">profile</a>
-                        <a href="@routes.UserController.logout">logout</a>
+                        <a href="@routes.UserController.view(username)">
+                            <img src="@assetsFinder.path("images/robot.svg")">
+                            your robots
+                        </a>
+                        <a href="@routes.UserController.logout()">
+                            <img src="@assetsFinder.path("images/logout.svg")">
+                            logout
+                        </a>
                     }
 
                     case None => {
                         <div class="d-flex">
-                            <a href="@routes.UserController.login">login</a>
+                            <a href="@routes.UserController.login()">login</a>
                                 &nbsp;&#47;&nbsp;
-                            <a href="@routes.UserController.create">signup</a>
+                            <a href="@routes.UserController.create()">signup</a>
                         </div>
                     }
                 }
