@@ -14,7 +14,10 @@
                 <table class="_body">
                 @for(robot <- robots) {
                     <tr class="@{if (!robot.active) "inactive"}">
-                        <td><a href="@routes.RobotController.view(user.username, robot.name)">@robot.name</a></td>
+                        <td><a href="@routes.RobotController.view(user.username, robot.name)">
+                            <img src="@assetsFinder.path("images/robot.svg")">
+                            @robot.name
+                        </a></td>
                         <td>@robot.lang</td>
                         <td>
                         @if(robot.published) {
@@ -23,7 +26,10 @@
                             Draft
                         }
                         </td>
-                        <td><a href="@routes.RobotController.edit(user.username, robot.name)">edit</a></td>
+                        <td><a href="@routes.RobotController.edit(user.username, robot.name)">
+                            <img src="@assetsFinder.path("images/wrench.svg")">
+                            edit
+                        </a></td>
                     </tr>
                 }
                 </table>

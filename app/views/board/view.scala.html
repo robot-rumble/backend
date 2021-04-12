@@ -20,11 +20,20 @@
         <table class="_body _robots">
         @for(FullBoardRobot(robot, pRobot, user) <- board.robots) {
             <tr>
-                <td><a href="@routes.RobotController.view(user.username, robot.name)">@robot.name</a></td>
-                <td>by <a href="@routes.UserController.view(user.username)">@user.username</a></td>
+                <td><a href="@routes.RobotController.view(user.username, robot.name)">
+                    <img src="@assetsFinder.path("images/robot.svg")">
+                    @robot.name
+                </a></td>
+                <td>by</td><td><a href="@routes.UserController.view(user.username)">
+                    <img src="@assetsFinder.path("images/face.svg")">
+                    @user.username
+                </a></td>
                 <td>@robot.lang</td>
                 <td>@pRobot.rating</td>
-                <td><a href="@routes.BoardController.viewRobotBattles(board.board.id.id, robot.id.id)">view battles</a></td>
+                <td><a href="@routes.BoardController.viewRobotBattles(board.board.id.id, robot.id.id)">
+                    <img src="@assetsFinder.path("images/battle.svg")">
+                    view battles
+                </a></td>
             </tr>
         }
         </table>

@@ -70,7 +70,10 @@
                         @for(FullBattle(battle, _, otherR) <- battles) {
                             <tr>
                                 <td class="text-gray">@battle.formatCreatedTime()</td>
-                                <td><a href="@routes.BattleController.view(battle.id.id)">battle #@battle.id.id</a></td>
+                                <td><a href="@routes.BattleController.view(battle.id.id)">
+                                    <img src="@assetsFinder.path("images/battle.svg")">
+                                    #@battle.id.id
+                                </a></td>
                                 <td class="_rating">
                                 @if(fullRobot.robot.id == battle.r1Id) {
                                     @ratingChangeImg(battle.pr1RatingChange)
@@ -80,7 +83,10 @@
                                     @ratingChange(battle.pr2RatingChange)
                                 }
                                 </td>
-                                <td class="_robot pr-0"><a href="@routes.RobotController.viewById(otherR.id.id)">@otherR.name</a></td>
+                                <td class="_robot pr-0"><a href="@routes.RobotController.viewById(otherR.id.id)">
+                                    <img src="@assetsFinder.path("images/robot.svg")">
+                                    @otherR.name
+                                </a></td>
                                 <td class="_robot _rating">
                                 @if(fullRobot.robot.id == battle.r1Id) {
                                     @battle.pr2Rating
@@ -102,7 +108,7 @@
                     <div class="_footer">
                         <a href="@routes.BoardController.viewRobotBattles(board.id.id, fullRobot.robot.id.id)">
                             <img src="@assetsFinder.path("images/launch.svg")" alt="">
-                            view all your battles
+                            view all @fullRobot.robot.name battles
                         </a>
                         <a href="@routes.BoardController.view(board.id.id)">
                             <img src="@assetsFinder.path("images/launch.svg")" alt="">

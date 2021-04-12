@@ -40,4 +40,5 @@ lerna-debug.log*
 ### Other
 boxfuse*.conf
 
-conf/secrets.conf
+*.secret.conf
+

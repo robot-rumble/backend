@@ -10,10 +10,14 @@
         @for(FullBattle(battle, r1, r2) <- boardWithBattles.battles) {
             <tr>
                 <td class="text-gray">@battle.formatCreated()</td>
-                <td><a href="@routes.BattleController.view(battle.id.id)">battle #@battle.id.id</a></td>
+                <td><a href="@routes.BattleController.view(battle.id.id)">
+                    <img src="@assetsFinder.path("images/battle.svg")">
+                    #@battle.id.id
+                </a></td>
                 <td class="_robot pr-0
                     @{if (battle.didRobotWin(r1.id).contains(true)) " _winner" else ""}
                 "><a href="@routes.RobotController.viewById(battle.r1Id.id)">
+                    <img src="@assetsFinder.path("images/robot.svg")">
                     @r1.name
                 </a></td>
                 <td class="_robot _rating
@@ -23,6 +27,7 @@
                 <td class="_robot pr-0
                     @{if (battle.didRobotWin(r2.id).contains(true)) "_winner" else ""}
                 "><a href="@routes.RobotController.viewById(battle.r2Id.id)">
+                    <img src="@assetsFinder.path("images/robot.svg")">
                     @r2.name
                 </a></td>
                 <td class="_robot _rating

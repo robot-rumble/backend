@@ -6,7 +6,10 @@
   <tbody>
   @for(board <- boards) {
       <tr>
-          <td><a href="@routes.BoardController.view(board.id.id)">@board.name</a></td>
+          <td><a href="@routes.BoardController.view(board.id.id)">
+              <img src="@assetsFinder.path("images/board.svg")">
+              @board.name
+          </a></td>
           <td class="text-grey">publish cooldown: @board.formatPublishCooldown()</td>
       </tr>
   }

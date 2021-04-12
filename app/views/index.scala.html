@@ -25,7 +25,10 @@
             <table class="_body">
                 @for(board <- boards.filter(_.isActive())) {
                     <tr>
-                        <td><a href="@routes.BoardController.view(board.id.id)">@board.name</a></td>
+                        <td><a href="@routes.BoardController.view(board.id.id)">
+                            <img src="@assetsFinder.path("images/board.svg")">
+                            @board.name
+                        </a></td>
                         <td class="text-grey">publish cooldown: @board.formatPublishCooldown()</td>
                     </tr>
                 }
@@ -46,5 +49,8 @@
         <p>* Fixed duplicate account creation issue</p>
     </div>
 
-    <p class="mt-3"><a target="_blank" href="https://forms.gle/LcGFBiQkgAJyDhWR6">Stay informed about new features and announcements.</a></p>
+    <p class="mt-3"><a target="_blank" href="https://forms.gle/LcGFBiQkgAJyDhWR6">
+        <img src="@assetsFinder.path("images/star.svg")">
+        Stay informed about new features and announcements.
+    </a></p>
 }

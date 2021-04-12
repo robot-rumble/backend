@@ -15,11 +15,11 @@
                     try it!
                 </a>
                 <a href="@routes.BoardController.index()">
-                    <img src="@assetsFinder.path("images/ranking.svg")">
+                    <img src="@assetsFinder.path("images/board.svg")">
                     boards
                 </a>
                 <a href="@routes.HomeController.rules()" target="_blank">
-                    <img src="@assetsFinder.path("images/bookmark.svg")">
+                    <img src="@assetsFinder.path("images/rules.svg")">
                     docs
                 </a>
                 @request.session.get("USERNAME") match {
