@@ -57,8 +57,8 @@
     }
 
     <div class="mt-5">
+        <h2>Battles</h2>
         @if(boardsWithBattles.nonEmpty) {
-            <h2>Battles</h2>
             @for((pRobot, BoardWithBattles(board, battles)) <- boardsWithBattles) {
                 <div>
                 <div class="_table mb-3">
@@ -112,6 +112,8 @@
                 </div>
                 </div>
             }
+        } else {
+          <p>No battles yet! Publish your robot to a board and you will be automatically paired against an opponent.</p>
         }
     </div>
 }

@@ -23,6 +23,7 @@ GET         /battles/:battle                       controllers.BattleController.
 GET         /seasons/:season                       controllers.SeasonController.view(season)
 
 GET         /boards                                controllers.BoardController.index
+GET         /boards/                               controllers.BoardController.index
 GET         /boards/:board                         controllers.BoardController.view(board: Long, page: Long ?= 0)
 GET         /boards/:board/publish                 controllers.BoardController.publish(board: Long)
 POST        /boards/:board/publish                 controllers.BoardController.postPublish(board: Long)
@@ -49,6 +50,7 @@ GET         /api/verify-user/:userId/:token        controllers.UserController.ve
 GET         /assets/*file                          controllers.Assets.at(file)
 
 GET         /:user                                 controllers.UserController.view(user)
+GET         /:user/                                controllers.UserController.view(user)
 GET         /:user/:robot                          controllers.RobotController.view(user, robot)
 GET         /:user/:robot/edit                     controllers.RobotController.edit(user, robot)
 GET         /:user/:robot/view-code                controllers.RobotController.viewPublishedCode(user, robot)
