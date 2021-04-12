@@ -12,7 +12,10 @@
         @helper.form(routes.BoardController.postPublish(board.id.id)) {
             @helper.select(form("robotId"), robotOptions, Symbol("_showConstraints") -> false, Symbol("_label") -> "robot name")
             @helper.CSRF.formField
-            <button class="button">publish</button>
+
+            <p class="mt-4">Please ensure that you've saved before publishing.</p>
+
+            <button class="button mt-3">publish</button>
         }
 
         <div class="mt-3">
