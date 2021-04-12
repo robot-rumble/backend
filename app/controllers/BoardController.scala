@@ -38,7 +38,7 @@ class BoardController @Inject()(
   }
 
   def viewBattles(id: Long, page: Long = 0) = Action.async { implicit request =>
-    boardsRepo.findBareWithBattles(BoardId(id), page, 5) map {
+    boardsRepo.findBareWithBattles(BoardId(id), page, 50) map {
       case Some(boardWithBattles) =>
         Ok(
           views.html.board.battles(boardWithBattles, page, assetsFinder)
