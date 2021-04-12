@@ -23,7 +23,7 @@
         <div class="mt-5 _table">
             <h2 class="mb-3">Active robot boards</h2>
             <table class="_body">
-                @for(board <- boards.filter(_.matchmakingEnabled)) {
+                @for(board <- boards.filter(_.isActive())) {
                     <tr>
                         <td><a href="@routes.BoardController.view(board.id.id)">@board.name</a></td>
                         <td class="text-grey">publish cooldown: @board.formatPublishCooldown()</td>

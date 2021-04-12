@@ -240,6 +240,10 @@ object Schema {
         time.toDateTime(DateTimeZone.forID("US/Eastern")).plus(publishCooldown)
       )
     }
+
+    def isActive(): Boolean = {
+      publishingEnabled
+    }
   }
 
   case class FullBoard(board: Board, robots: Seq[FullBoardRobot])

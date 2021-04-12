@@ -38,7 +38,7 @@
         }
     }
 
-    @defining(boards.filter(bo => bo.seasonId.isEmpty && bo.matchmakingEnabled)) { boards =>
+    @defining(boards.filter(bo => bo.seasonId.isEmpty && bo.isActive())) { boards =>
         <h2>Active Boards</h2>
         @if(boards.nonEmpty) {
             @displayBoards(boards)
@@ -54,7 +54,7 @@
         }
     }
 
-    @defining(boards.filter(bo => bo.seasonId.isEmpty && !bo.matchmakingEnabled)) { boards =>
+    @defining(boards.filter(bo => bo.seasonId.isEmpty && !bo.isActive())) { boards =>
         @if(boards.nonEmpty) {
             <h2>Archived Boards</h2>
             @displayBoards(boards)
