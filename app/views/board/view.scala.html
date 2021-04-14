@@ -1,10 +1,11 @@
+@import _root_.utils.Text.pluralize
 @import models.Schema._
 @(board: FullBoardWithBattles, page: Long, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
 @main(board.board.name, "board", assetsFinder) {
     <h1>@board.board.name</h1>
 
-    <p class="text-grey">Publish cooldown: @board.board.formatPublishCooldown()</p>
+    <p class="text-grey">Publish cooldown: @board.board.formatPublishCooldown(). Matchmaker settings: @pluralize("battle", board.board.publishBattleNum) on publish, and @pluralize("battle", board.board.publishBattleNum) every @board.board.formatBattleCooldown().</p>
 
     @board.board.bio match {
         case Some(bio) => {

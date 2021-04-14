@@ -209,7 +209,7 @@ object Schema {
       battleCooldown: Duration,
       recurrentBattleNum: Int
   ) {
-    val publishCooldownFormatter = new PeriodFormatterBuilder()
+    val cooldownFormatter = new PeriodFormatterBuilder()
       .printZeroRarelyFirst()
       .appendHours()
       .appendSuffix(" hour", " hours")
@@ -219,7 +219,11 @@ object Schema {
       .toFormatter
 
     def formatPublishCooldown(): String = {
-      publishCooldownFormatter.print(publishCooldown.toPeriod())
+      cooldownFormatter.print(publishCooldown.toPeriod())
+    }
+
+    def formatBattleCooldown(): String = {
+      cooldownFormatter.print(battleCooldown.toPeriod())
     }
 
     def publishCooldownExpired(time: LocalDateTime): Boolean =
