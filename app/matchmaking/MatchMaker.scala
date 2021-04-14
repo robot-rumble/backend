@@ -167,11 +167,13 @@ class MatchMaker @Inject()(
           case None          => r1Player draws r2Player
         }
 
-        val (r1Errored, r2Errored) = matchOutput.winner match {
-          case Some(Team.R1) => (false, true)
-          case Some(Team.R2) => (true, false)
-          case None          => (true, true)
-        }
+        val (r1Errored, r2Errored) =
+          (matchOutput.errored, matchOutput.winner) match {
+            case (false, _)            => (false, false)
+            case (true, Some(Team.R1)) => (false, true)
+            case (true, Some(Team.R2)) => (true, false)
+            case (true, None)          => (true, true)
+          }
 
         r1Player.updateRating(KFactor.USCF)
         r2Player.updateRating(KFactor.USCF)
