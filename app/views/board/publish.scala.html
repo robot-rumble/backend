@@ -1,5 +1,5 @@
 @import models.Schema._
-@(form: Form[forms.PublishForm.Data], board: Board, robotOptions: Seq[(String, String)], resultOption: Option[Either[PRobot, PRobotId]], assetsFinder: AssetsFinder)(implicit request: MessagesRequestHeader)
+@(form: Form[forms.PublishForm.Data], board: Board, robotOptions: Seq[(String, String)], resultOption: Option[PublishResult], assetsFinder: AssetsFinder)(implicit request: MessagesRequestHeader)
 
 @main(s"Publish to ${board.name}", "publish", assetsFinder) {
     <h1>Publish to <a href="@routes.BoardController.view(board.id.id)">@board.name</a></h1>
@@ -22,8 +22,8 @@
         @resultOption match {
             case Some(result) => {
                 @result match {
-                    case Left(pr) => {
-                        <p>Your robot was recently published. You can publish again only after @board.formatNextPublishTime(pr.created). </p>
+                    case Left(error) => {
+                        <p class="error">@error</p>
                     }
 
                     case Right(prId) => {

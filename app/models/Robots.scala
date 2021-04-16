@@ -146,21 +146,28 @@ class Robots @Inject()(
       run(robots.by(id).leftJoin(publishedRobots.by(board.id).latest).on((r, pr) => r.id == pr.rId))
         .map(_.headOption) flatMap {
         case Some((r, prOption)) =>
-          prOption match {
-            case Some(pr) if !board.publishCooldownExpired(pr.created) =>
-              Future successful Some(Left(pr))
-            case _ =>
-              for {
-                prId <- run(
-                  publishedRobots
-                    .insert(lift(PRobot(code = r.devCode, rId = r.id, boardId = board.id)))
-                    .returningGenerated(_.id)
+          if (r.devCode.isEmpty) {
+            Future successful Some(Left("Your robot code is empty!"))
+          } else {
+            prOption match {
+              case Some(pr) if !board.publishCooldownExpired(pr.created) =>
+                Future successful Some(
+                  Left(s"Your robot was recently published. You can publish again only after ${board
+                    .formatNextPublishTime(pr.created)}")
                 )
-                _ <- run(
-                  robots.by(id).update(_.published -> true, _.active -> true, _.errorCount -> 0)
-                )
-                // a robot's active status is reset on every publish
-              } yield Some(Right(prId))
+              case _ =>
+                for {
+                  prId <- run(
+                    publishedRobots
+                      .insert(lift(PRobot(code = r.devCode, rId = r.id, boardId = board.id)))
+                      .returningGenerated(_.id)
+                  )
+                  _ <- run(
+                    robots.by(id).update(_.published -> true, _.active -> true, _.errorCount -> 0)
+                  )
+                  // a robot's active status is reset on every publish
+                } yield Some(Right(prId))
+            }
           }
         case _ =>
           Future successful None

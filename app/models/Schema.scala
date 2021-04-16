@@ -8,7 +8,6 @@ import org.joda.time.format.{DateTimeFormatterBuilder, PeriodFormatterBuilder}
 import org.joda.time.{DateTimeZone, Duration, LocalDateTime}
 import play.api.libs.json.{Json, Writes}
 import services.Database
-import utils.LoadCode
 
 import javax.inject.Inject
 
@@ -70,15 +69,14 @@ object Schema {
 
   case class FullBoardRobot(robot: Robot, pRobot: PRobot, user: User)
 
-  // if publish cooldown hasn't expired, return the probot. otherwise return the new inserted id
-  type PublishResult = Either[PRobot, PRobotId]
+  type PublishResult = Either[String, PRobotId]
 
   object Robot {
     def apply(userId: UserId, name: String, lang: Lang) =
       new Robot(
         userId = userId,
         name = name,
-        devCode = LoadCode(lang),
+        devCode = "",
         lang = lang,
       )
   }
