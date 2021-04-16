@@ -17,8 +17,8 @@ object Validators {
   )
   val namingConstraint: Constraint[String] = regexConstraint(
     "naming",
-    "^[a-zA-Z0-9_-]+$",
-    "Must only contain letters, numbers, an underscore or a dash"
+    "^[a-zA-Z0-9-]+$",
+    "Must only contain letters, numbers, or a dash"
   )
   val allLowercaseConstraint: Constraint[String] =
     regexConstraint("lowerecase", "^[^A-Z]+$", "Must be all lowercase")
