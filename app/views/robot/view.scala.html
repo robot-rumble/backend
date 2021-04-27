@@ -67,7 +67,8 @@
                     </div>
                     <table class="_body _battles">
                     @if(battles.nonEmpty) {
-                        @for(FullBattle(battle, _, otherR) <- battles) {
+                        @for(FullBattle(battle, r1, r2) <- battles) {
+                            @defining(if (r1.id == fullRobot.robot.id) { r2 } else r1) { otherR =>
                             <tr>
                                 <td class="text-gray">@battle.formatCreatedTime()</td>
                                 <td><a href="@routes.BattleController.view(battle.id.id)">
@@ -100,6 +101,7 @@
                                     }
                                 </td>
                             </tr>
+                            }
                         }
                     } else {
                         <tr><td>No battles yet</td></tr>
