@@ -88,9 +88,16 @@ class Boards @Inject()(schema: Schema, robotsRepo: Robots, battlesRepo: Battles)
     findBare(id).flatMap {
       case Some(board) =>
         battlesRepo.findByBoardForRobotPaged(id, robot.id, page, numPerBoard) map { robots =>
-          Some(BoardWithBattles(board, robots map {
-            case (battle, opponent) => FullBattle(battle, robot, opponent)
-          }))
+          Some(
+            BoardWithBattles(
+              board,
+              robots map {
+                case (battle, opponent) if battle.r1Id == robot.id =>
+                  FullBattle(battle, robot, opponent)
+                case (battle, opponent) => FullBattle(battle, opponent, robot)
+              }
+            )
+          )
         }
       case None => Future successful None
     }
