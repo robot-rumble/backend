@@ -89,7 +89,7 @@ object Schema {
       boardId: BoardId,
       created: LocalDateTime = LocalDateTime.now(),
       code: String,
-      rating: Int = 1000,
+      rating: Int,
   )
 
   implicit val robotWrites = new Writes[Robot] {

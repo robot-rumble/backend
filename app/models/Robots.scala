@@ -155,11 +155,24 @@ class Robots @Inject()(
                   Left(s"Your robot was recently published. You can publish again only after ${board
                     .formatNextPublishTime(pr.created)}")
                 )
-              case _ =>
+              case pr =>
+                val initialRating = pr match {
+                  case Some(pr) => pr.rating
+                  case None     => config.get[Int]("queue.initialRating")
+                }
                 for {
                   prId <- run(
                     publishedRobots
-                      .insert(lift(PRobot(code = r.devCode, rId = r.id, boardId = board.id)))
+                      .insert(
+                        lift(
+                          PRobot(
+                            code = r.devCode,
+                            rId = r.id,
+                            boardId = board.id,
+                            rating = initialRating
+                          )
+                        )
+                      )
                       .returningGenerated(_.id)
                   )
                   _ <- run(

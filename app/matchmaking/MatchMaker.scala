@@ -182,9 +182,9 @@ class MatchMaker @Inject()(
           _ <- robotsRepo.updateAfterBattle(pr2.rId, pr2.id, r2Player.rating, r2Errored)
           _ <- battlesRepo.create(
             matchOutput,
-            pr1.rating,
+            r1Player.rating,
             r1Player.rating - pr1.rating,
-            pr2.rating,
+            r2Player.rating,
             r2Player.rating - pr2.rating
           )
         } yield ()
