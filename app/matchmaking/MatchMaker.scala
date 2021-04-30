@@ -141,7 +141,7 @@ class MatchMaker @Inject()(
     .runWith(battleQueue.sink)
 
   def processMatches(matchOutput: MatchOutput) = {
-    logger.debug("Received: " + matchOutput.copy(data = "TRUNCATED").toString)
+    logger.debug("Received: " + matchOutput.copy(data = Array()).toString)
 
     val getRobotInfo = (id: RobotId) => {
       (for {

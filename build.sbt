@@ -45,6 +45,8 @@ libraryDependencies += "com.github.daddykotex" %% "courier" % "2.0.0"
 
 libraryDependencies += "io.sentry" % "sentry-logback" % "4.3.0"
 
+libraryDependencies += "com.nixxcode.jvmbrotli" % "jvmbrotli" % "0.2.0"
+
 scalacOptions ++= Seq(
   "-feature",
   "-deprecation",

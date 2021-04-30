@@ -9,6 +9,7 @@ import org.joda.time.{DateTimeZone, Duration, LocalDateTime}
 import play.api.libs.json.{Json, Writes}
 import services.Database
 
+import java.util.Base64
 import javax.inject.Inject
 
 object Schema {
@@ -154,8 +155,8 @@ object Schema {
       createdTimeFormatter.print(created)
     }
 
-    def decompressData(): String = {
-      utils.Gzip.decompress(data)
+    def encodeData(): String = {
+      Base64.getEncoder.encodeToString(data)
     }
   }
 
@@ -183,7 +184,7 @@ object Schema {
         errored = matchOutput.errored,
         r1Time = matchOutput.r1Time,
         r2Time = matchOutput.r2Time,
-        data = utils.Gzip.compress(matchOutput.data),
+        data = matchOutput.data,
         pr1Rating = pr1Rating,
         pr2Rating = pr2Rating,
         pr1RatingChange = pr1RatingChange,

@@ -13,7 +13,6 @@ import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import software.amazon.awssdk.services.sqs.model.{Message, SendMessageRequest}
 
-import java.nio.charset.StandardCharsets
 import java.util.Base64
 import javax.inject._
 import scala.concurrent.duration._
@@ -77,10 +76,8 @@ class AwsQueue @Inject()(
           .map(
             message => {
               logger.debug(s"Got message ${message.messageId()}")
-              val compressed =
-                Base64.getDecoder.decode(message.body.getBytes(StandardCharsets.UTF_8))
-              val string = utils.Gzip.decompress(compressed)
-              Json.parse(string).as[MatchOutput]
+              val matchOutput = Json.parse(message.body).as[MatchOutput]
+              matchOutput.copy(data = Base64.getDecoder.decode(matchOutput.data))
             }
           )
       })

@@ -5,6 +5,7 @@ import akka.stream.scaladsl.{Flow, Keep, Sink, Source}
 import matchmaking.BattleQueue.{MatchInput, MatchOutput}
 import models.Schema.Team
 import play.api.libs.json.{JsObject, JsString, Json}
+import utils.Brotli
 
 import javax.inject.Inject
 import scala.sys.process._
@@ -38,7 +39,7 @@ class MockQueue @Inject()(
       else if (winner == JsString("Red")) Some(Team.R2)
       else None,
       errored,
-      jsonOutput
+      Brotli.compress(jsonOutput)
     )
   }
 

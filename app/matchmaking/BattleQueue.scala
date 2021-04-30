@@ -38,7 +38,7 @@ object BattleQueue {
       (JsPath \ "r2_time").read[Float] and
       (JsPath \ "winner").readNullable[Team] and
       (JsPath \ "errored").read[Boolean] and
-      (JsPath \ "data").read[String]
+      (JsPath \ "data").read[String].map(_.getBytes)
   )(MatchOutput.apply _)
 
   case class MatchInput(
@@ -64,6 +64,6 @@ object BattleQueue {
       r2Time: Float,
       winner: Option[Team],
       errored: Boolean,
-      data: String
+      data: Array[Byte],
   )
 }

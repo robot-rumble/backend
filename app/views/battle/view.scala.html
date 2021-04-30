@@ -1,4 +1,5 @@
 @import models.Schema._
+@import java.util.Base64
 @(fullBattle: FullBattle, userTeam: Option[String], userOwnsOpponent: Boolean, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
 @r1Link() = {
@@ -67,7 +68,7 @@
     }
 
     <div class="mt-5">
-        <battle-el data="@fullBattle.b.decompressData()" team="@userTeam" user-owns-opponent="@userOwnsOpponent"></battle-el>
+        <battle-el data="@fullBattle.b.encodeData()" team="@userTeam" user-owns-opponent="@userOwnsOpponent"></battle-el>
     </div>
 }
 
