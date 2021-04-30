@@ -1,6 +1,6 @@
-@import _root_.utils.Text.pluralize
 @import models.Schema._
-@(board: FullBoardWithBattles, page: Long, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+@import _root_.utils.Text.pluralize
+@(board: FullBoardWithBattles, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
 @main(board.board.name, "board", assetsFinder) {
     <h1>@board.board.name</h1>
@@ -19,30 +19,14 @@
     <h2 class="mt-4">Published Robots</h2>
     <div class="_table">
         <table class="_body _robots">
-        @for(FullBoardRobot(robot, pRobot, user) <- board.robots) {
-            <tr>
-                <td><a href="@routes.RobotController.view(user.username, robot.name)">
-                    <img src="@assetsFinder.path("images/robot.svg")">
-                    @robot.name
-                </a></td>
-                <td>by</td><td><a href="@routes.UserController.view(user.username)">
-                    <img src="@assetsFinder.path("images/face.svg")">
-                    @user.username
-                </a></td>
-                <td>@robot.lang</td>
-                <td>@pRobot.rating</td>
-                @if(board.battles.nonEmpty) {
-                    <td><a href="@routes.BoardController.viewRobotBattles(board.board.id.id, robot.id.id)">
-                        <img src="@assetsFinder.path("images/battle.svg")">
-                        view battles
-                    </a></td>
-                }
-            </tr>
-        }
+            @robotRows(board.board.id, board.robots, assetsFinder)
         </table>
         <div class="_footer">
             @if(board.robots.nonEmpty) {
-                @pageControls(page => routes.BoardController.view(board.board.id.id, page), page, assetsFinder)
+                <a href="@routes.BoardController.viewRobots(board.board.id.id)">
+                    <img src="@assetsFinder.path("images/launch.svg")" alt="">
+                    view all robots
+                </a>
             }
 
             @if(board.board.publishingEnabled) {
@@ -69,9 +53,7 @@
             </div>
         </div>
     } else {
-      @if(page == 0) {
         <h2 class="mt-5">Recent Battles</h2>
         None yet
-      }
     }
 }

@@ -1,0 +1,21 @@
+@import models.Schema._
+@(boardId: BoardId, robots: Seq[FullBoardRobot], assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+
+@for(FullBoardRobot(robot, pRobot, user) <- robots) {
+    <tr>
+        <td><a href="@routes.RobotController.view(user.username, robot.name)">
+            <img src="@assetsFinder.path("images/robot.svg")">
+            @robot.name
+        </a></td>
+        <td>by</td><td><a href="@routes.UserController.view(user.username)">
+        <img src="@assetsFinder.path("images/face.svg")">
+        @user.username
+    </a></td>
+        <td>@robot.lang</td>
+        <td>@pRobot.rating</td>
+        <td><a href="@routes.BoardController.viewRobotBattles(boardId.id, robot.id.id)">
+            <img src="@assetsFinder.path("images/battle.svg")">
+            view battles
+        </a></td>
+    </tr>
+}

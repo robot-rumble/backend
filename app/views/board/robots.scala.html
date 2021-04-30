@@ -1,0 +1,15 @@
+@import models.Schema._
+@(board: FullBoard, page: Long, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+
+@main(f"${board.board.name} Robots", "robots", assetsFinder) {
+    <h1><a href="@routes.BoardController.view(board.board.id.id)">@board.board.name</a> Robots</h1>
+
+    <div class="_table">
+        <table class="_battles">
+            @robotRows(board.board.id, board.robots, assetsFinder)
+        </table>
+        <div class="_footer">
+            @pageControls(page => routes.BoardController.viewRobots(board.board.id.id, page), page, assetsFinder)
+        </div>
+    </div>
+}

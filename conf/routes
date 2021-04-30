@@ -24,10 +24,11 @@ GET         /seasons/:season                       controllers.SeasonController.
 
 GET         /boards                                controllers.BoardController.index
 GET         /boards/                               controllers.BoardController.index
-GET         /boards/:board                         controllers.BoardController.view(board: Long, page: Long ?= 0)
+GET         /boards/:board                         controllers.BoardController.view(board: Long)
 GET         /boards/:board/publish                 controllers.BoardController.publish(board: Long)
 POST        /boards/:board/publish                 controllers.BoardController.postPublish(board: Long)
 GET         /boards/:board/battles                 controllers.BoardController.viewBattles(board: Long, page: Long ?= 0)
+GET         /boards/:board/robots                  controllers.BoardController.viewRobots(board: Long, page: Long ?= 0)
 GET         /boards/:board/battles/:robot          controllers.BoardController.viewRobotBattles(board: Long, robot: Long, page: Long ?= 0)
 
 
