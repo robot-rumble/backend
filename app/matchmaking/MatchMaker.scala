@@ -44,8 +44,13 @@ class MatchMaker @Inject()(
     if (USE_MOCK) 2.seconds
     else config.get[FiniteDuration]("queue.checkEvery")
 
+  val VOLATILITY_CUTOFF = config.get[Double]("queue.volatilityCutoff")
+  val NON_VOLATILE_BATTLE_COOLDOWN =
+    config.get[FiniteDuration]("queue.nonVolatileBattleCooldown").toDuration
+  val NON_VOLATILE_BATTLE_NUM = config.get[Int]("queue.nonVolatileBattleNum")
+
   logger.debug(
-    s"Starting with USE_MOCK ${USE_MOCK}, RECENT_OPPONENT_LIMIT ${RECENT_OPPONENT_LIMIT}, CHECK_EVERY ${CHECK_EVERY}"
+    s"Starting with USE_MOCK $USE_MOCK, RECENT_OPPONENT_LIMIT $RECENT_OPPONENT_LIMIT, CHECK_EVERY $CHECK_EVERY"
   )
 
   def prepareMatches(): Future[Iterable[MatchInput]] = {
@@ -67,7 +72,10 @@ class MatchMaker @Inject()(
               case (r, pr) =>
                 boardsMap.get(pr.boardId) match {
                   case Some(board) =>
-                    val battleCooldown = if (USE_MOCK) Duration.ZERO else board.battleCooldown
+                    val battleCooldown =
+                      if (USE_MOCK) Duration.ZERO
+                      else if (pr.volatility < VOLATILITY_CUTOFF) NON_VOLATILE_BATTLE_COOLDOWN
+                      else board.battleCooldown
                     val opponentNum = {
                       val publishedWithinWindow =
                         pr.created.isAfter(LocalDateTime.now().minus(CHECK_EVERY))
@@ -82,8 +90,9 @@ class MatchMaker @Inject()(
                               .plus(battleCooldown)
                               .isBefore(LocalDateTime.now())
                         }
-                        if (cooldownExpired) board.recurrentBattleNum
-                        else 0
+                        if (!cooldownExpired) 0
+                        else if (pr.volatility < VOLATILITY_CUTOFF) NON_VOLATILE_BATTLE_NUM
+                        else board.recurrentBattleNum
                       }
                     }
                     allRobots
