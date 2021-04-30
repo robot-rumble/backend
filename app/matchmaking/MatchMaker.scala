@@ -3,8 +3,9 @@ package matchmaking
 import akka.actor._
 import akka.stream.Materializer
 import akka.stream.scaladsl.{Sink, Source}
-import com.github.esap120.scala_elo._
-import models.Schema.{BoardId, RobotId, Team}
+import com.github.andriykuba.scala.glicko2.scala.Glicko2
+import com.github.andriykuba.scala.glicko2.scala.Glicko2.{Loss, Player, Win}
+import models.Schema.{BoardId, GlickoSettings, RobotId, Team}
 import models._
 import org.joda.time.{Duration, LocalDateTime}
 import play.api.{Configuration, Logger}
@@ -144,15 +145,11 @@ class MatchMaker @Inject()(
     logger.debug("Received: " + matchOutput.copy(data = Array()).toString)
 
     val getRobotInfo = (id: RobotId) => {
-      (for {
-        pr <- robotsRepo.findLatestPr(id, BoardId(matchOutput.boardId))
-        games <- battlesRepo.findByBoardForRobot(BoardId(matchOutput.boardId), pr.get.rId)
-      } yield (pr, games)) map {
-        case (Some(pr), games) =>
-          val rPlayer =
-            new Player(rating = pr.rating, startingGameCount = games.length)
+      robotsRepo.findLatestPr(id, BoardId(matchOutput.boardId)) map {
+        case Some(pr) =>
+          val rPlayer = Player(pr.rating, pr.deviation, pr.volatility)
           (pr, rPlayer)
-        case _ => throw new Exception(s"matchOutput robotId $id didn't return a robot")
+        case None => throw new Exception(s"matchOutput robotId $id didn't return a robot")
       }
     }
 
@@ -161,11 +158,16 @@ class MatchMaker @Inject()(
       r2Info <- getRobotInfo(RobotId(matchOutput.r2Id))
     } yield (r1Info, r2Info)) map {
       case ((pr1, r1Player), (pr2, r2Player)) =>
-        matchOutput.winner match {
-          case Some(Team.R1) => r1Player wins r2Player
-          case Some(Team.R2) => r2Player wins r1Player
-          case None          => r1Player draws r2Player
-        }
+        val (r1Settings, r2Settings) = ((matchOutput.winner match {
+          case Some(Team.R1) => Some((Win(r2Player), Loss(r1Player)))
+          case Some(Team.R2) => Some((Loss(r2Player), Win(r1Player)))
+          case None          => None
+        }) match {
+          case Some((r1Game, r2Game)) =>
+            (Glicko2.update(r1Player, Seq(r1Game)), Glicko2.update(r2Player, Seq(r2Game)))
+          case None =>
+            (r1Player, r2Player)
+        }) match { case (r1, r2) => (GlickoSettings(r1), GlickoSettings(r2)) }
 
         val (r1Errored, r2Errored) =
           (matchOutput.errored, matchOutput.winner) match {
@@ -175,17 +177,15 @@ class MatchMaker @Inject()(
             case (true, None)          => (true, true)
           }
 
-        r1Player.updateRating(KFactor.USCF)
-        r2Player.updateRating(KFactor.USCF)
         for {
-          _ <- robotsRepo.updateAfterBattle(pr1.rId, pr1.id, r1Player.rating, r1Errored)
-          _ <- robotsRepo.updateAfterBattle(pr2.rId, pr2.id, r2Player.rating, r2Errored)
+          _ <- robotsRepo.updateAfterBattle(pr1.rId, pr1.id, r1Settings, r1Errored)
+          _ <- robotsRepo.updateAfterBattle(pr2.rId, pr2.id, r2Settings, r2Errored)
           _ <- battlesRepo.create(
             matchOutput,
-            r1Player.rating,
-            r1Player.rating - pr1.rating,
-            r2Player.rating,
-            r2Player.rating - pr2.rating
+            r1Settings.rating,
+            r1Settings.rating - pr1.rating,
+            r2Settings.rating,
+            r2Settings.rating - pr2.rating
           )
         } yield ()
     }

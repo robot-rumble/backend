@@ -4,13 +4,7 @@ name := "rr"
 version := "0.0.1"
 maintainer := "antonoutkine@gmail.com"
 
-lazy val root = (project in file("."))
-  .enablePlugins(PlayScala)
-  .dependsOn(scalaElo)
-lazy val scalaElo = ProjectRef(
-  uri("git://github.com/robot-rumble/scala-elo.git#v1.0.4"),
-  "scala-elo"
-)
+lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
 resolvers += Resolver.sonatypeRepo("snapshots")
 
@@ -46,6 +40,8 @@ libraryDependencies += "com.github.daddykotex" %% "courier" % "2.0.0"
 libraryDependencies += "io.sentry" % "sentry-logback" % "4.3.0"
 
 libraryDependencies += "com.nixxcode.jvmbrotli" % "jvmbrotli" % "0.2.0"
+
+libraryDependencies += "com.github.andriykuba" % "scala-glicko2" % "1.0.1"
 
 scalacOptions ++= Seq(
   "-feature",

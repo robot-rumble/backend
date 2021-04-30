@@ -113,28 +113,41 @@ class Robots @Inject()(
       run(robots.by(id).update(_.devCode -> lift(devCode)))
     else throw new Exception("Updating robot with empty code.")
 
-  def updateAfterBattle(id: RobotId, prId: PRobotId, rating: Int, errored: Boolean): Future[Long] =
-    run(publishedRobots.by(prId).update(_.rating -> lift(rating)).returning(_.created)) flatMap {
-      created =>
-        if (created.plus(INACTIVITY_TIMEOUT).isBefore(LocalDateTime.now()))
-          run(robots.by(id).update(_.active -> false))
-        else if (errored)
-          run(
-            robots
-              .by(id)
-              .update(r => (r.errorCount -> (r.errorCount + 1)))
-              .returning(_.errorCount)
-          ) flatMap { errorCount =>
-            if (errorCount >= ERROR_LIMIT) {
-              run(
-                robots
-                  .by(id)
-                  .update(_.active -> false)
-              )
-            } else {
-              Future successful 1L
-            }
-          } else run(robots.by(id).update(_.errorCount -> 0))
+  def updateAfterBattle(
+      id: RobotId,
+      prId: PRobotId,
+      glickoSettings: GlickoSettings,
+      errored: Boolean
+  ): Future[Long] =
+    run(
+      publishedRobots
+        .by(prId)
+        .update(
+          _.rating -> lift(glickoSettings.rating),
+          _.deviation -> lift(glickoSettings.deviation),
+          _.volatility -> lift(glickoSettings.volatility)
+        )
+        .returning(_.created)
+    ) flatMap { created =>
+      if (created.plus(INACTIVITY_TIMEOUT).isBefore(LocalDateTime.now()))
+        run(robots.by(id).update(_.active -> false))
+      else if (errored)
+        run(
+          robots
+            .by(id)
+            .update(r => (r.errorCount -> (r.errorCount + 1)))
+            .returning(_.errorCount)
+        ) flatMap { errorCount =>
+          if (errorCount >= ERROR_LIMIT) {
+            run(
+              robots
+                .by(id)
+                .update(_.active -> false)
+            )
+          } else {
+            Future successful 1L
+          }
+        } else run(robots.by(id).update(_.errorCount -> 0))
 
     }
 
@@ -156,23 +169,19 @@ class Robots @Inject()(
                     .formatNextPublishTime(pr.created)}")
                 )
               case pr =>
-                val initialRating = pr match {
-                  case Some(pr) => pr.rating
-                  case None     => config.get[Int]("queue.initialRating")
+                val glickoSettings = pr match {
+                  case Some(pr) => GlickoSettings(pr.rating, pr.deviation, pr.volatility)
+                  case None =>
+                    GlickoSettings(
+                      config.get[Int]("queue.initialRating"),
+                      config.get[Double]("queue.initialDeviation"),
+                      config.get[Double]("queue.initialVolatility")
+                    )
                 }
                 for {
                   prId <- run(
                     publishedRobots
-                      .insert(
-                        lift(
-                          PRobot(
-                            code = r.devCode,
-                            rId = r.id,
-                            boardId = board.id,
-                            rating = initialRating
-                          )
-                        )
-                      )
+                      .insert(lift(PRobot(r.id, board.id, r.devCode, glickoSettings)))
                       .returningGenerated(_.id)
                   )
                   _ <- run(

@@ -1,5 +1,6 @@
 package models
 
+import com.github.andriykuba.scala.glicko2.scala.Glicko2
 import com.github.t3hnar.bcrypt._
 import enumeratum._
 import io.getquill.{EntityQuery, Query}
@@ -84,6 +85,17 @@ object Schema {
 
   case class PRobotId(id: Long)
 
+  case class GlickoSettings(rating: Int, deviation: Double, volatility: Double)
+
+  object GlickoSettings {
+    def apply(player: Glicko2.Player) =
+      new GlickoSettings(
+        player.rating.intValue(),
+        player.deviation.doubleValue(),
+        player.volatility.doubleValue()
+      )
+  }
+
   case class PRobot(
       id: PRobotId = PRobotId(-1),
       rId: RobotId,
@@ -91,7 +103,21 @@ object Schema {
       created: LocalDateTime = LocalDateTime.now(),
       code: String,
       rating: Int,
+      deviation: Double,
+      volatility: Double,
   )
+
+  object PRobot {
+    def apply(rId: RobotId, boardId: BoardId, code: String, glickoSettings: GlickoSettings) =
+      new PRobot(
+        rId = rId,
+        boardId = boardId,
+        code = code,
+        rating = glickoSettings.rating,
+        deviation = glickoSettings.deviation,
+        volatility = glickoSettings.volatility
+      )
+  }
 
   implicit val robotWrites = new Writes[Robot] {
     def writes(robot: Robot) = Json.obj(
