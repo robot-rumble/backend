@@ -1,7 +1,7 @@
 package controllers
 
 import controllers.Auth.{LoggedIn, LoggedOut, Visitor}
-import forms.{CreateRobotForm, UpdateRobotCodeForm}
+import forms.{CreateRobotForm, UpdateRobotCodeForm, UpdateRobotForm}
 import models.Schema._
 import models._
 import play.api.Configuration
@@ -96,6 +96,54 @@ class RobotController @Inject()(
       )
     }
 
+  def update(_username: String, name: String) =
+    auth.actionForceLI { user => implicit request =>
+      robotsRepo.findBare(user.id, name)(LoggedIn(user)) map {
+        case Some(robot) =>
+          Ok(
+            views.html.robot.update(UpdateRobotForm.form, robot, assetsFinder)
+          )
+        case None =>
+          NotFound("404")
+      }
+    }
+
+  def postUpdate(id: Long) =
+    auth.actionForceLI { user => implicit request =>
+      robotsRepo.findBare(RobotId(id))(LoggedIn(user)) flatMap {
+        case Some(robot) =>
+          UpdateRobotForm.form.bindFromRequest.fold(
+            formWithErrors => {
+              Future successful BadRequest(
+                views.html.robot.update(formWithErrors, robot, assetsFinder)
+              )
+            },
+            data => {
+              robotsRepo.findBare(user.id, data.name)(LoggedIn(user)) flatMap {
+                case Some(_) =>
+                  Future successful BadRequest(
+                    views.html.robot.update(
+                      UpdateRobotForm.form
+                        .fill(data)
+                        .withGlobalError("Robot with this name already exists"),
+                      robot,
+                      assetsFinder
+                    )
+                  )
+                case None =>
+                  robotsRepo.update(robot.id, data.name) map { _ =>
+                    Redirect(
+                      routes.RobotController.view(user.username, data.name)
+                    )
+                  }
+              }
+            }
+          )
+        case None =>
+          Future successful NotFound("404")
+      }
+    }
+
   def viewById(id: Long) = auth.action { visitor => implicit request =>
     robotsRepo.find(RobotId(id))(visitor) map {
       case Some(FullRobot(robot, user)) =>
@@ -141,8 +189,8 @@ class RobotController @Inject()(
     }
 
   def apiUpdate(robotId: Long) =
-    auth.actionForceLI { visitor => implicit request =>
-      robotsRepo.findBare(RobotId(robotId))(LoggedIn(visitor)) flatMap {
+    auth.actionForceLI { user => implicit request =>
+      robotsRepo.findBare(RobotId(robotId))(LoggedIn(user)) flatMap {
         case Some(robot) =>
           UpdateRobotCodeForm.form.bindFromRequest.fold(
             formWithErrors => {

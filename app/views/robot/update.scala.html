@@ -1,0 +1,20 @@
+@import models.Schema._
+@(form: Form[forms.UpdateRobotForm.Data], robot: Robot, assetsFinder: AssetsFinder)(implicit request: MessagesRequestHeader)
+
+@main("Create robot", "create-robot", assetsFinder) {
+    @helper.form(routes.RobotController.postUpdate(robot.id.id)) {
+        @helper.inputText(form("name"), Symbol("_showConstraints") -> false, Symbol("_label") -> "new name")
+        @helper.CSRF.formField
+        <button class="button">update</button>
+    }
+
+    <div class="mt-3">
+    @if(form.hasGlobalErrors) {
+        <ul class="error">
+        @for(error <- form.globalErrors) {
+            <li>@error.format</li>
+        }
+        </ul>
+    }
+    </div>
+}
