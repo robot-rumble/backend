@@ -1,9 +1,13 @@
 @import models.Schema._
 @import _root_.utils.Text.pluralize
-@(board: FullBoardWithBattles, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+@(board: FullBoardWithBattles, isUserAdmin: Boolean, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
 @main(board.board.name, "board", assetsFinder) {
-    <h1>@board.board.name</h1>
+    <h1>@board.board.name
+        @if(board.board.password.isDefined) {
+          <img src="@assetsFinder.path("images/lock.svg")">
+        }
+    </h1>
 
     <p class="text-grey">Publish cooldown: @board.board.formatPublishCooldown(). Matchmaker settings: @pluralize("battle", board.board.publishBattleNum) on publish, and @pluralize("battle", board.board.recurrentBattleNum) every @board.board.formatBattleCooldown().</p>
 

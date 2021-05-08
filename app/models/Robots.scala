@@ -154,52 +154,6 @@ class Robots @Inject()(
 
     }
 
-  def publish(
-      id: RobotId,
-      board: Board,
-  ): Future[Option[PublishResult]] = {
-    if (board.publishingEnabled)
-      run(robots.by(id).leftJoin(publishedRobots.by(board.id).latest).on((r, pr) => r.id == pr.rId))
-        .map(_.headOption) flatMap {
-        case Some((r, prOption)) =>
-          if (r.devCode.isEmpty) {
-            Future successful Some(Left("Your robot code is empty!"))
-          } else {
-            prOption match {
-              case Some(pr) if !board.publishCooldownExpired(pr.created) =>
-                Future successful Some(
-                  Left(s"Your robot was recently published. You can publish again only after ${board
-                    .formatNextPublishTime(pr.created)}")
-                )
-              case pr =>
-                val glickoSettings = pr match {
-                  case Some(pr) => GlickoSettings(pr.rating, pr.deviation, pr.volatility)
-                  case None =>
-                    GlickoSettings(
-                      config.get[Int]("queue.initialRating"),
-                      config.get[Double]("queue.initialDeviation"),
-                      config.get[Double]("queue.initialVolatility")
-                    )
-                }
-                for {
-                  prId <- run(
-                    publishedRobots
-                      .insert(lift(PRobot(r.id, board.id, r.devCode, glickoSettings)))
-                      .returningGenerated(_.id)
-                  )
-                  _ <- run(
-                    robots.by(id).update(_.published -> true, _.active -> true, _.errorCount -> 0)
-                  )
-                  // a robot's active status is reset on every publish
-                } yield Some(Right(prId))
-            }
-          }
-        case _ =>
-          Future successful None
-      } else
-      Future successful None
-  }
-
   def getLatestPublishedCode(id: RobotId): Future[Option[String]] =
     run(publishedRobots.by(id).sortBy(_.created)(Ord.desc).map(_.code)).map(_.headOption)
 }

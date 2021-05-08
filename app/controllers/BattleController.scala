@@ -12,11 +12,11 @@ class BattleController @Inject()(
     cc: ControllerComponents,
     assetsFinder: AssetsFinder,
     auth: Auth.AuthAction,
-    battlesRepo: Battles,
+    boardsRepo: Boards,
 )(implicit ec: ExecutionContext)
     extends AbstractController(cc) {
   def view(battleId: Long) = auth.action { visitor => implicit request =>
-    battlesRepo.find(BattleId(battleId)) map {
+    boardsRepo.findBattle(BattleId(battleId), visitor) map {
       case Some(fullBattle @ FullBattle(b, r1, r2)) =>
         val (userTeam, userOwnsOpponent) = visitor match {
           case LoggedIn(user) =>

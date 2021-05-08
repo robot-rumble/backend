@@ -54,7 +54,7 @@ class MatchMaker @Inject()(
   )
 
   def prepareMatches(): Future[Iterable[MatchInput]] = {
-    boardsRepo.findAllBare() flatMap { allBoards =>
+    boardsRepo.findAllBareNoMembershipCheck() flatMap { allBoards =>
       val boardsMap = allBoards.filter(_.matchmakingEnabled).map(board => (board.id, board)).toMap
 
       robotsRepo.findAllLatestPrForActive() flatMap { allRobots =>

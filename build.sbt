@@ -67,3 +67,13 @@ initialCommands in console :=
     |val boardsRepo = app.injector.instanceOf[Boards]
     |val seasonsRepo = app.injector.instanceOf[Seasons]
     |  """.trim.stripMargin
+initialCommands in console :=
+  """
+    |import play.api.inject.guice.GuiceApplicationBuilder
+    |import services.GMail
+    |import scala.concurrent.duration._
+    |import scala.concurrent.{Future, Await}
+    |import scala.concurrent.ExecutionContext.Implicits.global
+    |val app = new GuiceApplicationBuilder().build()
+    |val mail = app.injector.instanceOf[GMail]
+    |  """.trim.stripMargin

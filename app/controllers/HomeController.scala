@@ -13,11 +13,12 @@ class HomeController @Inject()(
     assetsFinder: AssetsFinder,
     config: Configuration,
     boardsRepo: Boards,
+    auth: Auth.AuthAction,
 )(implicit ec: ExecutionContext)
     extends AbstractController(cc) {
 
-  def index = Action.async { implicit request =>
-    boardsRepo.findAllBare map { boards =>
+  def index = auth.action { visitor => implicit request =>
+    boardsRepo.findAllBare(visitor) map { boards =>
       Ok(views.html.index(boards, assetsFinder))
     }
   }

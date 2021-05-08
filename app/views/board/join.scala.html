@@ -1,0 +1,19 @@
+@(form: Form[forms.JoinBoardForm.Data], assetsFinder: AssetsFinder)(implicit request: MessagesRequestHeader)
+
+@main("Join board", "join-board", assetsFinder) {
+    @helper.form(routes.BoardController.postJoin()) {
+        @helper.inputText(form("password"), Symbol("_showConstraints") -> false)
+        @helper.CSRF.formField
+        <button class="button">join</button>
+    }
+
+    <div class="mt-3">
+    @if(form.hasGlobalErrors) {
+        <ul class="error">
+        @for(error <- form.globalErrors) {
+            <li>@error.format</li>
+        }
+        </ul>
+    }
+    </div>
+}

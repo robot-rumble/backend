@@ -21,9 +21,6 @@ class Battles @Inject()(
   def find(id: BattleId): Future[Option[FullBattle]] =
     run(battles.by(id).withRobots()).map(_.headOption).map(_.map(FullBattle.tupled))
 
-  def findBare(id: BattleId): Future[Option[Battle]] =
-    run(battles.by(id)).map(_.headOption)
-
   def create(
       matchOutput: MatchOutput,
       r1Rating: Int,

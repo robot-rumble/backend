@@ -21,7 +21,7 @@ object Validators {
     "Must only contain letters, numbers, or a dash"
   )
   val allLowercaseConstraint: Constraint[String] =
-    regexConstraint("lowerecase", "^[^A-Z]+$", "Must be all lowercase")
+    regexConstraint("lowercase", "^[^A-Z]+$", "Must be all lowercase")
   val noWhitespaceConstraint: Constraint[String] =
     regexConstraint("whitespace", "^[^\\s]+$", "Must not have any whitespace")
   val emailConstraint: Constraint[String] = regexConstraint(
@@ -30,10 +30,16 @@ object Validators {
     "Must be a valid email"
   )
 
+  val bio = Forms.text
+
   val username =
     Forms.nonEmptyText(5, 15).verifying(alphanumericConstraint).verifying(allLowercaseConstraint)
+  val email = Forms.email.verifying(emailConstraint).verifying(allLowercaseConstraint)
+
   val name =
     Forms.nonEmptyText(5, 15).verifying(namingConstraint).verifying(allLowercaseConstraint)
   val password = Forms.nonEmptyText(10, 60).verifying(noWhitespaceConstraint)
-  val email = Forms.email.verifying(emailConstraint).verifying(allLowercaseConstraint)
+
+  val boardName = Forms.nonEmptyText(5, 30)
+  val boardPassword = Forms.nonEmptyText(5, 30).verifying(noWhitespaceConstraint)
 }

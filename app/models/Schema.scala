@@ -39,6 +39,7 @@ object Schema {
       password: String,
       created: LocalDateTime,
       verified: Boolean,
+      admin: Boolean,
   )
 
   object User {
@@ -49,6 +50,7 @@ object Schema {
         password = password.bcrypt,
         created = LocalDateTime.now(),
         verified = false,
+        admin = false,
       )
   }
 
@@ -285,6 +287,13 @@ object Schema {
       battles: Seq[FullBattle]
   )
 
+  case class BoardMembershipId(id: Long)
+  case class BoardMembership(
+      id: BoardMembershipId = BoardMembershipId(-1),
+      userId: UserId,
+      boardId: BoardId
+  )
+
   case class SeasonId(id: Long)
 
   case class Season(
@@ -355,6 +364,9 @@ object Schema {
     implicit val decodeBoardId = MappedEncoding[Long, BoardId](BoardId.apply)
     implicit val encodeSeasonId = MappedEncoding[SeasonId, Long](_.id)
     implicit val decodeSeasonId = MappedEncoding[Long, SeasonId](SeasonId.apply)
+    implicit val encodeBoardMembershipId = MappedEncoding[BoardMembershipId, Long](_.id)
+    implicit val decodeBoardMembershipId =
+      MappedEncoding[Long, BoardMembershipId](BoardMembershipId.apply)
     implicit val encodeDuration = MappedEncoding[Duration, Int](_.getStandardSeconds.toInt)
     implicit val decodeDuration = MappedEncoding[Int, Duration](Duration.standardSeconds(_))
 
@@ -396,6 +408,13 @@ object Schema {
     )
     val accountVerifications = quote(
       querySchema[AccountVerification]("account_verifications", _.userId -> "user_id")
+    )
+    val boardMemberships = quote(
+      querySchema[BoardMembership](
+        "board_memberships",
+        _.userId -> "user_id",
+        _.boardId -> "board_id"
+      )
     )
 
     implicit class RichQuotedQuery[T](query: Quoted[Query[T]]) {
@@ -471,6 +490,14 @@ object Schema {
           r1 <- robots if b.r1Id == r1.id
           r2 <- robots if b.r2Id == r2.id
         } yield (b, r1, r2)
+    }
+
+    implicit class BoardMembershipEntityQuery(query: Quoted[EntityQuery[BoardMembership]]) {
+      def by(id: BoardId): Quoted[EntityQuery[BoardMembership]] =
+        query.filter(_.boardId == lift(id))
+
+      def by(id: UserId): Quoted[EntityQuery[BoardMembership]] =
+        query.filter(_.userId == lift(id))
     }
 
     implicit class BoardEntityQuery(query: Quoted[EntityQuery[Board]]) {

@@ -21,6 +21,11 @@ GET         /seasons/:season                        controllers.SeasonController
 
 GET         /boards                                 controllers.BoardController.index
 GET         /boards/                                controllers.BoardController.index
+GET         /boards/create                          controllers.BoardController.create
+POST        /boards/create                          controllers.BoardController.postCreate
+GET         /boards/join                            controllers.BoardController.join
+POST        /boards/join                            controllers.BoardController.postJoin
+
 GET         /boards/:board                          controllers.BoardController.view(board: Long)
 GET         /boards/:board/publish                  controllers.BoardController.publish(board: Long)
 POST        /boards/:board/publish                  controllers.BoardController.postPublish(board: Long)

@@ -1,5 +1,5 @@
 @import models.Schema._
-@(seasons: Seq[Season], boards: Seq[Board], assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+@(seasons: Seq[Season], boards: Seq[Board], isAuthenticated: Boolean, isAdmin: Boolean, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
 @displayBoards(boards: Seq[Board]) = {
   <table class="_body">
@@ -33,6 +33,22 @@
     <h1>Boards</h1>
 
     <p>When you publish one of your draft robots, it begins to live on one of these boards, where it is matched with competitors to give you a rating. Some boards stand by themselves, while others belong to a specific Season. Learn more about publishing <a href="https://rr-docs.readthedocs.io/en/latest/publishing.html">here</a>.</p>
+
+    <div class="d-flex actions mt-3">
+        @if(isAdmin) {
+            <a href="@routes.BoardController.create()">
+                <img src="@assetsFinder.path("images/add-circle.svg")" alt="">
+                create board
+            </a>
+        }
+
+        @if(isAuthenticated) {
+            <a href="@routes.BoardController.join()">
+                <img src="@assetsFinder.path("images/key.svg")" alt="">
+                join board with password
+            </a>
+        }
+    </div>
 
     @defining(seasons.filter(_.isActive())) { seasons =>
         @if(seasons.nonEmpty) {
