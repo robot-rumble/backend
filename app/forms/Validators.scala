@@ -33,13 +33,13 @@ object Validators {
   val bio = Forms.text
 
   val username =
-    Forms.nonEmptyText(5, 15).verifying(alphanumericConstraint).verifying(allLowercaseConstraint)
+    Forms.nonEmptyText(3, 15).verifying(alphanumericConstraint).verifying(allLowercaseConstraint)
   val email = Forms.email.verifying(emailConstraint).verifying(allLowercaseConstraint)
 
   val name =
-    Forms.nonEmptyText(5, 15).verifying(namingConstraint).verifying(allLowercaseConstraint)
+    Forms.nonEmptyText(3, 15).verifying(namingConstraint).verifying(allLowercaseConstraint)
   val password = Forms.nonEmptyText(10, 60).verifying(noWhitespaceConstraint)
 
-  val boardName = Forms.nonEmptyText(5, 30)
+  val boardName = Forms.nonEmptyText(3, 30)
   val boardPassword = Forms.nonEmptyText(5, 30).verifying(noWhitespaceConstraint)
 }
