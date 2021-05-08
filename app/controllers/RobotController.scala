@@ -223,24 +223,25 @@ class RobotController @Inject()(
     }
   }
 
-  def apiGetRobotCode(robotId: Long) =
+  def apiGetDevCode(robotId: Long) =
     auth.action { visitor => implicit request =>
-      robotsRepo.find(RobotId(robotId))(visitor) flatMap {
-        case Some(FullRobot(robot, user)) =>
-          // if the logged in user owns this robot, return the robot's development code
-          // otherwise return its most recent published code
-          // I don't like that this behaviour is 'hidden under the hood', but it's what's most intuitive
-          // someone working in the Garage should be able to instantly see dev code changes reflected
-          // in battles against their own bots
-          if (user.username == BUILTIN_USER || Visitor.isLIAsUser(visitor, user)) {
-            Future successful Ok(Json.toJson(robot.devCode))
+      robotsRepo.find(RobotId(robotId))(visitor) map {
+        case Some(fullRobot) =>
+          if (fullRobot.user.username == BUILTIN_USER
+              || Visitor.isLIAsUser(visitor, fullRobot.user)) {
+            Ok(Json.toJson(fullRobot.robot.devCode))
           } else {
-            robotsRepo.getLatestPublishedCode(RobotId(robotId)) map {
-              case Some(code) => Ok(Json.toJson(code))
-              case None       => NotFound("404")
-            }
+            Forbidden("You can only get the dev code of your bots or builtin bots")
           }
-        case _ => Future successful NotFound("404")
+        case _ => NotFound("404")
+      }
+    }
+
+  def apiGetPublishedCode(robotId: Long) =
+    Action.async { implicit request =>
+      robotsRepo.getLatestPublishedCode(RobotId(robotId)) map {
+        case Some(code) => Ok(Json.toJson(code))
+        case None       => NotFound("404")
       }
     }
 
