@@ -33,7 +33,7 @@ class BoardController @Inject()(
   }
 
   def view(id: Long) = auth.action { visitor => implicit request =>
-    boardsRepo.findWithBattles(BoardId(id), 0, 10, 10, visitor) flatMap {
+    boardsRepo.findWithBattles(BoardId(id), 0, 10, 10)(visitor) flatMap {
       case Some(fullBoardWithBattles) =>
         fullBoardWithBattles.board.password match {
           case Some(_) =>
@@ -63,7 +63,7 @@ class BoardController @Inject()(
   }
 
   def viewBattles(id: Long, page: Long = 0) = auth.action { visitor => implicit request =>
-    boardsRepo.findBareWithBattles(BoardId(id), page, 50, visitor) map {
+    boardsRepo.findBareWithBattles(BoardId(id), page, 50)(visitor) map {
       case Some(boardWithBattles) =>
         Ok(
           views.html.board.battles(boardWithBattles, page, assetsFinder)
@@ -73,7 +73,7 @@ class BoardController @Inject()(
   }
 
   def viewRobots(id: Long, page: Long = 0) = auth.action { visitor => implicit request =>
-    boardsRepo.find(BoardId(id), page, 50, visitor) map {
+    boardsRepo.find(BoardId(id), page, 50)(visitor) map {
       case Some(board) =>
         Ok(views.html.board.robots(board, page, assetsFinder))
       case None => NotFound("404")
@@ -82,7 +82,7 @@ class BoardController @Inject()(
 
   def viewRobotBattles(id: Long, robotId: Long, page: Long = 0) =
     auth.action { visitor => implicit request =>
-      boardsRepo.findBareWithBattlesForRobot(BoardId(id), RobotId(robotId), page, 50, visitor) map {
+      boardsRepo.findBareWithBattlesForRobot(BoardId(id), RobotId(robotId), page, 50)(visitor) map {
         case Some((robot, boardWithBattles)) =>
           Ok(
             views.html.board.robot(
@@ -103,7 +103,7 @@ class BoardController @Inject()(
 
   def publish(id: Long) =
     auth.actionForceLI { user => implicit request =>
-      boardsRepo.findBare(BoardId(id), LoggedIn(user)) flatMap {
+      boardsRepo.findBare(BoardId(id))(LoggedIn(user)) flatMap {
         case Some(board) =>
           getRobotOptions(user) map { robotOptions =>
             Ok(
@@ -128,7 +128,7 @@ class BoardController @Inject()(
           Future.successful(InternalServerError("Unexpected form input"))
         },
         data => {
-          boardsRepo.findBare(BoardId(id), LoggedIn(user)) flatMap {
+          boardsRepo.findBare(BoardId(id))(LoggedIn(user)) flatMap {
             case Some(board) =>
               boardsRepo.publish(RobotId(data.robotId), board) flatMap {
                 case None => Future successful NotFound("404")

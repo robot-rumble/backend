@@ -29,10 +29,7 @@ class Boards @Inject()(
     run(boardMemberships.by(boardId).by(userId)).map(_.nonEmpty)
   }
 
-  def isMember(
-      boardId: BoardId,
-      visitor: Visitor
-  ): Future[Boolean] =
+  def isMember(boardId: BoardId)(visitor: Visitor): Future[Boolean] =
     visitor match {
       case LoggedIn(user) => isMember(boardId, user.id)
       case LoggedOut()    => run(boards.by(boardId).filter(_.password.isEmpty)).map(_.nonEmpty)
@@ -69,7 +66,7 @@ class Boards @Inject()(
   private def attachRobots(boards: Seq[Board], numPerBoard: Int): Future[Seq[FullBoard]] =
     Future.sequence(boards.map(attachRobot(_, 0, numPerBoard)))
 
-  def findAll(numPerBoard: Int, visitor: Visitor): Future[Seq[FullBoard]] =
+  def findAll(numPerBoard: Int)(visitor: Visitor): Future[Seq[FullBoard]] =
     allMembershipBoards(visitor).flatMap(attachRobots(_, numPerBoard))
 
   def findAll(seasonId: SeasonId, numPerBoard: Int): Future[Seq[FullBoard]] =
@@ -82,26 +79,19 @@ class Boards @Inject()(
     allMembershipBoards(visitor)
   }
 
-  def find(
-      id: BoardId,
-      page: Long,
-      numPerPage: Int,
+  def find(id: BoardId, page: Long, numPerPage: Int)(
       visitor: Visitor
   ): Future[Option[FullBoard]] = {
-    findBare(id, visitor) flatMap {
+    findBare(id)(visitor) flatMap {
       case Some(board) => attachRobot(board, page, numPerPage) map Some.apply
       case None        => Future successful None
     }
   }
 
-  def findWithBattles(
-      id: BoardId,
-      page: Long,
-      numRobotsPerPage: Int,
-      numBattlesPerPage: Int,
+  def findWithBattles(id: BoardId, page: Long, numRobotsPerPage: Int, numBattlesPerPage: Int)(
       visitor: Visitor
   ): Future[Option[FullBoardWithBattles]] = {
-    findBare(id, visitor) flatMap {
+    findBare(id)(visitor) flatMap {
       case Some(board) =>
         attachRobot(board, page, numRobotsPerPage) flatMap {
           case FullBoard(board, robots) =>
@@ -120,8 +110,8 @@ class Boards @Inject()(
     run(boards.by(id)).map(_.headOption)
   }
 
-  def findBare(id: BoardId, visitor: Visitor): Future[Option[Board]] = {
-    isMember(id, visitor) flatMap {
+  def findBare(id: BoardId)(visitor: Visitor): Future[Option[Board]] = {
+    isMember(id)(visitor) flatMap {
       case true  => run(boards.by(id)).map(_.headOption)
       case false => Future successful None
     }
@@ -135,10 +125,10 @@ class Boards @Inject()(
     run(boards.filter(_.adminId.contains(lift(userId))))
   }
 
-  def findBattle(battleId: BattleId, visitor: Visitor): Future[Option[FullBattle]] = {
+  def findBattle(battleId: BattleId)(visitor: Visitor): Future[Option[FullBattle]] = {
     battlesRepo.find(battleId) flatMap {
       case Some(fullBattle) =>
-        isMember(fullBattle.b.boardId, visitor) map {
+        isMember(fullBattle.b.boardId)(visitor) map {
           case true  => Some(fullBattle)
           case false => None
         }
@@ -146,13 +136,10 @@ class Boards @Inject()(
     }
   }
 
-  def findBareWithBattles(
-      id: BoardId,
-      page: Long,
-      numPerPage: Int,
+  def findBareWithBattles(id: BoardId, page: Long, numPerPage: Int)(
       visitor: Visitor
   ): Future[Option[BoardWithBattles]] = {
-    findBare(id, visitor).flatMap {
+    findBare(id)(visitor).flatMap {
       case Some(board) =>
         battlesRepo.findByBoardPaged(id, page, numPerPage) map { robots =>
           Some(BoardWithBattles(board, robots map {
@@ -190,11 +177,7 @@ class Boards @Inject()(
     }
   }
 
-  def findBareWithBattlesForRobot(
-      id: BoardId,
-      robotId: RobotId,
-      page: Long,
-      numPerBoard: Int,
+  def findBareWithBattlesForRobot(id: BoardId, robotId: RobotId, page: Long, numPerBoard: Int)(
       visitor: Visitor
   ): Future[Option[(Robot, BoardWithBattles)]] = {
     allMemberships(visitor) flatMap { memberships =>
@@ -210,10 +193,7 @@ class Boards @Inject()(
     }
   }
 
-  def findAllBareWithBattlesForRobot(
-      robotId: RobotId,
-      page: Long,
-      numPerBoard: Int,
+  def findAllBareWithBattlesForRobot(robotId: RobotId, page: Long, numPerBoard: Int)(
       visitor: Visitor
   ): Future[Seq[(PRobot, BoardWithBattles)]] = {
     allMemberships(visitor) flatMap { memberships =>

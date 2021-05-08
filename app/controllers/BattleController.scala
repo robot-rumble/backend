@@ -16,7 +16,7 @@ class BattleController @Inject()(
 )(implicit ec: ExecutionContext)
     extends AbstractController(cc) {
   def view(battleId: Long) = auth.action { visitor => implicit request =>
-    boardsRepo.findBattle(BattleId(battleId), visitor) map {
+    boardsRepo.findBattle(BattleId(battleId))(visitor) map {
       case Some(fullBattle @ FullBattle(b, r1, r2)) =>
         val (userTeam, userOwnsOpponent) = visitor match {
           case LoggedIn(user) =>

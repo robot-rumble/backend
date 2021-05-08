@@ -164,7 +164,7 @@ class RobotController @Inject()(
     auth.action { visitor => implicit request =>
       robotsRepo.find(username, name)(visitor) flatMap {
         case Some(fullRobot) =>
-          boardsRepo.findAllBareWithBattlesForRobot(fullRobot.robot.id, 0, 6, visitor) map {
+          boardsRepo.findAllBareWithBattlesForRobot(fullRobot.robot.id, 0, 6)(visitor) map {
             boardsWithBattles =>
               Ok(
                 views.html.robot.view(
