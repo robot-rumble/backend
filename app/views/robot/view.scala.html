@@ -31,7 +31,7 @@
     <h3 class="mb-4">@fullRobot.robot.lang robot by <a href="@routes.UserController.view(fullRobot.user.username)">@fullRobot.user.username</a></h3>
 
     <div class="d-flex actions">
-        @if(fullRobot.robot.published) {
+        @if(fullRobot.robot.published && (isOwner || fullRobot.robot.openSource)) {
             <a href="@routes.RobotController.viewPublishedCode(fullRobot.user.username, fullRobot.robot.name)">
                 <img src="@assetsFinder.path("images/code.svg")" alt="">
                 view published source

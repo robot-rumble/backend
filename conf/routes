@@ -59,6 +59,7 @@ POST        /robots/update/:robotId                 controllers.RobotController.
 GET         /:user                                  controllers.UserController.view(user)
 GET         /:user/                                 controllers.UserController.view(user)
 GET         /:user/:robot                           controllers.RobotController.view(user, robot)
+GET         /:user/:robot/                          controllers.RobotController.view(user, robot)
 GET         /:user/:robot/edit                      controllers.RobotController.edit(user, robot)
 GET         /:user/:robot/update                    controllers.RobotController.update(user, robot)
 GET         /:user/:robot/view-code                 controllers.RobotController.viewPublishedCode(user, robot)

@@ -18,8 +18,6 @@ class PasswordResets @Inject()(schema: Schema, usersRepo: models.Users)(
   }
 
   def complete(token: String, newPassword: String): Future[Option[Long]] = {
-    println(token, newPassword)
-
     run(
       passwordResets
         .filter(

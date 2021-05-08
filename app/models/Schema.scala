@@ -67,6 +67,7 @@ object Schema {
       published: Boolean = false,
       active: Boolean = true,
       errorCount: Int = 0,
+      openSource: Boolean,
   )
 
   case class FullRobot(robot: Robot, user: User)
@@ -76,12 +77,13 @@ object Schema {
   type PublishResult = Either[String, PRobotId]
 
   object Robot {
-    def apply(userId: UserId, name: String, lang: Lang) =
+    def apply(userId: UserId, name: String, lang: Lang, openSource: Boolean) =
       new Robot(
         userId = userId,
         name = name,
         devCode = "",
         lang = lang,
+        openSource = openSource
       )
   }
 
@@ -127,7 +129,8 @@ object Schema {
       "userId" -> robot.userId.id,
       "name" -> robot.name,
       "lang" -> robot.lang,
-      "published" -> robot.published
+      "published" -> robot.published,
+      "openSource" -> robot.openSource
     )
   }
 

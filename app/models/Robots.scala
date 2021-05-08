@@ -99,10 +99,15 @@ class Robots @Inject()(
     }
   }
 
-  def create(userId: UserId, name: String, lang: Lang): Future[Option[Robot]] = {
+  def create(
+      userId: UserId,
+      name: String,
+      lang: Lang,
+      openSource: Boolean
+  ): Future[Option[Robot]] = {
     usersRepo.find(userId) flatMap {
       case Some(user) if user.verified =>
-        val robot = Robot(userId, name, lang)
+        val robot = Robot(userId, name, lang, openSource)
         run(robots.insert(lift(robot)).returningGenerated(_.id)).map(robot.copy(_)).map(Some(_))
       case _ => Future successful None
     }
@@ -154,6 +159,13 @@ class Robots @Inject()(
 
     }
 
-  def getLatestPublishedCode(id: RobotId): Future[Option[String]] =
-    run(publishedRobots.by(id).sortBy(_.created)(Ord.desc).map(_.code)).map(_.headOption)
+  def getLatestPublishedCode(id: RobotId)(visitor: Visitor): Future[Option[String]] = {
+    findBare(id)(visitor) flatMap {
+      case Some(robot) if robot.openSource =>
+        println(robot)
+        run(publishedRobots.by(id).sortBy(_.created)(Ord.desc).map(_.code)).map(_.headOption)
+      case _ =>
+        Future successful None
+    }
+  }
 }

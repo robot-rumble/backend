@@ -1,0 +1,2 @@
+ALTER TABLE robots
+    ADD COLUMN open_source BOOLEAN NOT NULL DEFAULT true;

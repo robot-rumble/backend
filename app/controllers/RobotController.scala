@@ -40,7 +40,7 @@ class RobotController @Inject()(
       case Some(_) =>
         Future successful Right("Robot with this name already exists")
       case None =>
-        robotsRepo.create(user.id, data.name, data.lang) map {
+        robotsRepo.create(user.id, data.name, data.lang, data.openSource) map {
           case Some(robot) => Left(robot)
           case None        => Right("You must be verified to create a robot")
         }
@@ -206,21 +206,22 @@ class RobotController @Inject()(
       }
     }
 
-  def viewPublishedCode(username: String, name: String) = Action.async { implicit request =>
-    robotsRepo.find(username, name)(LoggedOut()) flatMap {
-      case Some(FullRobot(robot, user)) =>
-        if (user.username == BUILTIN_USER) {
-          Future successful Ok(views.html.robot.viewCode(robot.devCode, assetsFinder))
-        } else {
-          robotsRepo.getLatestPublishedCode(robot.id) map {
-            case Some(code) =>
-              Ok(views.html.robot.viewCode(code, assetsFinder))
-            case None => NotFound("404")
+  def viewPublishedCode(username: String, name: String) = auth.action {
+    visitor => implicit request =>
+      robotsRepo.find(username, name)(LoggedOut()) flatMap {
+        case Some(FullRobot(robot, user)) =>
+          if (user.username == BUILTIN_USER) {
+            Future successful Ok(views.html.robot.viewCode(robot.devCode, assetsFinder))
+          } else {
+            robotsRepo.getLatestPublishedCode(robot.id)(visitor) map {
+              case Some(code) =>
+                Ok(views.html.robot.viewCode(code, assetsFinder))
+              case None => NotFound("404")
+            }
           }
-        }
-      case None =>
-        Future successful NotFound("404")
-    }
+        case None =>
+          Future successful NotFound("404")
+      }
   }
 
   def apiGetDevCode(robotId: Long) =
@@ -238,8 +239,8 @@ class RobotController @Inject()(
     }
 
   def apiGetPublishedCode(robotId: Long) =
-    Action.async { implicit request =>
-      robotsRepo.getLatestPublishedCode(RobotId(robotId)) map {
+    auth.action { visitor => implicit request =>
+      robotsRepo.getLatestPublishedCode(RobotId(robotId))(visitor) map {
         case Some(code) => Ok(Json.toJson(code))
         case None       => NotFound("404")
       }

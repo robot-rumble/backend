@@ -8,6 +8,7 @@
             Seq("Python" -> "Python", "Javascript" -> "Javascript"),
             Symbol("_showConstraints") -> false
         )
+        @helper.checkbox(form("openSource"), Symbol("_showConstraints") -> false, Symbol("_label") -> "open source")
         @helper.CSRF.formField
         <button class="button">create</button>
     }

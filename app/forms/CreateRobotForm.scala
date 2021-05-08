@@ -10,10 +10,11 @@ object CreateRobotForm {
   val form: Form[Data] = Form(
     mapping(
       "name" -> name,
-      "lang" -> Lang.formField
+      "lang" -> Lang.formField,
+      "openSource" -> boolean,
     )(Data.apply)(Data.unapply)
   )
 
-  case class Data(name: String, lang: Lang)
+  case class Data(name: String, lang: Lang, openSource: Boolean)
 
 }
