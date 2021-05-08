@@ -28,7 +28,10 @@ class RobotController @Inject()(
     auth.actionForceLI { _ => implicit request =>
       Future successful Ok(
         views.html.robot
-          .create(CreateRobotForm.form, assetsFinder)
+          .create(
+            CreateRobotForm.form.fill(CreateRobotForm.Data("", Lang.Python, true)),
+            assetsFinder
+          )
       )
     }
 
