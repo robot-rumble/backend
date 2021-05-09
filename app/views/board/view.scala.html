@@ -1,6 +1,6 @@
 @import models.Schema._
 @import _root_.utils.Text.pluralize
-@(board: FullBoardWithBattles, isUserAdmin: Boolean, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+@(board: FullBoardWithBattles, isAdmin: Boolean, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
 @main(board.board.name, "board", assetsFinder) {
     <h1>@board.board.name
@@ -9,11 +9,20 @@
         }
     </h1>
 
+    @if(isAdmin) {
+        @board.board.password match {
+            case Some(password) => {
+                <p class="mb-2">Password: @password</p>
+            }
+            case None => {}
+        }
+    }
+
     <p class="text-grey">Publish cooldown: @board.board.formatPublishCooldown(). Matchmaker settings: @pluralize("battle", board.board.publishBattleNum) on publish, and @pluralize("battle", board.board.recurrentBattleNum) every @board.board.formatBattleCooldown().</p>
 
     @board.board.bio match {
         case Some(bio) => {
-            <div class="mt-3">
+            <div class="mt-4">
                 @Html(bio)
             </div>
         }
