@@ -22,17 +22,24 @@ class Boards @Inject()(
   import schema._
   import schema.ctx._
 
+  def isBoardPublic(boardId: BoardId): Future[Boolean] =
+    run(boards.by(boardId).filter(_.password.isEmpty)).map(_.nonEmpty)
+
   def isMember(
       boardId: BoardId,
       userId: UserId
   ): Future[Boolean] = {
-    run(boardMemberships.by(boardId).by(userId)).map(_.nonEmpty)
+    isBoardPublic(boardId) flatMap {
+      case true => Future successful true
+      case false =>
+        run(boardMemberships.by(boardId).by(userId)).map(_.nonEmpty)
+    }
   }
 
   def isMember(boardId: BoardId)(visitor: Visitor): Future[Boolean] =
     visitor match {
       case LoggedIn(user) => isMember(boardId, user.id)
-      case LoggedOut()    => run(boards.by(boardId).filter(_.password.isEmpty)).map(_.nonEmpty)
+      case LoggedOut()    => isBoardPublic(boardId)
     }
 
   def allMembershipBoards(userId: UserId): Future[Seq[Board]] = {
