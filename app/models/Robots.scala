@@ -24,10 +24,15 @@ class Robots @Inject()(
   import schema._
   import schema.ctx._
 
+  val BUILTIN_USER = UserId(config.get[Long]("site.builtinUserId"))
+
   def robotsAuth(visitor: Visitor): Quoted[EntityQuery[Robot]] = {
     visitor match {
-      case LoggedIn(user) => robots.filter(r => r.published || r.userId == lift(user.id))
-      case LoggedOut()    => robots.filter(r => r.published)
+      case LoggedIn(user) =>
+        robots.filter(
+          r => r.published || r.userId == lift(BUILTIN_USER) || r.userId == lift(user.id)
+        )
+      case LoggedOut() => robots.filter(r => r.published || r.userId == lift(BUILTIN_USER))
     }
   }
 

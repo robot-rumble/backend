@@ -22,7 +22,7 @@ class RobotController @Inject()(
 )(implicit ec: ExecutionContext)
     extends MessagesAbstractController(cc) {
 
-  val BUILTIN_USER = config.get[String]("site.builtinUser")
+  val BUILTIN_USER = UserId(config.get[Long]("site.builtinUserId"))
 
   def create =
     auth.actionForceLI { _ => implicit request =>
@@ -212,8 +212,8 @@ class RobotController @Inject()(
   def viewPublishedCode(username: String, name: String) = auth.action {
     visitor => implicit request =>
       robotsRepo.find(username, name)(LoggedOut()) flatMap {
-        case Some(FullRobot(robot, user)) =>
-          if (user.username == BUILTIN_USER) {
+        case Some(FullRobot(robot, _)) =>
+          if (robot.userId == BUILTIN_USER) {
             Future successful Ok(views.html.robot.viewCode(robot.devCode, assetsFinder))
           } else {
             robotsRepo.getLatestPublishedCode(robot.id)(visitor) map {
@@ -228,24 +228,25 @@ class RobotController @Inject()(
   }
 
   def apiGetDevCode(robotId: Long) =
-    auth.action { visitor => implicit request =>
-      robotsRepo.find(RobotId(robotId))(visitor) map {
+    auth.actionForceLI { user => implicit request =>
+      robotsRepo.find(RobotId(robotId))(LoggedIn(user)) map {
         case Some(fullRobot) =>
-          if (fullRobot.user.username == BUILTIN_USER
-              || Visitor.isLIAsUser(visitor, fullRobot.user)) {
-            Ok(Json.toJson(fullRobot.robot.devCode))
-          } else {
-            Forbidden("You can only get the dev code of your bots or builtin bots")
-          }
+          Ok(Json.toJson(fullRobot.robot.devCode))
         case _ => NotFound("404")
       }
     }
 
   def apiGetPublishedCode(robotId: Long) =
     auth.action { visitor => implicit request =>
-      robotsRepo.getLatestPublishedCode(RobotId(robotId))(visitor) map {
-        case Some(code) => Ok(Json.toJson(code))
-        case None       => NotFound("404")
+      robotsRepo.findBare(RobotId(robotId))(visitor) flatMap {
+        case Some(r) if r.userId == BUILTIN_USER =>
+          Future successful Ok(Json.toJson(r.devCode))
+        case Some(_) =>
+          robotsRepo.getLatestPublishedCode(RobotId(robotId))(visitor) map {
+            case Some(code) => Ok(Json.toJson(code))
+            case None       => NotFound("404")
+          }
+        case None => Future successful NotFound("404")
       }
     }
 

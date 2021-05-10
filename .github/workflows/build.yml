@@ -36,6 +36,7 @@ jobs:
           -envvars.AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
           -envvars.SMTP_USERNAME=${{ secrets.SMTP_USERNAME }}
           -envvars.SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}
+          -envvars.BUILTIN_USER_ID=108
           -jvm.args="-Ddb.default_.migration.auto=true -Dsentry.dsn=${{ secrets.SENTRY_DSN }}"
           -ports.http=80
           -env=prod
