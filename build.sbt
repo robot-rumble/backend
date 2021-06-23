@@ -49,31 +49,3 @@ scalacOptions ++= Seq(
   "-Xfatal-warnings",
 )
 
-initialCommands in console :=
-  """
-    |import play.api.inject.guice.GuiceApplicationBuilder
-    |import scala.concurrent.duration._
-    |import scala.concurrent.{Future, Await}
-    |import scala.concurrent.ExecutionContext.Implicits.global
-    |import models._
-    |import Schema._
-    |val app = new GuiceApplicationBuilder().build()
-    |val schema = app.injector.instanceOf[Schema]
-    |import schema._
-    |import schema.ctx._
-    |val usersRepo = app.injector.instanceOf[Users]
-    |val robotsRepo = app.injector.instanceOf[Robots]
-    |val battlesRepo = app.injector.instanceOf[Battles]
-    |val boardsRepo = app.injector.instanceOf[Boards]
-    |val seasonsRepo = app.injector.instanceOf[Seasons]
-    |  """.trim.stripMargin
-initialCommands in console :=
-  """
-    |import play.api.inject.guice.GuiceApplicationBuilder
-    |import services.GMail
-    |import scala.concurrent.duration._
-    |import scala.concurrent.{Future, Await}
-    |import scala.concurrent.ExecutionContext.Implicits.global
-    |val app = new GuiceApplicationBuilder().build()
-    |val mail = app.injector.instanceOf[GMail]
-    |  """.trim.stripMargin

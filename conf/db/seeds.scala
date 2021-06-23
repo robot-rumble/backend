@@ -1,10 +1,11 @@
+import scala.concurrent.ExecutionContext.Implicits.global
+
+import org.joda.time.LocalDateTime
 import play.api.inject.guice.GuiceApplicationBuilder
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import models._
-import Schema._
 import matchmaking.BattleQueue.MatchOutput
-import org.joda.time.LocalDateTime
+import models.Schema._
+import models._
 
 val app = new GuiceApplicationBuilder().build()
 val usersRepo = app.injector.instanceOf[Users]
@@ -21,15 +22,24 @@ def createBattle(
     pr2Id: PRobotId
 ) = {
   battlesRepo.create(
-    MatchOutput(boardId.id, r1Id.id, pr1Id.id, 0, r2Id.id, pr2Id.id, 0, Some(Team.R1), false, Array()),
+    MatchOutput(
+      boardId.id,
+      r1Id.id,
+      pr1Id.id,
+      0,
+      r2Id.id,
+      pr2Id.id,
+      0,
+      Some(Team.R1),
+      false,
+      Array()
+    ),
     1000,
     100,
     1000,
     100
   )
 }
-
-import org.joda.time.Duration
 for {
   season1 <- seasonsRepo.create(
     "The first season",
@@ -38,16 +48,16 @@ for {
     LocalDateTime.now().plusDays(30),
     "<b>Season!</b>"
   )
-  board1 <- boardsRepo.create(None, "one", Some(season1.id), None, None)
-  board2 <- boardsRepo.create(None, "two", Some(season1.id), None, None)
-  user <- usersRepo.create("test@test.com", "test", "test")
-  r1 <- robotsRepo.create(user.id, "r1", Lang.Python)
+  board1 <- boardsRepo.create(None, "one", None, None, Some(season1.id))
+  board2 <- boardsRepo.create(None, "two", None, None, Some(season1.id))
+  (user, _) <- usersRepo.create("test@test.com", "test", "password1")
+  Some(r1) <- robotsRepo.create(user.id, "r1", Lang.Python, true)
   Some(Right(pr1Id)) <- boardsRepo.publish(r1.id, board1)
-  r2 <- robotsRepo.create(user.id, "r2", Lang.Python)
+  Some(r2) <- robotsRepo.create(user.id, "r2", Lang.Python, true)
   Some(Right(pr2Id)) <- boardsRepo.publish(r2.id, board1)
-  r3 <- robotsRepo.create(user.id, "r3", Lang.Python)
+  Some(r3) <- robotsRepo.create(user.id, "r3", Lang.Python, true)
   Some(Right(pr3Id)) <- boardsRepo.publish(r3.id, board1)
-  r4 <- robotsRepo.create(user.id, "r4", Lang.Python)
+  Some(r4) <- robotsRepo.create(user.id, "r4", Lang.Python, true)
   Some(Right(pr4Id)) <- boardsRepo.publish(r4.id, board1)
   b1 <- createBattle(board1.id, r1.id, pr1Id, r2.id, pr2Id)
   b2 <- createBattle(board1.id, r2.id, pr2Id, r3.id, pr3Id)

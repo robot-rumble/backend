@@ -19,8 +19,7 @@ services:
     volumes:
       - .:/backend
     environment:
-      DB_ENDPOINT: db:5432
-      QUEUE_ENABLED: ${QUEUE_ENABLED-}
+      DB_HOST: db
 
     # https://github.com/docker/compose/issues/596#issuecomment-133004835
     stdin_open: true

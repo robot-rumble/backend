@@ -29,3 +29,9 @@ class SES @Inject()(config: Configuration)(implicit ec: ExecutionContext) extend
     )
   }
 }
+
+class MockMail @Inject()() extends Mail {
+  def mail(to: String, subject: String, body: String): Future[Unit] = {
+    Future successful Unit
+  }
+}
