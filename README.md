@@ -12,14 +12,15 @@ git clone https://github.com/robot-rumble/battle-viewer
 
 3. Fetch WASM worker assets
 ```sh
-aws s3 sync s3://rr-public-assets/worker-assets backend/public/dist/
+aws --no-sign-request s3 sync s3://rr-public-assets/worker-assets backend/public/dist/
+aws --no-sign-request s3 sync s3://rr-public-assets/lang-runners backend/public/dist/
 ```
 
 4. Start the battle-viewer webpack process:
 ```sh
 cd battle-viewer
 yarn
-yarn watch
+DOCKER=1 yarn watch
 ```
 
 4. Open a new terminal window and start docker:
