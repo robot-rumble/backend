@@ -30,4 +30,8 @@ class HomeController @Inject()(
   def demo = Action { implicit request =>
     Ok(views.html.robot.demo(assetsFinder))
   }
+
+  def tutorial = Action { implicit request =>
+    Ok(views.html.robot.tutorial(assetsFinder))
+  }
 }
