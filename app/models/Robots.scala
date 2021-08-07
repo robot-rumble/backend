@@ -20,6 +20,7 @@ class Robots @Inject()(
 ) {
   val ERROR_LIMIT = config.get[Long]("queue.errorLimit")
   val INACTIVITY_TIMEOUT = config.get[FiniteDuration]("queue.inactivityTimeout")
+  val MAX_RATING_CHANGE = config.get[Int]("queue.maxRatingChange")
 
   import schema._
   import schema.ctx._
@@ -130,13 +131,20 @@ class Robots @Inject()(
       id: RobotId,
       prId: PRobotId,
       glickoSettings: GlickoSettings,
+      oldRating: Int,
       errored: Boolean
-  ): Future[Long] =
+  ): Future[Int] = {
+    val ratingChange = Math.min(Math.abs(glickoSettings.rating - oldRating), MAX_RATING_CHANGE)
+    val ratingConstrained = if (glickoSettings.rating - oldRating > 0) { oldRating + ratingChange } else {
+      oldRating - ratingChange
+    }
+    val rating = Math.max(ratingConstrained, 0)
+
     run(
       publishedRobots
         .by(prId)
         .update(
-          _.rating -> lift(glickoSettings.rating),
+          _.rating -> lift(rating),
           _.deviation -> lift(glickoSettings.deviation),
           _.volatility -> lift(glickoSettings.volatility)
         )
@@ -161,8 +169,8 @@ class Robots @Inject()(
             Future successful 1L
           }
         } else run(robots.by(id).update(_.errorCount -> 0))
-
-    }
+    } map (_ => rating)
+  }
 
   def getLatestPublishedCode(id: RobotId)(visitor: Visitor): Future[Option[String]] = {
     findBare(id)(visitor) flatMap {

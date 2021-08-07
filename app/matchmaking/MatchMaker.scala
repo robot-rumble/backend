@@ -187,14 +187,26 @@ class MatchMaker @Inject()(
           }
 
         for {
-          _ <- robotsRepo.updateAfterBattle(pr1.rId, pr1.id, r1Settings, r1Errored)
-          _ <- robotsRepo.updateAfterBattle(pr2.rId, pr2.id, r2Settings, r2Errored)
+          r1Rating <- robotsRepo.updateAfterBattle(
+            pr1.rId,
+            pr1.id,
+            r1Settings,
+            pr1.rating,
+            r1Errored
+          )
+          r2Rating <- robotsRepo.updateAfterBattle(
+            pr2.rId,
+            pr2.id,
+            r2Settings,
+            pr2.rating,
+            r2Errored
+          )
           _ <- battlesRepo.create(
             matchOutput,
-            r1Settings.rating,
-            r1Settings.rating - pr1.rating,
-            r2Settings.rating,
-            r2Settings.rating - pr2.rating
+            r1Rating,
+            r1Rating - pr1.rating,
+            r2Rating,
+            r2Rating - pr2.rating
           )
         } yield ()
     }
