@@ -20,8 +20,8 @@ jobs:
             java-version: 1.8
       - run: sbt clean dist
 
-      - run: wget https://files.boxfuse.com/com/boxfuse/client/boxfuse-commandline/1.33.0.1460/boxfuse-commandline-1.33.0.1460-linux-x64.tar.gz
-      - run: tar xf boxfuse-commandline-1.33.0.1460-linux-x64.tar.gz
+      - run: wget https://files.cloudcaptain.sh/com/boxfuse/client/boxfuse-commandline/1.35.2.1525/boxfuse-commandline-1.35.2.1525-linux-x64.tar.gz
+      - run: tar xf boxfuse-commandline-1.35.2.1525-linux-x64.tar.gz
       - run: ./boxfuse/boxfuse run
           -user=${{ secrets.BOXFUSE_USER }}
           -secret=${{ secrets.BOXFUSE_SECRET }}
