@@ -39,5 +39,6 @@ jobs:
           -envvars.BUILTIN_USER_ID=108
           -jvm.args="-Ddb.default_.migration.auto=true -Dsentry.dsn=${{ secrets.SENTRY_DSN }}"
           -ports.http=80
+          -components.openjdk=11.0.13
           -env=prod
           # https://github.com/boxfuse/boxfuse-issues/issues/180
