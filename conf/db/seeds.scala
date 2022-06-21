@@ -40,6 +40,15 @@ def createBattle(
     100
   )
 }
+
+
+val code =
+  """
+    |function robot(state, unit) {
+    |    return Action.move(Direction.East)
+    |}
+    |""".stripMargin
+
 for {
   season1 <- seasonsRepo.create(
     "The first season",
@@ -51,13 +60,19 @@ for {
   board1 <- boardsRepo.create(None, "one", None, None, Some(season1.id))
   board2 <- boardsRepo.create(None, "two", None, None, Some(season1.id))
   (user, _) <- usersRepo.create("test@test.com", "test", "password1")
-  Some(r1) <- robotsRepo.create(user.id, "r1", Lang.Python, true)
+  accountVerification <- usersRepo.createAccountVerification(user.id)
+  Some(_) <- usersRepo.verify(user.id, accountVerification.token)
+  Some(r1) <- robotsRepo.create(user.id, "r1", Lang.Javascript, true)
+  _ <- robotsRepo.updateDevCode(r1.id, code)
   Some(Right(pr1Id)) <- boardsRepo.publish(r1.id, board1)
-  Some(r2) <- robotsRepo.create(user.id, "r2", Lang.Python, true)
+  Some(r2) <- robotsRepo.create(user.id, "r2", Lang.Javascript, true)
+  _ <- robotsRepo.updateDevCode(r2.id, code)
   Some(Right(pr2Id)) <- boardsRepo.publish(r2.id, board1)
-  Some(r3) <- robotsRepo.create(user.id, "r3", Lang.Python, true)
+  Some(r3) <- robotsRepo.create(user.id, "r3", Lang.Javascript, true)
+  _ <- robotsRepo.updateDevCode(r3.id, code)
   Some(Right(pr3Id)) <- boardsRepo.publish(r3.id, board1)
-  Some(r4) <- robotsRepo.create(user.id, "r4", Lang.Python, true)
+  Some(r4) <- robotsRepo.create(user.id, "r4", Lang.Javascript, true)
+  _ <- robotsRepo.updateDevCode(r4.id, code)
   Some(Right(pr4Id)) <- boardsRepo.publish(r4.id, board1)
   b1 <- createBattle(board1.id, r1.id, pr1Id, r2.id, pr2Id)
   b2 <- createBattle(board1.id, r2.id, pr2Id, r3.id, pr3Id)
