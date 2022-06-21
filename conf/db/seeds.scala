@@ -49,6 +49,11 @@ val code =
     |}
     |""".stripMargin
 
+var boardBio =
+  """
+    |<p>When you publish one of your draft robots, it begins to live on one of these boards, where it is matched with competitors to give you a rating. Some boards stand by themselves, while others belong to a specific Season. Learn more about publishing <a href="https://rr-docs.readthedocs.io/en/latest/publishing.html">here</a>.</p>
+    |""".stripMargin
+
 for {
   season1 <- seasonsRepo.create(
     "The first season",
@@ -57,8 +62,7 @@ for {
     LocalDateTime.now().plusDays(30),
     "<b>Season!</b>"
   )
-  board1 <- boardsRepo.create(None, "one", None, None, Some(season1.id))
-  board2 <- boardsRepo.create(None, "two", None, None, Some(season1.id))
+  board1 <- boardsRepo.create(None, "one", Some(boardBio), None, Some(season1.id))
   (user, _) <- usersRepo.create("test@test.com", "test", "password1")
   accountVerification <- usersRepo.createAccountVerification(user.id)
   Some(_) <- usersRepo.verify(user.id, accountVerification.token)
