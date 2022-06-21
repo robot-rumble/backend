@@ -9,7 +9,7 @@ object LoginForm {
   val form: Form[Data] = Form(
     mapping(
       "username" -> nonEmptyText,
-      "password" -> password
+      "password" -> nonEmptyText
     )(Data.apply)(Data.unapply)
   )
 
