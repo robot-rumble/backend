@@ -1,5 +1,5 @@
 @import models.Schema._
-@(boards: Seq[Board], assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+@(boardOption: Option[FullBoard], assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
 @main("Robot Rumble ALPHA", "index", assetsFinder) {
     <h1>Code robots, win matches, rank up.</h1>
@@ -19,28 +19,27 @@
         <p class="mt-2">You can also read more about the game rules <a href="@routes.HomeController.rules">here</a>.</p>
     </div>
 
-    @if(boards.nonEmpty) {
-        <div class="mt-5 _table">
-            <h2 class="mb-3">Active robot boards</h2>
-            <table class="_body">
-                @for(board <- boards.filter(_.isActive())) {
-                    <tr>
-                        <td><a href="@routes.BoardController.view(board.id.id)">
-                            <img src="@assetsFinder.path("images/board.svg")">
-                            @board.name
-                        </a></td>
-                        <td class="text-grey">publish cooldown: @board.formatPublishCooldown()</td>
-                    </tr>
-                }
-            </table>
-            <div class="_footer">
-                <a href="@routes.BoardController.index()">
-                    <img src="@assetsFinder.path("images/launch.svg")" alt="">
-                    view all boards
-                </a>
-            </div>
-        </div>
-    }
+  	@boardOption match {
+	  	case Some(board) => {
+			<div class="mt-5 _table">
+				<h2 class="mb-3">Leaderboard</h2>
+				<div class="_table">
+					<table class="_body _robots">
+					@robotRows(board.board.id, board.robots, assetsFinder)
+					</table>
+					<div class="_footer">
+						@if(board.robots.nonEmpty) {
+							<a href="@routes.BoardController.index()">
+								<img src="@assetsFinder.path("images/launch.svg")" alt="">
+								view full leaderboard
+							</a>
+						}
+					</div>
+				</div>
+			</div>
+		}
+  		case None => {}
+   }
 
     <h2 class="mt-5">Changelog</h2>
     <div>

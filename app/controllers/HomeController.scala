@@ -1,5 +1,7 @@
 package controllers
 
+import controllers.Auth.LoggedOut
+import models.Schema.BoardId
 import models._
 import play.api.Configuration
 import play.api.mvc._
@@ -17,9 +19,10 @@ class HomeController @Inject()(
 )(implicit ec: ExecutionContext)
     extends AbstractController(cc) {
 
-  def index = auth.action { visitor => implicit request =>
-    boardsRepo.findAllBare(visitor) map { boards =>
-      Ok(views.html.index(boards, assetsFinder))
+  def index = Action.async { implicit request =>
+    boardsRepo.find(BoardId(config.get[Long]("site.leaderboardId")), 0, 10)(LoggedOut()) map {
+      leaderboard =>
+        Ok(views.html.index(leaderboard, assetsFinder))
     }
   }
 
