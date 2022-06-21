@@ -48,4 +48,3 @@ scalacOptions ++= Seq(
   "-deprecation",
   "-Xfatal-warnings",
 )
-
