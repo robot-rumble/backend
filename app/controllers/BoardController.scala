@@ -22,14 +22,8 @@ class BoardController @Inject()(
 )(implicit ec: ExecutionContext)
     extends AbstractController(cc) {
 
-  def index() = auth.action { visitor => implicit request =>
-    seasonsRepo.findAll() flatMap { seasons =>
-      boardsRepo.findAllBare(visitor) map { boards =>
-        val isAuthenticated = Visitor.asOption(visitor).isDefined
-        val isAdmin = Visitor.asOption(visitor).exists(_.admin)
-        Ok(views.html.board.index(seasons, boards, isAuthenticated, isAdmin, assetsFinder))
-      }
-    }
+  def index() = Action { implicit request =>
+    Redirect(routes.BoardController.view(config.get[Long]("site.leaderboardId")))
   }
 
   def view(id: Long) = auth.action { visitor => implicit request =>
