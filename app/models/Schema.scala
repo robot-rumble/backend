@@ -30,6 +30,16 @@ object Schema {
     val values = findValues
   }
 
+  sealed trait DeactivationReason extends EnumEntry
+
+  case object DeactivationReason
+      extends PlayEnum[DeactivationReason]
+      with QuillEnum[DeactivationReason] {
+    case object Errored extends DeactivationReason
+    case object Inactivity extends DeactivationReason
+    val values = findValues
+  }
+
   case class UserId(id: Long)
 
   case class User(
@@ -66,6 +76,7 @@ object Schema {
       created: LocalDateTime = LocalDateTime.now(),
       published: Boolean = false,
       active: Boolean = true,
+      deactivationReason: Option[DeactivationReason] = None,
       errorCount: Int = 0,
       openSource: Boolean,
   )
@@ -122,6 +133,16 @@ object Schema {
         volatility = glickoSettings.volatility
       )
   }
+
+//  implicit val publishedRobotWrites = new Writes[PRobot] {
+//    def writes(publishedRobot: PRobot) = Json.obj(
+//      "id" -> publishedRobot.id.id,
+//      "boardId" -> publishedRobot.boardId.id,
+//      "rating" -> publishedRobot.rating,
+//      "deviation" -> publishedRobot.deviation,
+//      "volatility" -> publishedRobot.volatility,
+//    )
+//  }
 
   implicit val robotWrites = new Writes[Robot] {
     def writes(robot: Robot) = Json.obj(

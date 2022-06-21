@@ -27,6 +27,21 @@
         <h1>Robot @fullRobot.robot.name</h1>
     } else {
         <h1 class="inactive">Robot @fullRobot.robot.name (inactive)</h1>
+        @if(isOwner) {
+	        <p class="error mb-3">Deactivation reason:
+	        @fullRobot.robot.deactivationReason match {
+			  	case Some(DeactivationReason.Errored) => {
+				  	Your robot errored too many times in a row
+				}
+				case Some(DeactivationReason.Inactivity) => {
+					Your robot has not been updated in a long time
+				}
+				case None => {
+				  	Unknown
+				}
+		    }
+			</p>
+        }
     }
     <h3 class="mb-4">@fullRobot.robot.lang robot by <a href="@routes.UserController.view(fullRobot.user.username)">@fullRobot.user.username</a></h3>
 

@@ -2,6 +2,7 @@ package models
 
 import controllers.Auth.{LoggedIn, LoggedOut, Visitor}
 import io.getquill.{EntityQuery, Ord}
+import models.Schema.DeactivationReason
 import models.Schema._
 import org.joda.time.LocalDateTime
 import play.api.Configuration
@@ -151,7 +152,11 @@ class Robots @Inject()(
         .returning(_.created)
     ) flatMap { created =>
       if (created.plus(INACTIVITY_TIMEOUT).isBefore(LocalDateTime.now()))
-        run(robots.by(id).update(_.active -> false))
+        run(
+          robots
+            .by(id)
+            .update(_.active -> false, _.deactivationReason -> Some(DeactivationReason.Inactivity))
+        )
       else if (errored)
         run(
           robots
@@ -163,7 +168,7 @@ class Robots @Inject()(
             run(
               robots
                 .by(id)
-                .update(_.active -> false)
+                .update(_.active -> false, _.deactivationReason -> Some(DeactivationReason.Errored))
             )
           } else {
             Future successful 1L
