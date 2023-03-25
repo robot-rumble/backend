@@ -74,7 +74,6 @@ class MatchMaker @Inject()(
                   case Some(board) =>
                     val battleCooldown =
                       if (USE_MOCK) Duration.ZERO
-                      else if (pr.volatility < VOLATILITY_CUTOFF) NON_VOLATILE_BATTLE_COOLDOWN
                       else board.battleCooldown
                     val opponentNum = {
                       val publishedWithinWindow =
@@ -91,7 +90,6 @@ class MatchMaker @Inject()(
                               .isBefore(LocalDateTime.now())
                         }
                         if (!cooldownExpired) 0
-                        else if (pr.volatility < VOLATILITY_CUTOFF) NON_VOLATILE_BATTLE_NUM
                         else board.recurrentBattleNum
                       }
                     }
