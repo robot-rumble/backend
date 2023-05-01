@@ -152,11 +152,11 @@ class Robots @Inject()(
         .returning(_.created)
     ) flatMap { created =>
       if (created.plus(INACTIVITY_TIMEOUT).isBefore(LocalDateTime.now()))
-        run(
-          robots
-            .by(id)
-            .update(_.active -> false, _.deactivationReason -> Some(DeactivationReason.Inactivity))
-        )
+//        run(
+//          robots
+//            .by(id)
+//            .update(_.active -> false, _.deactivationReason -> Some(DeactivationReason.Inactivity))
+//        )
       else if (errored)
         run(
           robots
