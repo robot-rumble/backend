@@ -33,7 +33,7 @@
   <logger name="io.getquill" level="DEBUG"/>
 
   <logger name="akka.actor" level="DEBUG" />
-  <logger name="software.amazon.awssdk" level="DEBUG" />
+  <logger name="software.amazon.awssdk" level="OFF" />
 
   <logger name="play" level="INFO" />
   <logger name="application" level="INFO" />
