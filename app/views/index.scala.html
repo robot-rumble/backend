@@ -29,7 +29,7 @@
 					</table>
 					<div class="_footer">
 						@if(board.robots.nonEmpty) {
-							<a href="@routes.BoardController.index()">
+							<a href="@routes.BoardController.viewRobots(board.board.id.id)">
 								<img src="@assetsFinder.path("images/launch.svg")" alt="">
 								view full leaderboard
 							</a>

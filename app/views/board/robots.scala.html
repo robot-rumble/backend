@@ -2,7 +2,8 @@
 @(board: FullBoard, page: Long, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
 @main(f"${board.board.name} Robots", "robots", assetsFinder) {
-    <h1><a href="@routes.BoardController.view(board.board.id.id)">@board.board.name</a> Robots</h1>
+    <h1>@board.board.name Robots</h1>
+    <div class="mb-4"><a href="@routes.BoardController.view(board.board.id.id)">Back to the board page</a></div>
 
     <div class="_table">
         <table class="_battles">
