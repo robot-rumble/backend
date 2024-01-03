@@ -20,6 +20,7 @@ class Robots @Inject()(
 ) {
   val ERROR_LIMIT = config.get[Long]("queue.errorLimit")
   val INACTIVITY_TIMEOUT = config.get[FiniteDuration]("queue.inactivityTimeout")
+  val INACTIVITY_RATING_CUTOFF = config.get[FiniteDuration]("queue.inactivityRatingCutoff")
   val MAX_RATING_CHANGE = config.get[Int]("queue.maxRatingChange")
 
   import schema._
@@ -148,15 +149,15 @@ class Robots @Inject()(
           _.deviation -> lift(glickoSettings.deviation),
           _.volatility -> lift(glickoSettings.volatility)
         )
-        .returning(_.created)
-    ) flatMap { created =>
-      if (created.plus(INACTIVITY_TIMEOUT).isBefore(LocalDateTime.now()))
+        .returning(pr => (pr.created, pr.rating))
+    ) flatMap { case (created, rating) =>
+      if (created.plus(INACTIVITY_TIMEOUT).isBefore(LocalDateTime.now()) && rating < INACTIVITY_RATING_CUTOFF) {
         run(
           robots
             .by(id)
             .update(_.active -> false, _.deactivationReason -> lift(Some(DeactivationReason.Inactivity): Option[DeactivationReason]))
         )
-      else if (errored)
+      } else if (errored)
         run(
           robots
             .by(id)
