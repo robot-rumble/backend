@@ -63,7 +63,7 @@ for {
     "<b>Season!</b>"
   )
   board1 <- boardsRepo.create(None, "one", Some(boardBio), None, Some(season1.id))
-  (user, _) <- usersRepo.create("test@test.com", "test", "password1")
+  (user, _) <- usersRepo.create("test@test.com", "builtin", "password1")
   accountVerification <- usersRepo.createAccountVerification(user.id)
   Some(_) <- usersRepo.verify(user.id, accountVerification.token)
   Some(r1) <- robotsRepo.create(user.id, "r1", Lang.Javascript, true)
@@ -82,5 +82,7 @@ for {
   b2 <- createBattle(board1.id, r2.id, pr2Id, r3.id, pr3Id)
   b2 <- createBattle(board1.id, r2.id, pr2Id, r4.id, pr4Id)
   b2 <- createBattle(board1.id, r4.id, pr4Id, r2.id, pr2Id)
+  (user2, _) <- usersRepo.create("test2@test.com", "user", "password1")
+  _ <- usersRepo.createAccountVerification(user2.id)
 } yield ()
 
