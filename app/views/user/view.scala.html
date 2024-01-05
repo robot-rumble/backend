@@ -36,6 +36,10 @@
                                 <img src="@assetsFinder.path("images/wrench.svg")">
                                 edit
                             </a></td>
+                            <td><a href="@routes.RobotController.update(user.username, robot.name)">
+                                <img src="@assetsFinder.path("images/edit.svg")" alt="">
+                                update name
+                            </a></td>
                         }
                     </tr>
                 }
