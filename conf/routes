@@ -5,7 +5,8 @@
 GET         /                                       controllers.HomeController.index
 GET         /rules                                  controllers.HomeController.rules
 GET         /demo                                   controllers.HomeController.demo
-GET         /tutorial                               controllers.HomeController.tutorial
+GET         /tutorial                               controllers.HomeController.tutorialHome
+GET         /tutorial/:part                         controllers.HomeController.tutorial(part: Int)
 
 GET         /signup                                 controllers.UserController.create
 POST        /signup                                 controllers.UserController.postCreate
