@@ -1,0 +1,8 @@
+@(assetsFinder: AssetsFinder)(implicit request: RequestHeader)
+
+@main("Tutorial", "tutorial", assetsFinder) {
+    <p>Welcome! The Robot Rumble tutorial is an interactive series of "chapters" that teach you the basics of creating your first robot. So far, part one is complete.</p>
+    <ol class="mt-3">
+        <li><a href="@routes.HomeController.tutorial(1)">Basic robot movement and action</a></li>
+    </ol>
+}
