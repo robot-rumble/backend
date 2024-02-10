@@ -120,7 +120,19 @@ object Schema {
       rating: Int,
       deviation: Double,
       volatility: Double,
-  )
+  ) {
+    val publishedFormatter = new DateTimeFormatterBuilder()
+      .appendMonthOfYear(2)
+      .appendLiteral('/')
+      .appendDayOfMonth(2)
+      .appendLiteral('/')
+      .appendTwoDigitYear(0)
+      .toFormatter
+
+    def formatPublished(): String = {
+      publishedFormatter.print(created)
+    }
+  }
 
   object PRobot {
     def apply(rId: RobotId, boardId: BoardId, code: String, glickoSettings: GlickoSettings) =
@@ -187,6 +199,8 @@ object Schema {
       .appendMonthOfYear(2)
       .appendLiteral('/')
       .appendDayOfMonth(2)
+      .appendLiteral('/')
+      .appendTwoDigitYear(0)
       .toFormatter
 
     def formatCreated(): String = {

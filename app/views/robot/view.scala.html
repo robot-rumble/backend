@@ -84,12 +84,16 @@
                 <div class="_table mb-3">
                     <div class="_header">
                         <p>
-                            @board.name <span class="text-grey">
+                            @board.name
                             @if(board.password.isDefined) {
                                 <img src="@assetsFinder.path("images/lock.svg")">
                             }
-                            &nbsp;rating: @pRobot.rating</span>
                         </p>
+
+                        <div>
+                            <span class="text-grey">rating: @pRobot.rating&nbsp;</span>
+                            <span class="text-grey">last published: @pRobot.formatPublished()</span>
+                        </div>
                     </div>
                     <table class="_body _battles">
                     @if(battles.nonEmpty) {
