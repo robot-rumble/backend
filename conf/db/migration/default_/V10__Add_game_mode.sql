@@ -1,0 +1,2 @@
+ALTER TABLE boards
+    ADD COLUMN game_mode VARCHAR(50) NOT NULL DEFAULT 'Normal';

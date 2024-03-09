@@ -40,6 +40,14 @@ object Schema {
     val values = findValues
   }
 
+  sealed trait GameMode extends EnumEntry
+
+  case object GameMode extends PlayEnum[GameMode] with QuillEnum[GameMode] {
+    case object Normal extends GameMode
+    case object NormalHeal extends GameMode
+    val values = findValues
+  }
+
   case class UserId(id: Long)
 
   case class User(
@@ -272,7 +280,8 @@ object Schema {
       publishCooldown: Duration,
       publishBattleNum: Int,
       battleCooldown: Duration,
-      recurrentBattleNum: Int
+      recurrentBattleNum: Int,
+      gameMode: GameMode
   ) {
     val cooldownFormatter = new PeriodFormatterBuilder()
       .printZeroRarelyFirst()

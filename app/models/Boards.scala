@@ -244,7 +244,8 @@ class Boards @Inject()(
       publishCooldown = config.get[FiniteDuration]("queue.defaultPublishCooldown"),
       publishBattleNum = config.get[Int]("queue.defaultPublishBattleNum"),
       battleCooldown = config.get[FiniteDuration]("queue.defaultBattleCooldown"),
-      recurrentBattleNum = config.get[Int]("queue.defaultRecurrentBattleNum")
+      recurrentBattleNum = config.get[Int]("queue.defaultRecurrentBattleNum"),
+      gameMode = GameMode.Normal,
     )
     run(boards.insert(lift(board)).returningGenerated(_.id)).map(board.copy(_)) flatMap { board =>
       adminId match {
