@@ -129,6 +129,9 @@ class Robots @Inject()(
   def update(id: RobotId, name: String, bio: String, openSource: Boolean): Future[Long] =
     run(robots.by(id).update(_.name -> lift(name), _.bio -> lift(bio), _.openSource -> lift(openSource)))
 
+  def deactivate(id: RobotId): Future[Long] =
+    run(robots.by(id).update(_.active -> false, _.deactivationReason -> lift(Some(DeactivationReason.Manual): Option[DeactivationReason])))
+
   def updateAfterBattle(
       id: RobotId,
       prId: PRobotId,

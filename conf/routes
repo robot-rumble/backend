@@ -59,6 +59,7 @@ GET         /assets/*file                           controllers.Assets.at(file)
 GET         /robots/create                          controllers.RobotController.create
 POST        /robots/create                          controllers.RobotController.postCreate
 POST        /robots/update/:robotId                 controllers.RobotController.postUpdate(robotId: Long)
+POST        /robots/deactivate/:robotId             controllers.RobotController.postDeactivate(robotId: Long)
 
 GET         /:user                                  controllers.UserController.view(user)
 GET         /:user/                                 controllers.UserController.view(user)
@@ -66,4 +67,5 @@ GET         /:user/:robot                           controllers.RobotController.
 GET         /:user/:robot/                          controllers.RobotController.view(user, robot)
 GET         /:user/:robot/edit                      controllers.RobotController.edit(user, robot)
 GET         /:user/:robot/update                    controllers.RobotController.update(user, robot)
+GET         /:user/:robot/deactivate                controllers.RobotController.deactivate(user, robot)
 GET         /:user/:robot/view-code                 controllers.RobotController.viewPublishedCode(user, robot)

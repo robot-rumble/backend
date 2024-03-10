@@ -37,6 +37,7 @@ object Schema {
       with QuillEnum[DeactivationReason] {
     case object Errored extends DeactivationReason
     case object Inactivity extends DeactivationReason
+    case object Manual extends DeactivationReason
     val values = findValues
   }
 

@@ -27,21 +27,6 @@
         <h1>Robot @fullRobot.robot.name</h1>
     } else {
         <h1 class="inactive">Robot @fullRobot.robot.name (inactive)</h1>
-        @if(isOwner) {
-	        <p class="error mb-3">Deactivation reason:
-	        @fullRobot.robot.deactivationReason match {
-			  	case Some(DeactivationReason.Errored) => {
-				  	Your robot errored too many times in a row
-				}
-				case Some(DeactivationReason.Inactivity) => {
-					Your robot has not been updated in a long time
-				}
-				case None => {
-				  	Unknown
-				}
-		    }
-			</p>
-        }
     }
     <h3 class="mb-4">@if(fullRobot.robot.openSource) { Open Source } @fullRobot.robot.lang robot by <a href="@routes.UserController.view(fullRobot.user.username)">@fullRobot.user.username</a></h3>
 
@@ -63,16 +48,39 @@
                 <img src="@assetsFinder.path("images/edit.svg")" alt="">
                 update name/bio/open source
             </a>
+
+            @if(fullRobot.robot.active) {
+                <a href="@routes.RobotController.deactivate(fullRobot.user.username, fullRobot.robot.name)">
+                    <img src="@assetsFinder.path("images/deactivate.svg")" alt="">
+                    deactivate
+                </a>
+            }
         }
     </div>
 
-    @if(isOwner && fullRobot.robot.errorCount > 0) {
-        <p class="mt-3 error">
+    @if(isOwner && !fullRobot.robot.active) {
+        <p class=@{if (fullRobot.robot.deactivationReason != Some(DeactivationReason.Manual)) "error mt-3" else "mt-3"}>Your robot is no longer active, which means it is not involved in matchmaking. You can reactivate it by publishing to a board. Deactivation reason:
+            @fullRobot.robot.deactivationReason match {
+                case Some(DeactivationReason.Errored) => {
+                    Your robot errored @fullRobot.robot.errorCount times in a row
+                }
+                case Some(DeactivationReason.Inactivity) => {
+                    Your robot has not been updated in a long time
+                }
+                case Some(DeactivationReason.Manual) => {
+                    Your robot has been manually deactivated
+                }
+                case None => {
+                    Unknown
+                }
+            } <a href="https://rr-docs.readthedocs.io/en/latest/publishing.html#deactivation" target="_blank">(learn more)</a>
+        </p>
+    }
+
+    @if(isOwner && fullRobot.robot.errorCount > 0 && (fullRobot.robot.active || fullRobot.robot.deactivationReason != Some(DeactivationReason.Errored))) {
+        <p class="error mt-3">
             <img src="@assetsFinder.path("images/error.svg")" alt="">
             Your robot errored @fullRobot.robot.errorCount time@{if (fullRobot.robot.errorCount > 1) "s"} in recent battles.
-            @if(!fullRobot.robot.active) {
-                It has been automatically deactivated. Matchmaking will resume once you re-publish with corrected code. <a href="https://rr-docs.readthedocs.io/en/latest/publishing.html#deactivation" target="_blank">Learn more</a>
-            }
         </p>
     }
 

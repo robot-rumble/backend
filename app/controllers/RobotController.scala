@@ -147,6 +147,32 @@ class RobotController @Inject()(
       }
     }
 
+  def deactivate(_username: String, name: String) =
+    auth.actionForceLI { user => implicit request =>
+      robotsRepo.findBare(user.id, name)(LoggedIn(user)) map {
+        case Some(robot) =>
+          Ok(
+            views.html.robot.deactivate(robot, assetsFinder)
+          )
+        case None =>
+          NotFound("404")
+      }
+    }
+
+  def postDeactivate(id: Long) =
+    auth.actionForceLI { user => implicit request =>
+      robotsRepo.findBare(RobotId(id))(LoggedIn(user)) flatMap {
+        case Some(robot) =>
+          robotsRepo.deactivate(robot.id) map { _ =>
+            Redirect(
+              routes.RobotController.view(user.username, robot.name)
+            )
+          }
+        case None =>
+          Future successful NotFound("404")
+      }
+    }
+
   def viewById(id: Long) = auth.action { visitor => implicit request =>
     robotsRepo.find(RobotId(id))(visitor) map {
       case Some(FullRobot(robot, user)) =>

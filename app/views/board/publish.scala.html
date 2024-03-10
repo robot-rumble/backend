@@ -4,7 +4,7 @@
 @main(s"Publish to ${board.name}", "publish", assetsFinder) {
     <h1>Publish to <a href="@routes.BoardController.view(board.id.id)">@board.name</a></h1>
 
-    <p class="mb-3">Once you publish, your robot will be seen to every other user on this site, and will be queued for battles to establish your rating. You can only publish once every <b>@board.formatPublishCooldown()</b>, so make sure to only do so when your robot is ready to meet the competition.
+    <p class="mb-3">Once you publish, your robot will be seen to every other user on this site, and will be queued for battles to establish your rating. Please note that you cannot unpublish a robot, although you can pause matchmaking for that robot by deactivating it. Also, you can only publish once every <b>@board.formatPublishCooldown()</b> on this board, so make sure to only do so when your robot is ready to meet the competition.
         <a href="https://rr-docs.readthedocs.io/en/latest/publishing.html" target="_blank">Learn more</a>
     </p>
 
