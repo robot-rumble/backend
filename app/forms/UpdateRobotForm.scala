@@ -9,10 +9,11 @@ object UpdateRobotForm {
   val form: Form[Data] = Form(
     mapping(
       "name" -> name,
-      "bio" -> bio
+      "bio" -> bio,
+      "openSource" -> boolean
     )(Data.apply)(Data.unapply)
   )
 
-  case class Data(name: String, bio: String)
+  case class Data(name: String, bio: String, openSource: Boolean)
 
 }

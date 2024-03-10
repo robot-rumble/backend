@@ -5,6 +5,7 @@
     @helper.form(routes.RobotController.postUpdate(robot.id.id)) {
         @helper.inputText(form("name"), Symbol("_showConstraints") -> false)
         @helper.textarea(form("bio"), Symbol("_showConstraints") -> false)
+        @helper.checkbox(form("openSource"), Symbol("_showConstraints") -> false)
         @helper.CSRF.formField
         <button class="button">update</button>
     }

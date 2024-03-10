@@ -104,7 +104,7 @@ class RobotController @Inject()(
       robotsRepo.findBare(user.id, name)(LoggedIn(user)) map {
         case Some(robot) =>
           Ok(
-            views.html.robot.update(UpdateRobotForm.form.fill(UpdateRobotForm.Data(robot.name, robot.bio)), robot, assetsFinder)
+            views.html.robot.update(UpdateRobotForm.form.fill(UpdateRobotForm.Data(robot.name, robot.bio, robot.openSource)), robot, assetsFinder)
           )
         case None =>
           NotFound("404")
@@ -134,7 +134,7 @@ class RobotController @Inject()(
                     )
                   )
                 case None =>
-                  robotsRepo.update(robot.id, data.name, data.bio) map { _ =>
+                  robotsRepo.update(robot.id, data.name, data.bio, data.openSource) map { _ =>
                     Redirect(
                       routes.RobotController.view(user.username, data.name)
                     )

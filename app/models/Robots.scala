@@ -126,8 +126,8 @@ class Robots @Inject()(
       run(robots.by(id).update(_.devCode -> lift(devCode)))
     else throw new Exception("Updating robot with empty code.")
 
-  def update(id: RobotId, name: String, bio: String): Future[Long] =
-    run(robots.by(id).update(_.name -> lift(name), _.bio -> lift(bio)))
+  def update(id: RobotId, name: String, bio: String, openSource: Boolean): Future[Long] =
+    run(robots.by(id).update(_.name -> lift(name), _.bio -> lift(bio), _.openSource -> lift(openSource)))
 
   def updateAfterBattle(
       id: RobotId,
