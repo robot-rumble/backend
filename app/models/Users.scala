@@ -26,9 +26,10 @@ class Users @Inject()(schema: Schema)(implicit ec: ExecutionContext) {
   def create(
       email: String,
       username: String,
-      password: String
+      password: String,
+      bio: String
   ): Future[(User, AccountVerification)] = {
-    val data = User(email, username, password)
+    val data = User(email, username, password, bio)
     run(users.insert(lift(data)).returningGenerated(_.id)).map(data.copy(_)) flatMap { user =>
       createAccountVerification(user.id) map { accountVerification =>
         (user, accountVerification)
@@ -50,4 +51,7 @@ class Users @Inject()(schema: Schema)(implicit ec: ExecutionContext) {
       case Some(_) => run(users.by(id).update(_.verified -> true).returning(u => u)).map(Some(_))
       case None    => Future successful None
     }
+
+  def update(id: UserId, bio: String): Future[Long] =
+    run(users.by(id).update(_.bio -> lift(bio)))
 }

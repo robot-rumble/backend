@@ -4,16 +4,17 @@
 @main(user.username, "view", assetsFinder) {
     <h1>@user.username</h1>
 
+    @if(isAuthenticated) {
+        <a href="@routes.UserController.update">
+            <img src="@assetsFinder.path("images/edit.svg")" alt="">
+            update bio
+        </a>
+    }
+    <p class="mt-3 mb-3">@user.bio</p>
+
     @if(isAuthenticated && !user.verified) {
         <p class="error">Account not verified. Please follow the link sent to @user.email before creating any robots</p>
     } else {
-        @if(isAuthenticated) {
-            <p class="mb-5">
-                Thank you for being an alpha user! We greatly appreciate any and all thoughts, suggestions, or comments. You can send them anonymously through <a href="https://forms.gle/5F6T5tptGV5rTjgd9">
-                this Google form.</a>
-                If you would be open to giving more in-depth feedback, please contact antonoutkine At gmail Dot com. Happy coding!</p>
-        }
-
         <div class="_table">
             @if(robots.nonEmpty) {
                 <table class="_body">

@@ -10,10 +10,11 @@ object SignupForm {
     mapping(
       "email" -> email,
       "username" -> username,
-      "password" -> password
+      "password" -> password,
+      "bio" -> bio
     )(Data.apply)(Data.unapply)
   )
 
-  case class Data(email: String, username: String, password: String)
+  case class Data(email: String, username: String, password: String, bio: String)
 
 }

@@ -4,15 +4,14 @@ import forms.Validators._
 import play.api.data.Form
 import play.api.data.Forms._
 
-object UpdateRobotForm {
+object UpdateUserForm {
 
   val form: Form[Data] = Form(
     mapping(
-      "name" -> name,
       "bio" -> bio
     )(Data.apply)(Data.unapply)
   )
 
-  case class Data(name: String, bio: String)
+  case class Data(bio: String)
 
 }

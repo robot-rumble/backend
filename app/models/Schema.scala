@@ -50,10 +50,11 @@ object Schema {
       created: LocalDateTime,
       verified: Boolean,
       admin: Boolean,
+      bio: String
   )
 
   object User {
-    def apply(email: String, username: String, password: String) =
+    def apply(email: String, username: String, password: String, bio: String) =
       new User(
         email = email,
         username = username,
@@ -61,6 +62,7 @@ object Schema {
         created = LocalDateTime.now(),
         verified = false,
         admin = false,
+        bio = bio
       )
   }
 
@@ -79,6 +81,7 @@ object Schema {
       deactivationReason: Option[DeactivationReason] = None,
       errorCount: Int = 0,
       openSource: Boolean,
+      bio: String
   )
 
   case class FullRobot(robot: Robot, user: User)
@@ -88,13 +91,14 @@ object Schema {
   type PublishResult = Either[String, PRobotId]
 
   object Robot {
-    def apply(userId: UserId, name: String, lang: Lang, openSource: Boolean) =
+    def apply(userId: UserId, name: String, lang: Lang, openSource: Boolean, bio: String) =
       new Robot(
         userId = userId,
         name = name,
         devCode = "",
         lang = lang,
-        openSource = openSource
+        openSource = openSource,
+        bio = bio
       )
   }
 

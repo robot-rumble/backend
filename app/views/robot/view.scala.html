@@ -61,7 +61,7 @@
 
             <a href="@routes.RobotController.update(fullRobot.user.username, fullRobot.robot.name)">
                 <img src="@assetsFinder.path("images/edit.svg")" alt="">
-                update name
+                update name/bio
             </a>
         }
     </div>
@@ -75,6 +75,8 @@
             }
         </p>
     }
+
+    <p class="mt-3">@fullRobot.robot.bio</p>
 
     <div class="mt-5">
         <h2>Battles</h2>

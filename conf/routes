@@ -12,6 +12,8 @@ GET         /signup                                 controllers.UserController.c
 POST        /signup                                 controllers.UserController.postCreate
 GET         /login                                  controllers.UserController.login
 POST        /login                                  controllers.UserController.postLogin
+GET         /update                                 controllers.UserController.update
+POST        /update                                 controllers.UserController.postUpdate
 GET         /password-reset                         controllers.UserController.passwordReset
 POST        /password-reset                         controllers.UserController.postPasswordReset
 GET         /password-reset/complete                controllers.UserController.updatePassword

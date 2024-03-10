@@ -12,9 +12,10 @@ object CreateRobotForm {
       "name" -> name,
       "lang" -> Lang.formField,
       "openSource" -> boolean,
+      "bio" -> bio
     )(Data.apply)(Data.unapply)
   )
 
-  case class Data(name: String, lang: Lang, openSource: Boolean)
+  case class Data(name: String, lang: Lang, openSource: Boolean, bio: String)
 
 }

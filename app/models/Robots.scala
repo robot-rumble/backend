@@ -110,11 +110,12 @@ class Robots @Inject()(
       userId: UserId,
       name: String,
       lang: Lang,
-      openSource: Boolean
+      openSource: Boolean,
+      bio: String
   ): Future[Option[Robot]] = {
     usersRepo.find(userId) flatMap {
       case Some(user) if user.verified =>
-        val robot = Robot(userId, name, lang, openSource)
+        val robot = Robot(userId, name, lang, openSource, bio)
         run(robots.insert(lift(robot)).returningGenerated(_.id)).map(robot.copy(_)).map(Some(_))
       case _ => Future successful None
     }
@@ -125,8 +126,8 @@ class Robots @Inject()(
       run(robots.by(id).update(_.devCode -> lift(devCode)))
     else throw new Exception("Updating robot with empty code.")
 
-  def update(id: RobotId, name: String): Future[Long] =
-    run(robots.by(id).update(_.name -> lift(name)))
+  def update(id: RobotId, name: String, bio: String): Future[Long] =
+    run(robots.by(id).update(_.name -> lift(name), _.bio -> lift(bio)))
 
   def updateAfterBattle(
       id: RobotId,

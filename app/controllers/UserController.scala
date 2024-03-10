@@ -2,7 +2,7 @@ package controllers
 
 import com.github.t3hnar.bcrypt._
 import controllers.Auth.Visitor
-import forms.{LoginForm, PasswordResetForm, SignupForm, UpdatePasswordForm}
+import forms.{LoginForm, PasswordResetForm, SignupForm, UpdatePasswordForm, UpdateUserForm}
 import models.Schema._
 import models._
 import play.api.libs.json.Json
@@ -40,7 +40,7 @@ class UserController @Inject()(
             passwordUser =>
               (usernameUser, passwordUser) match {
                 case (None, None) =>
-                  usersRepo.create(data.email, data.username, data.password) flatMap {
+                  usersRepo.create(data.email, data.username, data.password, data.bio) flatMap {
                     case (user, accountVerification) =>
                       val link =
                         s"https://robotrumble.org${routes.UserController.verify(user.id.id, accountVerification.token)}"
@@ -257,4 +257,30 @@ class UserController @Inject()(
         )
     }
   }
+
+  def update =
+    auth.actionForceLI { user => implicit request =>
+        Future successful Ok(
+          views.html.user.update(UpdateUserForm.form.fill(UpdateUserForm.Data(user.bio)), assetsFinder)
+        )
+    }
+
+  def postUpdate =
+    auth.actionForceLI { user => implicit request =>
+        UpdateUserForm.form.bindFromRequest.fold(
+          formWithErrors => {
+            Future successful BadRequest(
+              views.html.user.update(formWithErrors, assetsFinder)
+            )
+          },
+          data => {
+              usersRepo.update(user.id, data.bio) map { _ =>
+                Redirect(
+                  routes.UserController.view(user.username)
+                )
+              }
+          }
+        )
+    }
+
 }

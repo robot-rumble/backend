@@ -29,7 +29,7 @@ class RobotController @Inject()(
       Future successful Ok(
         views.html.robot
           .create(
-            CreateRobotForm.form.fill(CreateRobotForm.Data("", Lang.Python, true)),
+            CreateRobotForm.form.fill(CreateRobotForm.Data("", Lang.Python, true, "")),
             assetsFinder
           )
       )
@@ -43,7 +43,7 @@ class RobotController @Inject()(
       case Some(_) =>
         Future successful Right("Robot with this name already exists")
       case None =>
-        robotsRepo.create(user.id, data.name, data.lang, data.openSource) map {
+        robotsRepo.create(user.id, data.name, data.lang, data.openSource, data.bio) map {
           case Some(robot) => Left(robot)
           case None        => Right("You must be verified to create a robot")
         }
@@ -104,7 +104,7 @@ class RobotController @Inject()(
       robotsRepo.findBare(user.id, name)(LoggedIn(user)) map {
         case Some(robot) =>
           Ok(
-            views.html.robot.update(UpdateRobotForm.form, robot, assetsFinder)
+            views.html.robot.update(UpdateRobotForm.form.fill(UpdateRobotForm.Data(robot.name, robot.bio)), robot, assetsFinder)
           )
         case None =>
           NotFound("404")
@@ -134,7 +134,7 @@ class RobotController @Inject()(
                     )
                   )
                 case None =>
-                  robotsRepo.update(robot.id, data.name) map { _ =>
+                  robotsRepo.update(robot.id, data.name, data.bio) map { _ =>
                     Redirect(
                       routes.RobotController.view(user.username, data.name)
                     )
