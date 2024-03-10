@@ -26,6 +26,7 @@
                         <td><a href="@routes.RobotController.view(user.username, robot.name)">
                             <img src="@assetsFinder.path("images/robot.svg")">
                             @robot.name
+                            @if(robot.openSource) { <img src="@assetsFinder.path("images/open-source.svg")"> }
                         </a></td>
                         <td>by <a href="@routes.UserController.view(user.username)">@user.username</a></td>
                         <td>@robot.lang</td>

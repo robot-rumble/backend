@@ -43,7 +43,7 @@
 			</p>
         }
     }
-    <h3 class="mb-4">@fullRobot.robot.lang robot by <a href="@routes.UserController.view(fullRobot.user.username)">@fullRobot.user.username</a></h3>
+    <h3 class="mb-4">@if(fullRobot.robot.openSource) { Open Source } @fullRobot.robot.lang robot by <a href="@routes.UserController.view(fullRobot.user.username)">@fullRobot.user.username</a></h3>
 
     <div class="d-flex actions">
         @if(fullRobot.robot.published && (isOwner || fullRobot.robot.openSource)) {
