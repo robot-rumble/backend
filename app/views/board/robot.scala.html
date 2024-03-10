@@ -10,7 +10,7 @@
         @for(FullBattle(battle, r1, r2) <- boardWithBattles.battles) {
             @defining(if (r1.id == robot.id) { (r1, r2) } else (r2, r1)) { case (ourR, otherR) =>
                 <tr>
-                    <td class="text-gray">@battle.formatCreated()</td>
+                    <td class="text-gray">@battle.formatCreatedTime()</td>
                     <td><a href="@routes.BattleController.view(battle.id.id)">
                         <img src="@assetsFinder.path("images/battle.svg")">
                         #@battle.id.id

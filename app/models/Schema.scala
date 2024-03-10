@@ -227,7 +227,9 @@ object Schema {
       .appendHourOfDay(2)
       .appendLiteral(':')
       .appendMinuteOfHour(2)
+      .appendLiteral(" UTC")
       .toFormatter
+      .withZone(DateTimeZone.UTC)
 
     def formatCreatedTime(): String = {
       createdTimeFormatter.print(created)
