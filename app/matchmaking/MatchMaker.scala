@@ -127,6 +127,7 @@ class MatchMaker @Inject()(
                   pr2.id.id,
                   pr2.code,
                   r2.lang,
+                  boardsMap(pr1.boardId).gameMode
                 )
             }
         }

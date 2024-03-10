@@ -2,7 +2,7 @@ package matchmaking
 
 import akka.NotUsed
 import akka.stream.scaladsl.{Sink, Source}
-import models.Schema.{Lang, Team}
+import models.Schema.{GameMode, Lang, Team}
 import play.api.libs.functional.syntax._
 
 trait BattleQueue {
@@ -25,6 +25,7 @@ object BattleQueue {
       "pr2_id" -> matchInput.pr2Id,
       "r2_code" -> matchInput.r2Code,
       "r2_lang" -> matchInput.r2Lang,
+      "game_mode" -> matchInput.gameMode,
     )
   }
 
@@ -52,6 +53,7 @@ object BattleQueue {
       pr2Id: Long,
       r2Code: String,
       r2Lang: Lang,
+      gameMode: GameMode
   )
 
   case class MatchOutput(
