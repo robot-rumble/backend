@@ -122,23 +122,29 @@ class RobotController @Inject()(
               )
             },
             data => {
-              robotsRepo.findBare(user.id, data.name)(LoggedIn(user)) flatMap {
-                case Some(_) =>
-                  Future successful BadRequest(
-                    views.html.robot.update(
-                      UpdateRobotForm.form
-                        .fill(data)
-                        .withGlobalError("Robot with this name already exists"),
-                      robot,
-                      assetsFinder
-                    )
+              val success = () =>
+                robotsRepo.update(robot.id, data.name, data.bio, data.openSource) map { _ =>
+                  Redirect(
+                    routes.RobotController.view(user.username, data.name)
                   )
-                case None =>
-                  robotsRepo.update(robot.id, data.name, data.bio, data.openSource) map { _ =>
-                    Redirect(
-                      routes.RobotController.view(user.username, data.name)
+                }
+              if (data.name != robot.name) {
+                robotsRepo.findBare(user.id, data.name)(LoggedIn(user)) flatMap {
+                  case Some(_) =>
+                    Future successful BadRequest(
+                      views.html.robot.update(
+                        UpdateRobotForm.form
+                          .fill(data)
+                          .withGlobalError("Robot with this name already exists"),
+                        robot,
+                        assetsFinder
+                      )
                     )
-                  }
+                  case None =>
+                    success()
+                }
+              } else {
+                success()
               }
             }
           )
