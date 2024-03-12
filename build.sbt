@@ -43,6 +43,11 @@ libraryDependencies += "com.nixxcode.jvmbrotli" % "jvmbrotli" % "0.2.0"
 
 libraryDependencies += "com.github.andriykuba" % "scala-glicko2" % "1.0.1"
 
+libraryDependencies ++= Seq(
+  "org.commonmark" % "commonmark" % "0.21.0",
+  "com.googlecode.owasp-java-html-sanitizer" % "owasp-java-html-sanitizer" % "20220608.1"
+)
+
 scalacOptions ++= Seq(
   "-feature",
   "-deprecation",

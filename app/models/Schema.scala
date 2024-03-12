@@ -8,7 +8,7 @@ import matchmaking.BattleQueue.MatchOutput
 import org.joda.time.format.{DateTimeFormatterBuilder, PeriodFormatterBuilder}
 import org.joda.time.{DateTimeZone, Duration, LocalDateTime}
 import play.api.libs.json.{Json, Writes}
-import services.Database
+import services.{Database, Markdown}
 
 import java.util.Base64
 import javax.inject.Inject
@@ -59,11 +59,12 @@ object Schema {
       created: LocalDateTime,
       verified: Boolean,
       admin: Boolean,
-      bio: String
+      bio: String,
+      renderedBio: String
   )
 
   object User {
-    def apply(email: String, username: String, password: String, bio: String) =
+    def apply(email: String, username: String, password: String, bio: String, markdown: Markdown) =
       new User(
         email = email,
         username = username,
@@ -71,7 +72,8 @@ object Schema {
         created = LocalDateTime.now(),
         verified = false,
         admin = false,
-        bio = bio
+        bio = bio,
+        renderedBio = markdown.render(bio)
       )
   }
 
@@ -90,7 +92,8 @@ object Schema {
       deactivationReason: Option[DeactivationReason] = None,
       errorCount: Int = 0,
       openSource: Boolean,
-      bio: String
+      bio: String,
+      renderedBio: String,
   )
 
   case class FullRobot(robot: Robot, user: User)
@@ -100,14 +103,15 @@ object Schema {
   type PublishResult = Either[String, PRobotId]
 
   object Robot {
-    def apply(userId: UserId, name: String, lang: Lang, openSource: Boolean, bio: String) =
+    def apply(userId: UserId, name: String, lang: Lang, openSource: Boolean, bio: String, markdown: Markdown) =
       new Robot(
         userId = userId,
         name = name,
         devCode = "",
         lang = lang,
         openSource = openSource,
-        bio = bio
+        bio = bio,
+        renderedBio = markdown.render(bio)
       )
   }
 

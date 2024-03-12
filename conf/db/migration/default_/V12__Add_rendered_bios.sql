@@ -1,0 +1,4 @@
+ALTER TABLE users
+    ADD COLUMN rendered_bio TEXT NOT NULL DEFAULT '';
+ALTER TABLE robots
+    ADD COLUMN rendered_bio TEXT NOT NULL DEFAULT '';

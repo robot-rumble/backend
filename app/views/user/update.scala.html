@@ -2,7 +2,7 @@
 
 @main("Update user", "update-user", assetsFinder) {
     @helper.form(routes.UserController.postUpdate) {
-        @helper.textarea(form("bio"), Symbol("_showConstraints") -> false)
+        @helper.textarea(form("bio"), Symbol("_label") -> "bio (supports markdown)", Symbol("_showConstraints") -> false)
         @helper.CSRF.formField
         <button class="button">update</button>
     }

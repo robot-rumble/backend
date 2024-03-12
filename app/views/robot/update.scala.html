@@ -4,7 +4,7 @@
 @main("Update robot", "update-robot", assetsFinder) {
     @helper.form(routes.RobotController.postUpdate(robot.id.id)) {
         @helper.inputText(form("name"), Symbol("_showConstraints") -> false)
-        @helper.textarea(form("bio"), Symbol("_showConstraints") -> false)
+        @helper.textarea(form("bio"), Symbol("_label") -> "bio (supports markdown)", Symbol("_showConstraints") -> false)
         @helper.checkbox(form("openSource"), Symbol("_label") -> "open source", Symbol("_showConstraints") -> false)
         @helper.CSRF.formField
         <button class="button">update</button>

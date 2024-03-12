@@ -6,6 +6,7 @@ import models.Schema.{DeactivationReason, _}
 import org.joda.time.LocalDateTime
 import play.api.Configuration
 import services.JodaUtils._
+import services.Markdown
 
 import javax.inject.Inject
 import scala.concurrent.duration.FiniteDuration
@@ -15,6 +16,7 @@ class Robots @Inject()(
     val config: Configuration,
     val schema: Schema,
     val usersRepo: Users,
+    val markdown: Markdown
 )(
     implicit ec: ExecutionContext
 ) {
@@ -115,7 +117,7 @@ class Robots @Inject()(
   ): Future[Option[Robot]] = {
     usersRepo.find(userId) flatMap {
       case Some(user) if user.verified =>
-        val robot = Robot(userId, name, lang, openSource, bio)
+        val robot = Robot(userId, name, lang, openSource, bio, markdown)
         run(robots.insert(lift(robot)).returningGenerated(_.id)).map(robot.copy(_)).map(Some(_))
       case _ => Future successful None
     }
@@ -127,7 +129,7 @@ class Robots @Inject()(
     else throw new Exception("Updating robot with empty code.")
 
   def update(id: RobotId, name: String, bio: String, openSource: Boolean): Future[Long] =
-    run(robots.by(id).update(_.name -> lift(name), _.bio -> lift(bio), _.openSource -> lift(openSource)))
+    run(robots.by(id).update(_.name -> lift(name), _.bio -> lift(bio), _.renderedBio -> lift(markdown.render(bio)), _.openSource -> lift(openSource)))
 
   def deactivate(id: RobotId): Future[Long] =
     run(robots.by(id).update(_.active -> false, _.deactivationReason -> lift(Some(DeactivationReason.Manual): Option[DeactivationReason])))

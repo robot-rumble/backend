@@ -2,11 +2,12 @@ package models
 
 import com.github.t3hnar.bcrypt._
 import models.Schema._
+import services.Markdown
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class Users @Inject()(schema: Schema)(implicit ec: ExecutionContext) {
+class Users @Inject()(schema: Schema, markdown: Markdown)(implicit ec: ExecutionContext) {
   import schema._
   import schema.ctx._
 
@@ -29,7 +30,7 @@ class Users @Inject()(schema: Schema)(implicit ec: ExecutionContext) {
       password: String,
       bio: String
   ): Future[(User, AccountVerification)] = {
-    val data = User(email, username, password, bio)
+    val data = User(email, username, password, bio, markdown)
     run(users.insert(lift(data)).returningGenerated(_.id)).map(data.copy(_)) flatMap { user =>
       createAccountVerification(user.id) map { accountVerification =>
         (user, accountVerification)
@@ -53,5 +54,5 @@ class Users @Inject()(schema: Schema)(implicit ec: ExecutionContext) {
     }
 
   def update(id: UserId, bio: String): Future[Long] =
-    run(users.by(id).update(_.bio -> lift(bio)))
+    run(users.by(id).update(_.bio -> lift(bio), _.renderedBio -> lift(markdown.render(bio))))
 }
