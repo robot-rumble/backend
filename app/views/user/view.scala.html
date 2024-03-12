@@ -6,12 +6,17 @@
     <h1>@user.username</h1>
 
     @if(isAuthenticated) {
-        <a href="@routes.UserController.update">
-            <img src="@assetsFinder.path("images/edit.svg")" alt="">
-            update bio
-        </a>
+        <div class="mb-3">
+            <a href="@routes.UserController.update">
+                <img src="@assetsFinder.path("images/edit.svg")" alt="">
+                update bio
+            </a>
+        </div>
     }
-    <div class="mt-5 mb-5 bio">@Html(user.renderedBio)</div>
+
+    @if(user.renderedBio.nonEmpty) {
+        <div class="mt-5 mb-5 bio">@Html(user.renderedBio)</div>
+    }
 
     @if(isAuthenticated && !user.verified) {
         <p class="error">Account not verified. Please follow the link sent to @user.email before creating any robots</p>

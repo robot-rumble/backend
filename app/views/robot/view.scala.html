@@ -85,7 +85,9 @@
         </p>
     }
 
-    <div class="mt-5 bio">@Html(fullRobot.robot.renderedBio)</div>
+    @if(fullRobot.robot.renderedBio.nonEmpty) {
+        <div class="mt-5 bio">@Html(fullRobot.robot.renderedBio)</div>
+    }
 
     <div class="mt-5">
         <h2>Battles</h2>
