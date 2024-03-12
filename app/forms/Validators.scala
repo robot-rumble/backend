@@ -24,17 +24,12 @@ object Validators {
     regexConstraint("lowercase", "^[^A-Z]+$", "Must be all lowercase")
   val noWhitespaceConstraint: Constraint[String] =
     regexConstraint("whitespace", "^[^\\s]+$", "Must not have any whitespace")
-  val emailConstraint: Constraint[String] = regexConstraint(
-    "email",
-    "^\\w+([-+.']\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$",
-    "Must be a valid email"
-  )
 
   val bio = Forms.text
 
   val username =
     Forms.nonEmptyText(3, 15).verifying(alphanumericConstraint).verifying(allLowercaseConstraint)
-  val email = Forms.email.verifying(emailConstraint).verifying(allLowercaseConstraint)
+  val email = Forms.email.verifying(allLowercaseConstraint)
 
   val name =
     Forms.nonEmptyText(3, 15).verifying(namingConstraint).verifying(allLowercaseConstraint)
