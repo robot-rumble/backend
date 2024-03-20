@@ -39,8 +39,8 @@ class HomeController @Inject()(
   }
 
   def tutorial(part: Int) = Action { implicit request =>
-    if (part == 1) {
-      Ok(views.html.robot.tutorial(assetsFinder))
+    if (part == 1 || part == 2) {
+      Ok(views.html.robot.tutorial(assetsFinder, part))
     } else NotFound
   }
 }

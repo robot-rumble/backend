@@ -1,8 +1,9 @@
 @(assetsFinder: AssetsFinder)(implicit request: RequestHeader)
 
 @main("Tutorial", "tutorial", assetsFinder) {
-    <p>Welcome! The Robot Rumble tutorial is an interactive series of "chapters" that teach you the basics of creating your first robot. So far, part one is complete and it presents code examples in Python.</p>
+    <p>Welcome! The Robot Rumble tutorial is an interactive series of "chapters" that teach you the basics of creating your first robot. So far, two parts are complete and they present code examples in Python. If you prefer to learn along with a page of documentation instead, please check out the <a href="https://rr-docs.readthedocs.io/en/latest/quickstart.html">quickstart guide</a>!</p>
     <ol class="mt-3">
         <li><a href="@routes.HomeController.tutorial(1)">Learning to move</a></li>
+        <li><a href="@routes.HomeController.tutorial(2)">Coordinating and strategizing</a></li>
     </ol>
 }

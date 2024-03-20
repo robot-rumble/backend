@@ -1,10 +1,10 @@
-@(assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+@(assetsFinder: AssetsFinder, part: Int)(implicit request: Request[AnyContent])
 
 @basic(s"Tutorial", assetsFinder) {
     <link rel="stylesheet" type="text/css" href="@assetsFinder.path("dist/garage_css.css")">
     <script src="@assetsFinder.path("dist/garage_js.js")" type="text/javascript"></script>
 } {
     <div class="garage">
-        <garage-el assetsPath="@assetsFinder.assetsUrlPrefix" tutorial="true"></garage-el>
+        <garage-el assetsPath="@assetsFinder.assetsUrlPrefix" tutorial="@part"></garage-el>
     </div>
 }
