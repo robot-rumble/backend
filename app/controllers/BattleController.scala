@@ -6,7 +6,7 @@ import models._
 import play.api.mvc._
 
 import javax.inject._
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class BattleController @Inject()(
     cc: ControllerComponents,
@@ -16,7 +16,7 @@ class BattleController @Inject()(
 )(implicit ec: ExecutionContext)
     extends AbstractController(cc) {
   def view(battleId: Long) = auth.action { visitor => implicit request =>
-    boardsRepo.findBattle(BattleId(battleId))(visitor) map {
+    boardsRepo.findBattle(BattleId(battleId))(visitor) flatMap {
       case Some(fullBattle @ FullBattle(b, r1, r2)) =>
         val (userTeam, userOwnsOpponent) = visitor match {
           case LoggedIn(user) =>
@@ -33,8 +33,14 @@ class BattleController @Inject()(
             (None, false)
 
         }
-        Ok(views.html.battle.view(fullBattle, userTeam, userOwnsOpponent, assetsFinder))
-      case None => NotFound("404")
+
+        boardsRepo.findBare(b.boardId)(visitor) map {
+          case Some(board) =>
+            Ok(views.html.battle.view(fullBattle, userTeam, userOwnsOpponent, board.gameMode, assetsFinder))
+          case None => InternalServerError("500")
+        }
+
+      case None => Future successful NotFound("404")
     }
   }
 }

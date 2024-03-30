@@ -1,6 +1,6 @@
 @import models.Schema._
 @import java.util.Base64
-@(fullBattle: FullBattle, userTeam: Option[String], userOwnsOpponent: Boolean, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
+@(fullBattle: FullBattle, userTeam: Option[String], userOwnsOpponent: Boolean, gameMode: GameMode, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
 @r1Link() = {
     <a style="color: inherit !important" href="@routes.RobotController.viewById(fullBattle.r1.id.id)">@fullBattle.r1.name</a>
@@ -23,7 +23,7 @@
     <link rel="stylesheet" type="text/css" href="@assetsFinder.path("dist/battle_css.css")">
     <script src="@assetsFinder.path("dist/battle_js.js")" type="text/javascript"></script>
 
-    <h4 class="text-center text-gray">battle #@fullBattle.b.id.id, @fullBattle.b.formatCreatedTime()</h4>
+    <h4 class="text-center text-gray">battle #@fullBattle.b.id.id, @fullBattle.b.formatCreatedTime(), gamemode: @gameMode</h4>
     <h1 class="mt-3 mb-2 text-center">
         @fullBattle.b.winner match {
             case Some(Team.R1) => {
@@ -68,7 +68,7 @@
     }
 
     <div class="mt-5">
-        <battle-el data="@fullBattle.b.encodeData()" team="@userTeam" user-owns-opponent="@userOwnsOpponent"></battle-el>
+        <battle-el data="@fullBattle.b.encodeData()" team="@userTeam" user-owns-opponent="@userOwnsOpponent" game-mode="@gameMode"></battle-el>
     </div>
 }
 
