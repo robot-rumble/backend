@@ -46,6 +46,7 @@ object Schema {
   case object GameMode extends PlayEnum[GameMode] with QuillEnum[GameMode] {
     case object Normal extends GameMode
     case object NormalHeal extends GameMode
+    case object Hill extends GameMode
     val values = findValues
   }
 
