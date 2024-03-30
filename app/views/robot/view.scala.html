@@ -11,14 +11,14 @@
     }
 }
 
-@ratingChangeImg(change: Int) = {
-    @if(change > 0) {
+@ratingChangeImg(didWin: Option[Boolean]) = {
+    @if(didWin.contains(true)) {
         <img src="@assetsFinder.path("images/increase.svg")" />
     }
-    @if(change < 0) {
+    @if(didWin.contains(false)) {
         <img src="@assetsFinder.path("images/decrease.svg")" />
     }
-    @if(change == 0) {
+    @if(didWin.isEmpty) {
         <img src="@assetsFinder.path("images/nochange.svg")" />
     }
 }
@@ -119,11 +119,10 @@
                                     #@battle.id.id
                                 </a></td>
                                 <td class="_rating">
+                                @ratingChangeImg(battle.didRobotWin(fullRobot.robot.id))
                                 @if(fullRobot.robot.id == battle.r1Id) {
-                                    @ratingChangeImg(battle.pr1RatingChange)
                                     @ratingChange(battle.pr1RatingChange)
                                 } else {
-                                    @ratingChangeImg(battle.pr2RatingChange)
                                     @ratingChange(battle.pr2RatingChange)
                                 }
                                 </td>
