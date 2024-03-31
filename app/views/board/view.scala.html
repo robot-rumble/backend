@@ -40,6 +40,8 @@
                     <img src="@assetsFinder.path("images/launch.svg")" alt="">
                     view all robots
                 </a>
+            } else {
+                <p>None yet</p>
             }
 
             @if(board.board.publishingEnabled) {
@@ -51,9 +53,8 @@
         </div>
     </div>
 
+    <h2 class="mt-5">Recent Battles</h2>
     @if(board.battles.nonEmpty) {
-        <h2 class="mt-5">Recent Battles</h2>
-
         <div class="_table">
             <table class="_battles">
                 @battleRows(board.battles, assetsFinder)
@@ -66,7 +67,6 @@
             </div>
         </div>
     } else {
-        <h2 class="mt-5">Recent Battles</h2>
-        None yet
+        <p>None yet</p>
     }
 }
