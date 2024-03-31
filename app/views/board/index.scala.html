@@ -68,14 +68,14 @@
 
     @defining(seasons.filter(!_.isActive())) { seasons =>
         @if(seasons.nonEmpty) {
-            <h2>Archived Seasons</h2>
+            <h2>Inactive Seasons</h2>
             @displaySeasons(seasons)
         }
     }
 
     @defining(boards.filter(bo => bo.seasonId.isEmpty && !bo.isActive())) { boards =>
         @if(boards.nonEmpty) {
-            <h2>Archived Boards</h2>
+            <h2>Inactive Boards</h2>
             @displayBoards(boards)
         }
     }
