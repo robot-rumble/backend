@@ -2,11 +2,11 @@
 @import services.Markdown
 @(fullRobot: FullRobot, boardsWithBattles: Seq[(PRobot, BoardWithBattles)], isOwner: Boolean, assetsFinder: AssetsFinder)(implicit request: Request[AnyContent])
 
-@ratingChange(change: Int) = {
-    @if(change > 0) {
+@ratingChange(change: Int, didWin: Option[Boolean]) = {
+    @if(didWin.contains(true)) {
         (+@change)
     }
-    @if(change < 0) {
+    @if(didWin.contains(false)) {
         (@change)
     }
 }
@@ -121,9 +121,9 @@
                                 <td class="_rating">
                                 @ratingChangeImg(battle.didRobotWin(fullRobot.robot.id))
                                 @if(fullRobot.robot.id == battle.r1Id) {
-                                    @ratingChange(battle.pr1RatingChange)
+                                    @ratingChange(battle.pr1RatingChange, battle.didRobotWin(fullRobot.robot.id))
                                 } else {
-                                    @ratingChange(battle.pr2RatingChange)
+                                    @ratingChange(battle.pr2RatingChange, battle.didRobotWin(fullRobot.robot.id))
                                 }
                                 </td>
                                 <td class="_robot pr-0"><a href="@routes.RobotController.viewById(otherR.id.id)">

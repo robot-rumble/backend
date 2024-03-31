@@ -10,11 +10,10 @@
 }
 
 
-@ratingChange(change: Int) = {
-    @if(change > 0) {
+@ratingChange(change: Int, didWin: Boolean) = {
+    @if(didWin) {
         (+@change)
-    }
-    @if(change < 0) {
+    } else {
         (@change)
     }
 }
@@ -40,10 +39,10 @@
     <h3 class="text-center">
         @fullBattle.b.winner match {
             case Some(Team.R1) => {
-                @fullBattle.b.pr1Rating @ratingChange(fullBattle.b.pr1RatingChange) <span style="color: var(--grey-2)">/</span> @fullBattle.b.pr2Rating @ratingChange(fullBattle.b.pr2RatingChange)
+                @fullBattle.b.pr1Rating @ratingChange(fullBattle.b.pr1RatingChange, true) <span style="color: var(--grey-2)">/</span> @fullBattle.b.pr2Rating @ratingChange(fullBattle.b.pr2RatingChange, false)
             }
             case Some(Team.R2) => {
-                @fullBattle.b.pr2Rating @ratingChange(fullBattle.b.pr2RatingChange) <span style="color: var(--grey-2)">/</span> @fullBattle.b.pr1Rating @ratingChange(fullBattle.b.pr1RatingChange)
+                @fullBattle.b.pr2Rating @ratingChange(fullBattle.b.pr2RatingChange, true) <span style="color: var(--grey-2)">/</span> @fullBattle.b.pr1Rating @ratingChange(fullBattle.b.pr1RatingChange, false)
             }
             case None => {
             }
